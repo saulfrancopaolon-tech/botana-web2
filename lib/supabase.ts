@@ -1,7 +1,7 @@
-import { createClient } from "@supabase/supabase-js"
+import { createClient, SupabaseClient } from "@supabase/supabase-js"
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ""
 const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ""
 
-// Only create client if credentials exist
-export const supabase = url && key ? createClient(url, key) : null
+export const supabase: SupabaseClient | null =
+  url && key ? createClient(url, key) : null
