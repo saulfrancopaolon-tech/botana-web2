@@ -35,42 +35,52 @@ function clearCard() {
 }
 
 async function fetchRemoteCard(username: string): Promise<{ points: number; verified: boolean } | null> {
-  if (!supabase) return null
+  if (!supabase) {
+    console.warn("[BOTANA] Supabase no esta configurado - revisa las variables de entorno")
+    return null
+  }
   try {
-    const { data } = await supabase
+    console.log("[BOTANA] Buscando usuario en Supabase:", username)
+    const { data, error } = await supabase
       .from("clientes_leales")
       .select("puntos, is_verified")
       .eq("usuario_ig", username)
       .single()
-    const row = data as { puntos: number; is_verified: boolean } | null
-    if (!row) return null
+    if (error) {
+      console.warn("[BOTANA] Error al leer Supabase:", error.code, error.message)
+      return null
+    }
+    if (!data) {
+      console.log("[BOTANA] Usuario no encontrado en Supabase")
+      return null
+    }
+    const row = data as { puntos: number; is_verified: boolean }
+    console.log("[BOTANA] Usuario encontrado - puntos:", row.puntos, "verificado:", row.is_verified)
     return { points: row.puntos ?? 0, verified: row.is_verified ?? false }
-  } catch {
+  } catch (e) {
+    console.error("[BOTANA] Excepcion al leer Supabase:", e)
     return null
   }
 }
 
-async function syncToSupabase(card: LocalCard) {
+async function upsertToSupabase(card: LocalCard) {
   if (!supabase) return
   try {
-    const { data } = await supabase
+    console.log("[BOTANA] Guardando en Supabase:", card.username, "puntos:", card.points)
+    const { error } = await supabase
       .from("clientes_leales")
-      .select("puntos")
-      .eq("usuario_ig", card.username)
-      .single()
-    if (data) {
-      const row = data as { puntos: number }
-      const pts = Math.max(row.puntos ?? 0, card.points)
-      await supabase
-        .from("clientes_leales")
-        .update({ puntos: pts, is_verified: card.verified })
-        .eq("usuario_ig", card.username)
+      .upsert(
+        { usuario_ig: card.username, puntos: card.points, is_verified: card.verified },
+        { onConflict: "usuario_ig" }
+      )
+    if (error) {
+      console.warn("[BOTANA] Error al guardar en Supabase:", error.code, error.message)
     } else {
-      await supabase
-        .from("clientes_leales")
-        .insert([{ usuario_ig: card.username, puntos: card.points, is_verified: card.verified }])
+      console.log("[BOTANA] Guardado en Supabase OK")
     }
-  } catch {}
+  } catch (e) {
+    console.error("[BOTANA] Excepcion al guardar en Supabase:", e)
+  }
 }
 
 interface Props {
@@ -115,6 +125,7 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
       setScreen(saved.verified ? "card" : "verify")
       fetchRemoteCard(saved.username).then(remote => {
         if (remote !== null && remote.points > saved.points) {
+          console.log("[BOTANA] Sincronizando puntos remotos:", remote.points, ">", saved.points)
           const updated = { ...saved, points: remote.points, verified: remote.verified }
           setCard(updated)
           saveCard(updated)
@@ -163,7 +174,7 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
     setCard(updated)
     saveCard(updated)
     setScreen("card")
-    syncToSupabase(updated)
+    upsertToSupabase(updated)
   }
 
   async function handleRedeem() {
@@ -198,7 +209,7 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
         saveCard(updated)
         setCode("")
         setCodeStatus({ msg: "+1 punto agregado!", type: "ok" })
-        syncToSupabase(updated)
+        upsertToSupabase(updated)
       } else {
         setCodeStatus({ msg: result.message || "Codigo invalido o ya usado", type: "err" })
       }
@@ -213,7 +224,7 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
         saveCard(updated)
         setCode("")
         setCodeStatus({ msg: "+1 punto agregado!", type: "ok" })
-        syncToSupabase(updated)
+        upsertToSupabase(updated)
       } else {
         setCodeStatus({ msg: "No se pudo verificar. Intenta de nuevo.", type: "err" })
       }
@@ -240,7 +251,7 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
     return (
       <div className="py-16 text-center">
         <div className="w-10 h-10 border-2 border-white/10 border-t-white rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-white/40 text-sm">Cargando tu tarjeta...</p>
+        <p className="text-white/40 text-sm">Buscando tu tarjeta...</p>
       </div>
     )
   }
