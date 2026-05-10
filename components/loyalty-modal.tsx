@@ -17,15 +17,21 @@ function loadCard(): LocalCard | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     return raw ? JSON.parse(raw) : null
-  } catch { return null }
+  } catch {
+    return null
+  }
 }
 
 function saveCard(card: LocalCard) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(card)) } catch {}
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(card))
+  } catch {}
 }
 
 function clearCard() {
-  try { localStorage.removeItem(STORAGE_KEY) } catch {}
+  try {
+    localStorage.removeItem(STORAGE_KEY)
+  } catch {}
 }
 
 async function syncToSupabase(card: LocalCard) {
@@ -36,9 +42,9 @@ async function syncToSupabase(card: LocalCard) {
       .select("puntos")
       .eq("usuario_ig", card.username)
       .single()
-
     if (data) {
-      const pts = Math.max((data as { puntos: number }).puntos ?? 0, card.points)
+      const row = data as { puntos: number }
+      const pts = Math.max(row.puntos ?? 0, card.points)
       await supabase
         .from("clientes_leales")
         .update({ puntos: pts, is_verified: card.verified })
@@ -48,7 +54,7 @@ async function syncToSupabase(card: LocalCard) {
         .from("clientes_leales")
         .insert([{ usuario_ig: card.username, puntos: card.points, is_verified: card.verified }])
     }
-  } catch { /* silent */ }
+  } catch {}
 }
 
 async function fetchRemotePoints(username: string): Promise<number | null> {
@@ -59,12 +65,27 @@ async function fetchRemotePoints(username: string): Promise<number | null> {
       .select("puntos")
       .eq("usuario_ig", username)
       .single()
-    return (data as { puntos: number } | null)?.puntos ?? null
-  } catch { return null }
+    const row = data as { puntos: number } | null
+    return row?.puntos ?? null
+  } catch {
+    return null
+  }
 }
 
-interface Props { isOpen: boolean; onClose: () => void }
+interface Props {
+  isOpen: boolean
+  onClose: () => void
+}
+
 type Screen = "login" | "verify" | "card"
+
+const CLS_BTN_ACTIVE = "w-full py-4 rounded-full font-black text-sm tracking-widest uppercase bg-[#E53E3E] text-white hover:bg-[#FF5252] transition-all"
+const CLS_BTN_INACTIVE = "w-full py-4 rounded-full font-black text-sm tracking-widest uppercase bg-white/5 border border-white/10 text-white/25 cursor-not-allowed transition-all"
+const CLS_DOT_ON = "aspect-square rounded-full flex items-center justify-center text-xs font-bold bg-[#E53E3E] text-white scale-105 transition-all duration-300"
+const CLS_DOT_OFF = "aspect-square rounded-full flex items-center justify-center text-xs font-bold bg-white/5 border border-white/10 text-white/20 transition-all duration-300"
+const CLS_STATUS_OK = "mt-3 py-2.5 px-3 rounded-xl text-center text-xs font-black uppercase tracking-wider bg-green-500/10 text-green-400 border border-green-500/20"
+const CLS_STATUS_ERR = "mt-3 py-2.5 px-3 rounded-xl text-center text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/20"
+const CLS_STATUS_LOAD = "mt-3 py-2.5 px-3 rounded-xl text-center text-xs font-black uppercase tracking-wider bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
 
 export function LoyaltyModal({ isOpen, onClose }: Props) {
   const [screen, setScreen] = useState<Screen>("login")
@@ -79,12 +100,16 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : ""
-    return () => { document.body.style.overflow = "" }
+    return () => {
+      document.body.style.overflow = ""
+    }
   }, [isOpen])
 
   useEffect(() => {
     if (!isOpen) return
-    const fn = (e: KeyboardEvent) => { if (e.key === "Escape") onClose() }
+    const fn = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose()
+    }
     window.addEventListener("keydown", fn)
     return () => window.removeEventListener("keydown", fn)
   }, [isOpen, onClose])
@@ -113,7 +138,7 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
   function handleLogin() {
     const clean = inputVal.trim().toLowerCase().replace(/^@/, "")
     if (clean.length < 2) {
-      setInputError("Ingresa un usuario válido (mínimo 2 caracteres)")
+      setInputError("Ingresa un usuario válido")
       return
     }
     setInputError("")
@@ -142,15 +167,12 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
   async function handleRedeem() {
     if (!card || !code.trim() || codeLoading) return
     const trimmed = code.trim().toUpperCase()
-
     if (card.usedCodes.includes(trimmed)) {
       setCodeStatus({ msg: "Este código ya fue usado", type: "err" })
       return
     }
-
     setCodeLoading(true)
     setCodeStatus({ msg: "Verificando...", type: "load" })
-
     try {
       const res = await fetch(GA_URL, {
         method: "POST",
@@ -158,14 +180,12 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
         body: JSON.stringify({ codigo: trimmed, usuario: card.username }),
         redirect: "follow",
       })
-
       let result: { success: boolean; message?: string }
       try {
         result = await res.json()
       } catch {
-        result = { success: false, message: "Respuesta inválida del servidor" }
+        result = { success: false, message: "Respuesta inválida" }
       }
-
       if (result.success) {
         const updated: LocalCard = {
           ...card,
@@ -193,7 +213,7 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
         setCodeStatus({ msg: "¡+1 punto agregado! 🎉", type: "ok" })
         syncToSupabase(updated)
       } else {
-        setCodeStatus({ msg: "No se pudo verificar el código. Intenta de nuevo.", type: "err" })
+        setCodeStatus({ msg: "No se pudo verificar. Intenta de nuevo.", type: "err" })
       }
     } finally {
       setCodeLoading(false)
@@ -215,10 +235,7 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
   if (!isOpen) return null
 
   return (
-    <div
-      className="fixed inset-0 z-[200] flex items-center justify-center p-4"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
       <div
         className="relative bg-[#111] border border-white/10 rounded-[2rem] w-full max-w-sm max-h-[90vh] overflow-y-auto p-6 z-10 animate-slide-up"
@@ -229,19 +246,20 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
           className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
 
-        {/* ── LOGIN ── */}
         {screen === "login" && (
           <div className="pt-3">
             <div className="text-center mb-7">
               <div className="text-5xl mb-3">🎁</div>
               <h2 className="font-head text-[2rem] leading-none mb-1">Tu BOTA-Card</h2>
               <p className="text-white/40 text-sm leading-relaxed">
-                Acumula puntos con cada compra.<br />10 puntos = 1 snack gratis 🌶
+                Acumula puntos con cada compra.
+                <br />
+                10 puntos = 1 snack gratis 🌶
               </p>
             </div>
             <div className="space-y-3">
@@ -254,8 +272,13 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
                   className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white text-base outline-none focus:border-[#E53E3E] transition-colors font-mono text-center tracking-widest placeholder:text-white/15"
                   placeholder="@tu_usuario"
                   value={inputVal}
-                  onChange={e => { setInputVal(e.target.value); setInputError("") }}
-                  onKeyDown={e => { if (e.key === "Enter") handleLogin() }}
+                  onChange={e => {
+                    setInputVal(e.target.value)
+                    setInputError("")
+                  }}
+                  onKeyDown={e => {
+                    if (e.key === "Enter") handleLogin()
+                  }}
                   autoComplete="off"
                   autoCapitalize="none"
                   spellCheck={false}
@@ -267,7 +290,7 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
               <button
                 onClick={handleLogin}
                 disabled={inputVal.trim().length < 2}
-                className="w-full py-4 rounded-full bg-[#E53E3E] text-white font-black text-sm tracking-widest uppercase hover:bg-[#FF5252] active:scale-[.98] transition-all disabled:opacity-25 disabled:cursor-not-allowed"
+                className="w-full py-4 rounded-full bg-[#E53E3E] text-white font-black text-sm tracking-widest uppercase hover:bg-[#FF5252] transition-all disabled:opacity-25 disabled:cursor-not-allowed"
               >
                 Entrar a mi tarjeta
               </button>
@@ -275,15 +298,15 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
           </div>
         )}
 
-        {/* ── VERIFY ── */}
         {screen === "verify" && card && (
           <div className="pt-3">
             <div className="text-center mb-7">
               <div className="text-5xl mb-3">📱</div>
               <h2 className="font-head text-[2rem] leading-none mb-1">Activa tu Tarjeta</h2>
               <p className="text-white/40 text-sm">
-                Hola <span className="text-white font-bold">@{card.username}</span>,<br />
-                síguenos en Instagram para activar tus puntos
+                Hola <span className="text-white font-bold">@{card.username}</span>,
+                <br />
+                síguenos en Instagram para activar
               </p>
             </div>
             <div className="space-y-3">
@@ -292,26 +315,22 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setIgClicked(true)}
-                className="flex items-center justify-center gap-2.5 w-full px-5 py-4 rounded-2xl text-white font-black text-xs tracking-widest uppercase hover:opacity-90 active:scale-[.98] transition-all"
+                className="flex items-center justify-center gap-2.5 w-full px-5 py-4 rounded-2xl text-white font-black text-xs tracking-widest uppercase hover:opacity-90 transition-all"
                 style={{ background: "linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)" }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                  <rect x="2" y="2" width="20" height="20" rx="5"/>
-                  <circle cx="12" cy="12" r="5"/>
-                  <circle cx="17.5" cy="6.5" r="1" fill="white"/>
+                  <rect x="2" y="2" width="20" height="20" rx="5" />
+                  <circle cx="12" cy="12" r="5" />
+                  <circle cx="17.5" cy="6.5" r="1" fill="white" />
                 </svg>
-                {igClicked ? "✓ Instagram visitado" : "1. Ir a @bota.na.mx"}
+                {igClicked ? "✓ Visitado" : "1. Ir a @bota.na.mx"}
               </a>
               <button
                 onClick={handleActivate}
                 disabled={!igClicked}
-                className={
-                  igClicked
-                    ? "w-full py-4 rounded-full font-black text-sm tracking-widest uppercase bg-[#E53E3E] text-white hover:bg-[#FF5252] active:scale-[.98] transition-all"
-                    : "w-full py-4 rounded-full font-black text-sm tracking-widest uppercase bg-white/5 border border-white/10 text-white/25 cursor-not-allowed transition-all"
-                }
+                className={igClicked ? CLS_BTN_ACTIVE : CLS_BTN_INACTIVE}
               >
-                {igClicked ? "2. ¡Listo! Activar BOTA-Card" : "2. (Primero visita Instagram ↑)"}
+                {igClicked ? "2. Activar BOTA-Card" : "2. (Primero visita Instagram)"}
               </button>
             </div>
             <button
@@ -323,37 +342,34 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
           </div>
         )}
 
-        {/* ── CARD ── */}
         {screen === "card" && card && (
           <div className="pt-2">
             <div className="text-center mb-5">
               <div className="text-4xl mb-2">🥜</div>
               <h2 className="font-head text-[2rem] leading-none mb-1">Mi BOTA-Card</h2>
-              <p className="text-[.68rem] text-white/25 uppercase tracking-[.15em] font-mono">@{card.username}</p>
+              <p className="text-[.68rem] text-white/25 uppercase tracking-[.15em] font-mono">
+                @{card.username}
+              </p>
             </div>
-
             <div className="grid grid-cols-5 gap-2 mb-2">
               {[...Array(10)].map((_, i) => (
-                <div
-                  key={i}
-                  className={`aspect-square rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
-                    i < card.points
-                      ? "bg-[#E53E3E] text-white scale-105 shadow-[0_0_12px_rgba(229,62,62,.4)]"
-                      : "bg-white/5 border border-white/10 text-white/20"
-                  }`}
-                >
-                  {i < card.points
-                    ? <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
-                    : <span>{i + 1}</span>
-                  }
+                <div key={i} className={i < card.points ? CLS_DOT_ON : CLS_DOT_OFF}>
+                  {i < card.points ? (
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  ) : (
+                    <span>{i + 1}</span>
+                  )}
                 </div>
               ))}
             </div>
-
             <p className="text-center text-xs text-white/25 mb-5 font-mono">
-              {card.points}/10 · {card.points >= 10 ? "🎉 ¡Tarjeta completa!" : `faltan ${10 - card.points} puntos`}
+              {card.points}/10
+              {card.points >= 10
+                ? " · 🎉 ¡Tarjeta completa!"
+                : " · faltan " + String(10 - card.points) + " puntos"}
             </p>
-
             {card.points >= 10 ? (
               <div
                 className="rounded-2xl p-5 text-center mb-4"
@@ -361,12 +377,12 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
               >
                 <p className="font-head text-[1.8rem] mb-3">🎉 ¡TARJETA LLENA!</p>
                 
-                  href={`https://wa.me/${WA}?text=${encodeURIComponent(`Hola! Llené mi BOTA-Card (10 puntos). Mi usuario de IG es: @${card.username}. ¡Quiero reclamar mi snack gratis!`)}`}
+                  href={"https://wa.me/" + WA + "?text=" + encodeURIComponent("Hola! Llené mi BOTA-Card. Usuario IG: @" + card.username + ". ¡Quiero mi snack gratis!")}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block bg-[#22c55e] text-white text-center py-3.5 rounded-full font-black text-xs tracking-widest uppercase hover:bg-[#16a34a] active:scale-[.98] transition-all"
+                  className="block bg-[#22c55e] text-white text-center py-3.5 rounded-full font-black text-xs tracking-widest uppercase hover:bg-[#16a34a] transition-all"
                 >
-                  Reclamar premio por WhatsApp
+                  Reclamar por WhatsApp
                 </a>
               </div>
             ) : (
@@ -380,35 +396,38 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
                     placeholder="BOTA-XXXX"
                     maxLength={12}
                     value={code}
-                    onChange={e => { setCode(e.target.value.toUpperCase()); setCodeStatus(null) }}
-                    onKeyDown={e => { if (e.key === "Enter") handleRedeem() }}
+                    onChange={e => {
+                      setCode(e.target.value.toUpperCase())
+                      setCodeStatus(null)
+                    }}
+                    onKeyDown={e => {
+                      if (e.key === "Enter") handleRedeem()
+                    }}
                     disabled={codeLoading}
                   />
                   <button
                     onClick={handleRedeem}
                     disabled={!code.trim() || codeLoading}
-                    className="px-4 py-3 rounded-xl bg-white text-black font-black text-xs tracking-widest uppercase hover:bg-[#FBBF24] active:scale-[.97] transition-all disabled:opacity-25 disabled:cursor-not-allowed flex items-center justify-center"
+                    className="px-4 py-3 rounded-xl bg-white text-black font-black text-xs tracking-widest uppercase hover:bg-[#FBBF24] transition-all disabled:opacity-25 disabled:cursor-not-allowed flex items-center justify-center"
                   >
-                    {codeLoading
-                      ? <span className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin block" />
-                      : "OK"
-                    }
+                    {codeLoading ? (
+                      <span className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin block" />
+                    ) : (
+                      "OK"
+                    )}
                   </button>
                 </div>
                 {codeStatus && (
-                  <div className={`mt-3 py-2.5 px-3 rounded-xl text-center text-xs font-black uppercase tracking-wider ${
-                    codeStatus.type === "ok"
-                      ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                      : codeStatus.type === "err"
-                      ? "bg-red-500/10 text-red-400 border border-red-500/20"
-                      : "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
-                  }`}>
+                  <div className={
+                    codeStatus.type === "ok" ? CLS_STATUS_OK
+                    : codeStatus.type === "err" ? CLS_STATUS_ERR
+                    : CLS_STATUS_LOAD
+                  }>
                     {codeStatus.msg}
                   </div>
                 )}
               </div>
             )}
-
             <button
               onClick={handleLogout}
               className="w-full text-xs text-white/15 uppercase tracking-widest hover:text-white/35 transition-colors py-1"
