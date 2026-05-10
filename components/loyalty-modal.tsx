@@ -305,11 +305,11 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
               <button
                 onClick={handleActivate}
                 disabled={!igClicked}
-                className={`w-full py-4 rounded-full font-black text-sm tracking-widest uppercase active:scale-[.98] transition-all ${
+                className={
                   igClicked
-                    ? "bg-[#E53E3E] text-white hover:bg-[#FF5252]"
-                    : "bg-white/5 border border-white/10 text-white/25 cursor-not-allowed"
-                }`}
+                    ? "w-full py-4 rounded-full font-black text-sm tracking-widest uppercase bg-[#E53E3E] text-white hover:bg-[#FF5252] active:scale-[.98] transition-all"
+                    : "w-full py-4 rounded-full font-black text-sm tracking-widest uppercase bg-white/5 border border-white/10 text-white/25 cursor-not-allowed transition-all"
+                }
               >
                 {igClicked ? "2. ¡Listo! Activar BOTA-Card" : "2. (Primero visita Instagram ↑)"}
               </button>
