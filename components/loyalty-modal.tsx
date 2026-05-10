@@ -34,6 +34,22 @@ function clearCard() {
   } catch {}
 }
 
+async function fetchRemoteCard(username: string): Promise<{ points: number; verified: boolean } | null> {
+  if (!supabase) return null
+  try {
+    const { data } = await supabase
+      .from("clientes_leales")
+      .select("puntos, is_verified")
+      .eq("usuario_ig", username)
+      .single()
+    const row = data as { puntos: number; is_verified: boolean } | null
+    if (!row) return null
+    return { points: row.puntos ?? 0, verified: row.is_verified ?? false }
+  } catch {
+    return null
+  }
+}
+
 async function syncToSupabase(card: LocalCard) {
   if (!supabase) return
   try {
@@ -57,27 +73,12 @@ async function syncToSupabase(card: LocalCard) {
   } catch {}
 }
 
-async function fetchRemotePoints(username: string): Promise<number | null> {
-  if (!supabase) return null
-  try {
-    const { data } = await supabase
-      .from("clientes_leales")
-      .select("puntos")
-      .eq("usuario_ig", username)
-      .single()
-    const row = data as { puntos: number } | null
-    return row?.puntos ?? null
-  } catch {
-    return null
-  }
-}
-
 interface Props {
   isOpen: boolean
   onClose: () => void
 }
 
-type Screen = "login" | "verify" | "card"
+type Screen = "login" | "verify" | "card" | "loading"
 
 export function LoyaltyModal({ isOpen, onClose }: Props) {
   const [screen, setScreen] = useState<Screen>("login")
@@ -112,9 +113,9 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
     if (saved) {
       setCard(saved)
       setScreen(saved.verified ? "card" : "verify")
-      fetchRemotePoints(saved.username).then(remote => {
-        if (remote !== null && remote > saved.points) {
-          const updated = { ...saved, points: remote }
+      fetchRemoteCard(saved.username).then(remote => {
+        if (remote !== null && remote.points > saved.points) {
+          const updated = { ...saved, points: remote.points, verified: remote.verified }
           setCard(updated)
           saveCard(updated)
         }
@@ -127,24 +128,33 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
     }
   }, [isOpen])
 
-  function handleLogin() {
+  async function handleLogin() {
     const clean = inputVal.trim().toLowerCase().replace(/^@/, "")
     if (clean.length < 2) {
       setInputError("Ingresa un usuario valido")
       return
     }
     setInputError("")
-    const newCard: LocalCard = { username: clean, points: 0, verified: false, usedCodes: [] }
-    setCard(newCard)
-    saveCard(newCard)
-    setScreen("verify")
-    fetchRemotePoints(clean).then(remote => {
-      if (remote !== null) {
-        const updated = { ...newCard, points: remote }
-        setCard(updated)
-        saveCard(updated)
+    setScreen("loading")
+
+    const remote = await fetchRemoteCard(clean)
+
+    if (remote) {
+      const restoredCard: LocalCard = {
+        username: clean,
+        points: remote.points,
+        verified: remote.verified,
+        usedCodes: [],
       }
-    })
+      setCard(restoredCard)
+      saveCard(restoredCard)
+      setScreen(remote.verified ? "card" : "verify")
+    } else {
+      const newCard: LocalCard = { username: clean, points: 0, verified: false, usedCodes: [] }
+      setCard(newCard)
+      saveCard(newCard)
+      setScreen("verify")
+    }
   }
 
   function handleActivate() {
@@ -225,6 +235,15 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
   }
 
   if (!isOpen) return null
+
+  function renderLoading() {
+    return (
+      <div className="py-16 text-center">
+        <div className="w-10 h-10 border-2 border-white/10 border-t-white rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-white/40 text-sm">Cargando tu tarjeta...</p>
+      </div>
+    )
+  }
 
   function renderLogin() {
     return (
@@ -333,7 +352,6 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
       : "Faltan " + String(ptsleft) + " puntos"
     const waText = "Hola! Llene mi BOTA-Card. Usuario IG: @" + card.username + ". Quiero mi snack gratis!"
     const waHref = "https://wa.me/" + WA + "?text=" + encodeURIComponent(waText)
-
     let statusClass = "mt-3 py-2.5 px-3 rounded-xl text-center text-xs font-black uppercase tracking-wider bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
     if (codeStatus) {
       if (codeStatus.type === "ok") {
@@ -342,7 +360,6 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
         statusClass = "mt-3 py-2.5 px-3 rounded-xl text-center text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/20"
       }
     }
-
     return (
       <div className="pt-2">
         <div className="text-center mb-5">
@@ -454,6 +471,7 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
+        {screen === "loading" && renderLoading()}
         {screen === "login" && renderLogin()}
         {screen === "verify" && renderVerify()}
         {screen === "card" && renderCard()}
