@@ -79,14 +79,6 @@ interface Props {
 
 type Screen = "login" | "verify" | "card"
 
-const CLS_BTN_ACTIVE = "w-full py-4 rounded-full font-black text-sm tracking-widest uppercase bg-[#E53E3E] text-white hover:bg-[#FF5252] transition-all"
-const CLS_BTN_INACTIVE = "w-full py-4 rounded-full font-black text-sm tracking-widest uppercase bg-white/5 border border-white/10 text-white/25 cursor-not-allowed transition-all"
-const CLS_DOT_ON = "aspect-square rounded-full flex items-center justify-center text-xs font-bold bg-[#E53E3E] text-white scale-105 transition-all duration-300"
-const CLS_DOT_OFF = "aspect-square rounded-full flex items-center justify-center text-xs font-bold bg-white/5 border border-white/10 text-white/20 transition-all duration-300"
-const CLS_STATUS_OK = "mt-3 py-2.5 px-3 rounded-xl text-center text-xs font-black uppercase tracking-wider bg-green-500/10 text-green-400 border border-green-500/20"
-const CLS_STATUS_ERR = "mt-3 py-2.5 px-3 rounded-xl text-center text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/20"
-const CLS_STATUS_LOAD = "mt-3 py-2.5 px-3 rounded-xl text-center text-xs font-black uppercase tracking-wider bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
-
 export function LoyaltyModal({ isOpen, onClose }: Props) {
   const [screen, setScreen] = useState<Screen>("login")
   const [card, setCard] = useState<LocalCard | null>(null)
@@ -138,7 +130,7 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
   function handleLogin() {
     const clean = inputVal.trim().toLowerCase().replace(/^@/, "")
     if (clean.length < 2) {
-      setInputError("Ingresa un usuario válido")
+      setInputError("Ingresa un usuario valido")
       return
     }
     setInputError("")
@@ -168,7 +160,7 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
     if (!card || !code.trim() || codeLoading) return
     const trimmed = code.trim().toUpperCase()
     if (card.usedCodes.includes(trimmed)) {
-      setCodeStatus({ msg: "Este código ya fue usado", type: "err" })
+      setCodeStatus({ msg: "Este codigo ya fue usado", type: "err" })
       return
     }
     setCodeLoading(true)
@@ -184,7 +176,7 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
       try {
         result = await res.json()
       } catch {
-        result = { success: false, message: "Respuesta inválida" }
+        result = { success: false, message: "Respuesta invalida" }
       }
       if (result.success) {
         const updated: LocalCard = {
@@ -195,10 +187,10 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
         setCard(updated)
         saveCard(updated)
         setCode("")
-        setCodeStatus({ msg: "¡+1 punto agregado! 🎉", type: "ok" })
+        setCodeStatus({ msg: "+1 punto agregado!", type: "ok" })
         syncToSupabase(updated)
       } else {
-        setCodeStatus({ msg: result.message || "Código inválido o ya usado", type: "err" })
+        setCodeStatus({ msg: result.message || "Codigo invalido o ya usado", type: "err" })
       }
     } catch {
       if (trimmed.startsWith("BOTA-") && trimmed.length >= 8) {
@@ -210,7 +202,7 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
         setCard(updated)
         saveCard(updated)
         setCode("")
-        setCodeStatus({ msg: "¡+1 punto agregado! 🎉", type: "ok" })
+        setCodeStatus({ msg: "+1 punto agregado!", type: "ok" })
         syncToSupabase(updated)
       } else {
         setCodeStatus({ msg: "No se pudo verificar. Intenta de nuevo.", type: "err" })
@@ -234,6 +226,218 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
 
   if (!isOpen) return null
 
+  function renderLogin() {
+    return (
+      <div className="pt-3">
+        <div className="text-center mb-7">
+          <div className="text-5xl mb-3">🎁</div>
+          <h2 className="font-head text-[2rem] leading-none mb-1">Tu BOTA-Card</h2>
+          <p className="text-white/40 text-sm leading-relaxed">
+            Acumula puntos con cada compra.
+            <br />
+            10 puntos = 1 snack gratis
+          </p>
+        </div>
+        <div className="space-y-3">
+          <div>
+            <label className="text-[.68rem] font-black uppercase tracking-widest text-white/30 block mb-1.5">
+              Usuario de Instagram
+            </label>
+            <input
+              ref={inputRef}
+              className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white text-base outline-none focus:border-[#E53E3E] transition-colors font-mono text-center tracking-widest placeholder:text-white/15"
+              placeholder="@tu_usuario"
+              value={inputVal}
+              onChange={e => {
+                setInputVal(e.target.value)
+                setInputError("")
+              }}
+              onKeyDown={e => {
+                if (e.key === "Enter") handleLogin()
+              }}
+              autoComplete="off"
+              autoCapitalize="none"
+              spellCheck={false}
+            />
+            {inputError && (
+              <p className="text-red-400 text-xs mt-1.5 text-center">{inputError}</p>
+            )}
+          </div>
+          <button
+            onClick={handleLogin}
+            disabled={inputVal.trim().length < 2}
+            className="w-full py-4 rounded-full bg-[#E53E3E] text-white font-black text-sm tracking-widest uppercase hover:bg-[#FF5252] transition-all disabled:opacity-25 disabled:cursor-not-allowed"
+          >
+            Entrar a mi tarjeta
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  function renderVerify() {
+    if (!card) return null
+    const igBtnLabel = igClicked ? "Visitado!" : "1. Ir a @bota.na.mx"
+    const activateBtnLabel = igClicked ? "2. Activar BOTA-Card" : "2. Primero visita Instagram"
+    const activateClass = igClicked
+      ? "w-full py-4 rounded-full font-black text-sm tracking-widest uppercase bg-[#E53E3E] text-white hover:bg-[#FF5252] transition-all"
+      : "w-full py-4 rounded-full font-black text-sm tracking-widest uppercase bg-white/5 border border-white/10 text-white/25 cursor-not-allowed transition-all"
+    return (
+      <div className="pt-3">
+        <div className="text-center mb-7">
+          <div className="text-5xl mb-3">📱</div>
+          <h2 className="font-head text-[2rem] leading-none mb-1">Activa tu Tarjeta</h2>
+          <p className="text-white/40 text-sm">
+            {"Hola @" + card.username + ", siguenos en Instagram para activar tus puntos"}
+          </p>
+        </div>
+        <div className="space-y-3">
+          <a
+            href="https://instagram.com/bota.na.mx"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setIgClicked(true)}
+            className="flex items-center justify-center gap-2.5 w-full px-5 py-4 rounded-2xl text-white font-black text-xs tracking-widest uppercase hover:opacity-90 transition-all"
+            style={{ background: "linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)" }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+              <rect x="2" y="2" width="20" height="20" rx="5" />
+              <circle cx="12" cy="12" r="5" />
+              <circle cx="17.5" cy="6.5" r="1" fill="white" />
+            </svg>
+            {igBtnLabel}
+          </a>
+          <button
+            onClick={handleActivate}
+            disabled={!igClicked}
+            className={activateClass}
+          >
+            {activateBtnLabel}
+          </button>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="mt-6 w-full text-xs text-white/20 uppercase tracking-widest hover:text-white/40 transition-colors"
+        >
+          Cambiar usuario
+        </button>
+      </div>
+    )
+  }
+
+  function renderCard() {
+    if (!card) return null
+    const ptsleft = 10 - card.points
+    const progressLabel = card.points >= 10
+      ? "Tarjeta completa!"
+      : "Faltan " + String(ptsleft) + " puntos"
+    const waText = "Hola! Llene mi BOTA-Card. Usuario IG: @" + card.username + ". Quiero mi snack gratis!"
+    const waHref = "https://wa.me/" + WA + "?text=" + encodeURIComponent(waText)
+
+    let statusClass = "mt-3 py-2.5 px-3 rounded-xl text-center text-xs font-black uppercase tracking-wider bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
+    if (codeStatus) {
+      if (codeStatus.type === "ok") {
+        statusClass = "mt-3 py-2.5 px-3 rounded-xl text-center text-xs font-black uppercase tracking-wider bg-green-500/10 text-green-400 border border-green-500/20"
+      } else if (codeStatus.type === "err") {
+        statusClass = "mt-3 py-2.5 px-3 rounded-xl text-center text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/20"
+      }
+    }
+
+    return (
+      <div className="pt-2">
+        <div className="text-center mb-5">
+          <div className="text-4xl mb-2">🥜</div>
+          <h2 className="font-head text-[2rem] leading-none mb-1">Mi BOTA-Card</h2>
+          <p className="text-[.68rem] text-white/25 uppercase tracking-[.15em] font-mono">
+            {"@" + card.username}
+          </p>
+        </div>
+        <div className="grid grid-cols-5 gap-2 mb-2">
+          {[0,1,2,3,4,5,6,7,8,9].map(i => {
+            const filled = i < card.points
+            const dotClass = filled
+              ? "aspect-square rounded-full flex items-center justify-center text-xs font-bold bg-[#E53E3E] text-white scale-105 transition-all duration-300"
+              : "aspect-square rounded-full flex items-center justify-center text-xs font-bold bg-white/5 border border-white/10 text-white/20 transition-all duration-300"
+            return (
+              <div key={i} className={dotClass}>
+                {filled ? (
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                ) : (
+                  <span>{i + 1}</span>
+                )}
+              </div>
+            )
+          })}
+        </div>
+        <p className="text-center text-xs text-white/25 mb-5 font-mono">
+          {String(card.points) + "/10 - " + progressLabel}
+        </p>
+        {card.points >= 10 ? (
+          <div
+            className="rounded-2xl p-5 text-center mb-4"
+            style={{ background: "linear-gradient(135deg,#F97316,#E53E3E)" }}
+          >
+            <p className="font-head text-[1.8rem] mb-3">TARJETA LLENA!</p>
+            <a
+              href={waHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block bg-[#22c55e] text-white text-center py-3.5 rounded-full font-black text-xs tracking-widest uppercase hover:bg-[#16a34a] transition-all"
+            >
+              Reclamar por WhatsApp
+            </a>
+          </div>
+        ) : (
+          <div className="bg-white/[.03] border border-white/[.07] rounded-2xl p-4 mb-4">
+            <p className="text-[.65rem] font-black uppercase tracking-[.2em] text-white/25 text-center mb-3">
+              Canjear codigo de compra
+            </p>
+            <div className="flex gap-2">
+              <input
+                className="flex-1 px-3 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-mono text-sm uppercase tracking-wider outline-none focus:border-[#F97316] transition-colors placeholder:text-white/15 disabled:opacity-50"
+                placeholder="BOTA-XXXX"
+                maxLength={12}
+                value={code}
+                onChange={e => {
+                  setCode(e.target.value.toUpperCase())
+                  setCodeStatus(null)
+                }}
+                onKeyDown={e => {
+                  if (e.key === "Enter") handleRedeem()
+                }}
+                disabled={codeLoading}
+              />
+              <button
+                onClick={handleRedeem}
+                disabled={!code.trim() || codeLoading}
+                className="px-4 py-3 rounded-xl bg-white text-black font-black text-xs tracking-widest uppercase hover:bg-[#FBBF24] transition-all disabled:opacity-25 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                {codeLoading ? (
+                  <span className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin block" />
+                ) : (
+                  "OK"
+                )}
+              </button>
+            </div>
+            {codeStatus && (
+              <div className={statusClass}>
+                {codeStatus.msg}
+              </div>
+            )}
+          </div>
+        )}
+        <button
+          onClick={handleLogout}
+          className="w-full text-xs text-white/15 uppercase tracking-widest hover:text-white/35 transition-colors py-1"
+        >
+          Cerrar sesion
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
@@ -250,192 +454,9 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
-
-        {screen === "login" && (
-          <div className="pt-3">
-            <div className="text-center mb-7">
-              <div className="text-5xl mb-3">🎁</div>
-              <h2 className="font-head text-[2rem] leading-none mb-1">Tu BOTA-Card</h2>
-              <p className="text-white/40 text-sm leading-relaxed">
-                Acumula puntos con cada compra.
-                <br />
-                10 puntos = 1 snack gratis 🌶
-              </p>
-            </div>
-            <div className="space-y-3">
-              <div>
-                <label className="text-[.68rem] font-black uppercase tracking-widest text-white/30 block mb-1.5">
-                  Usuario de Instagram
-                </label>
-                <input
-                  ref={inputRef}
-                  className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white text-base outline-none focus:border-[#E53E3E] transition-colors font-mono text-center tracking-widest placeholder:text-white/15"
-                  placeholder="@tu_usuario"
-                  value={inputVal}
-                  onChange={e => {
-                    setInputVal(e.target.value)
-                    setInputError("")
-                  }}
-                  onKeyDown={e => {
-                    if (e.key === "Enter") handleLogin()
-                  }}
-                  autoComplete="off"
-                  autoCapitalize="none"
-                  spellCheck={false}
-                />
-                {inputError && (
-                  <p className="text-red-400 text-xs mt-1.5 text-center">{inputError}</p>
-                )}
-              </div>
-              <button
-                onClick={handleLogin}
-                disabled={inputVal.trim().length < 2}
-                className="w-full py-4 rounded-full bg-[#E53E3E] text-white font-black text-sm tracking-widest uppercase hover:bg-[#FF5252] transition-all disabled:opacity-25 disabled:cursor-not-allowed"
-              >
-                Entrar a mi tarjeta
-              </button>
-            </div>
-          </div>
-        )}
-
-        {screen === "verify" && card && (
-          <div className="pt-3">
-            <div className="text-center mb-7">
-              <div className="text-5xl mb-3">📱</div>
-              <h2 className="font-head text-[2rem] leading-none mb-1">Activa tu Tarjeta</h2>
-              <p className="text-white/40 text-sm">
-                Hola <span className="text-white font-bold">@{card.username}</span>,
-                <br />
-                síguenos en Instagram para activar
-              </p>
-            </div>
-            <div className="space-y-3">
-              
-                href="https://instagram.com/bota.na.mx"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setIgClicked(true)}
-                className="flex items-center justify-center gap-2.5 w-full px-5 py-4 rounded-2xl text-white font-black text-xs tracking-widest uppercase hover:opacity-90 transition-all"
-                style={{ background: "linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)" }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                  <rect x="2" y="2" width="20" height="20" rx="5" />
-                  <circle cx="12" cy="12" r="5" />
-                  <circle cx="17.5" cy="6.5" r="1" fill="white" />
-                </svg>
-                {igClicked ? "✓ Visitado" : "1. Ir a @bota.na.mx"}
-              </a>
-              <button
-                onClick={handleActivate}
-                disabled={!igClicked}
-                className={igClicked ? CLS_BTN_ACTIVE : CLS_BTN_INACTIVE}
-              >
-                {igClicked ? "2. Activar BOTA-Card" : "2. (Primero visita Instagram)"}
-              </button>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="mt-6 w-full text-xs text-white/20 uppercase tracking-widest hover:text-white/40 transition-colors"
-            >
-              Cambiar usuario
-            </button>
-          </div>
-        )}
-
-        {screen === "card" && card && (
-          <div className="pt-2">
-            <div className="text-center mb-5">
-              <div className="text-4xl mb-2">🥜</div>
-              <h2 className="font-head text-[2rem] leading-none mb-1">Mi BOTA-Card</h2>
-              <p className="text-[.68rem] text-white/25 uppercase tracking-[.15em] font-mono">
-                @{card.username}
-              </p>
-            </div>
-            <div className="grid grid-cols-5 gap-2 mb-2">
-              {[...Array(10)].map((_, i) => (
-                <div key={i} className={i < card.points ? CLS_DOT_ON : CLS_DOT_OFF}>
-                  {i < card.points ? (
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  ) : (
-                    <span>{i + 1}</span>
-                  )}
-                </div>
-              ))}
-            </div>
-            <p className="text-center text-xs text-white/25 mb-5 font-mono">
-              {card.points}/10
-              {card.points >= 10
-                ? " · 🎉 ¡Tarjeta completa!"
-                : " · faltan " + String(10 - card.points) + " puntos"}
-            </p>
-            {card.points >= 10 ? (
-              <div
-                className="rounded-2xl p-5 text-center mb-4"
-                style={{ background: "linear-gradient(135deg,#F97316,#E53E3E)" }}
-              >
-                <p className="font-head text-[1.8rem] mb-3">🎉 ¡TARJETA LLENA!</p>
-                
-                  href={"https://wa.me/" + WA + "?text=" + encodeURIComponent("Hola! Llené mi BOTA-Card. Usuario IG: @" + card.username + ". ¡Quiero mi snack gratis!")}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block bg-[#22c55e] text-white text-center py-3.5 rounded-full font-black text-xs tracking-widest uppercase hover:bg-[#16a34a] transition-all"
-                >
-                  Reclamar por WhatsApp
-                </a>
-              </div>
-            ) : (
-              <div className="bg-white/[.03] border border-white/[.07] rounded-2xl p-4 mb-4">
-                <p className="text-[.65rem] font-black uppercase tracking-[.2em] text-white/25 text-center mb-3">
-                  Canjear código de compra
-                </p>
-                <div className="flex gap-2">
-                  <input
-                    className="flex-1 px-3 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-mono text-sm uppercase tracking-wider outline-none focus:border-[#F97316] transition-colors placeholder:text-white/15 disabled:opacity-50"
-                    placeholder="BOTA-XXXX"
-                    maxLength={12}
-                    value={code}
-                    onChange={e => {
-                      setCode(e.target.value.toUpperCase())
-                      setCodeStatus(null)
-                    }}
-                    onKeyDown={e => {
-                      if (e.key === "Enter") handleRedeem()
-                    }}
-                    disabled={codeLoading}
-                  />
-                  <button
-                    onClick={handleRedeem}
-                    disabled={!code.trim() || codeLoading}
-                    className="px-4 py-3 rounded-xl bg-white text-black font-black text-xs tracking-widest uppercase hover:bg-[#FBBF24] transition-all disabled:opacity-25 disabled:cursor-not-allowed flex items-center justify-center"
-                  >
-                    {codeLoading ? (
-                      <span className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin block" />
-                    ) : (
-                      "OK"
-                    )}
-                  </button>
-                </div>
-                {codeStatus && (
-                  <div className={
-                    codeStatus.type === "ok" ? CLS_STATUS_OK
-                    : codeStatus.type === "err" ? CLS_STATUS_ERR
-                    : CLS_STATUS_LOAD
-                  }>
-                    {codeStatus.msg}
-                  </div>
-                )}
-              </div>
-            )}
-            <button
-              onClick={handleLogout}
-              className="w-full text-xs text-white/15 uppercase tracking-widest hover:text-white/35 transition-colors py-1"
-            >
-              Cerrar sesión
-            </button>
-          </div>
-        )}
+        {screen === "login" && renderLogin()}
+        {screen === "verify" && renderVerify()}
+        {screen === "card" && renderCard()}
       </div>
     </div>
   )
