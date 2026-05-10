@@ -1,7 +1,7 @@
 "use client"
 import Image from "next/image"
 import { useCart } from "./cart-context"
-import type { Product } from "@/app/page"
+import type { Product } from "@/lib/products"
 
 interface GridProps {
   products: Product[]
