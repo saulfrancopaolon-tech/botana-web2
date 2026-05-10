@@ -1,6 +1,6 @@
 "use client"
 export function Marquee() {
-  const items = ["🌶 BOTA-NA","SNACKS PREMIUM","LA SALLE BAJÍO","CACAHUATES","CHIPS","GOMITAS","PAPAS","BEBIDAS","MAYOREO","FIDELIDAD"]
+  const items = ["BOTA-NA","SNACKS PREMIUM","LEÓN. GTO","CACAHUATES","CHIPS VEGETALES","GOMITAS","PAPAS","BEBIDAS","MAYOREO"]
   const doubled = [...items, ...items]
   return (
     <div className="overflow-hidden whitespace-nowrap bg-[#E53E3E] py-2 border-y border-white/10" aria-hidden="true">
