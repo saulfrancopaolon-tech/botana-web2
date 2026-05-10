@@ -13,7 +13,7 @@ export function Hero({ onMenuClick, onWholesaleOpen }: HeroProps) {
         {/* Eyebrow */}
         <div className="inline-flex items-center gap-2 bg-[#E53E3E]/10 border border-[#E53E3E]/30 rounded-full px-4 py-1.5 text-[.72rem] font-bold tracking-[.15em] uppercase text-[#E53E3E] mb-7">
           <span className="w-1.5 h-1.5 rounded-full bg-[#E53E3E] animate-pulse" />
-          La Salle Bajío · León, Gto.
+          León, Gto.
         </div>
 
         {/* Headline */}
@@ -22,7 +22,7 @@ export function Hero({ onMenuClick, onWholesaleOpen }: HeroProps) {
         </h1>
 
         <p className="text-[clamp(.95rem,2.5vw,1.15rem)] text-white/50 max-w-[520px] mx-auto mb-10 font-light leading-relaxed">
-          Snacks artesanales irresistibles. Desde cacahuates holandeses hasta chips de betabel — seleccionados para hacerte la jornada más sabrosa.
+          Snacks irresistibles. Seleccionados para hacerte la jornada más sabrosa.
         </p>
 
         <div className="flex flex-wrap gap-3 justify-center">
