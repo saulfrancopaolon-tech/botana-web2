@@ -18,7 +18,7 @@ import { Toast, LoyaltyPromo, WholesaleSection } from "@/components/ui-component
 const SHEETS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSQKeuTywAmniswIKciTQS0hI-fMIm4l0DRiGATcUpA_eff42eVS6171CngdgtGphWUADrllm5dcxe1/pub?output=csv"
 
 export default function Page() {
-  const [activeCat, setActiveCat] = useState("🔥 Top")
+  const [activeCat, setActiveCat] = useState("Todos")
   const [stockData, setStockData] = useState<Record<number, boolean>>({})
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [cartOpen, setCartOpen] = useState(false)
@@ -55,11 +55,12 @@ export default function Page() {
     inStock: stockData[p.id] !== undefined ? stockData[p.id] : true,
   }))
 
-  const filtered = activeCat === "🔥 Top"
-    ? products.filter(p => p.pop)
-    : activeCat === "Todos"
+  const filtered = activeCat === "Todos"
     ? products
     : products.filter(p => p.cat === activeCat)
+
+  // "Todos" muestra carruseles agrupados, categorias muestran tarjetas individuales
+  const showGroups = activeCat === "Todos"
 
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null)
@@ -91,11 +92,11 @@ export default function Page() {
         onMenuClick={() => document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" })}
         onWholesaleOpen={() => setWholesaleOpen(true)}
       />
-      <div id="menu" className="sticky top-16 z-50 bg-[#0A0A0A]/95 backdrop-blur-xl border-b border-white/5">
+      <div id="menu" className="sticky top-14 z-50 bg-[#0A0A0A]/95 backdrop-blur-xl border-b border-white/5">
         <CategoryTabs categories={CATEGORIES} active={activeCat} onSelect={setActiveCat} />
       </div>
       <section
-        className="max-w-7xl mx-auto px-4 sm:px-6 py-8 pb-20 min-h-[60vh]"
+        className="max-w-7xl mx-auto px-4 sm:px-6 py-6 pb-20 min-h-[60vh]"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -103,19 +104,32 @@ export default function Page() {
         <ProductGrid
           products={filtered}
           onProductClick={setSelectedProduct}
-          onAddToCart={(p) => showToast(`${p.name} agregado 🛒`)}
+          onAddToCart={p => showToast(p.name + " agregado")}
+          showGroups={showGroups}
         />
       </section>
       <LoyaltyPromo onOpen={() => setLoyaltyOpen(true)} />
       <WholesaleSection />
       <footer className="border-t border-white/5 py-12 text-center px-4">
-        <div className="font-head text-4xl tracking-wide text-white mb-1">BOTA<span className="text-red-500">-</span>NA</div>
-        <p className="text-[11px] text-white/25 uppercase tracking-[.2em] font-bold mb-6">Snacks Premium · La Salle Bajío · León, Gto.</p>
-        <div className="flex justify-center gap-6 flex-wrap mb-6">
-          <a href="https://instagram.com/bota.na.mx" target="_blank" rel="noopener noreferrer" className="text-[13px] text-white/40 hover:text-white transition-colors uppercase tracking-wider font-semibold">Instagram</a>
-          <a href="https://wa.me/524774950232" target="_blank" rel="noopener noreferrer" className="text-[13px] text-white/40 hover:text-white transition-colors uppercase tracking-wider font-semibold">WhatsApp</a>
+        <div className="font-head text-4xl tracking-wide text-white mb-1">
+          BOTA<span className="text-red-500">-</span>NA
         </div>
-        <p className="text-[11px] text-white/20 uppercase tracking-[.15em]">© 2025 BOTA-NA por Saúl &amp; Aranza</p>
+        <p className="text-[11px] text-white/25 uppercase tracking-[.2em] font-bold mb-6">
+          Snacks Premium · La Salle Bajio · Leon, Gto.
+        </p>
+        <div className="flex justify-center gap-6 flex-wrap mb-6">
+          <a href="https://instagram.com/bota.na.mx" target="_blank" rel="noopener noreferrer"
+            className="text-[13px] text-white/40 hover:text-white transition-colors uppercase tracking-wider font-semibold">
+            Instagram
+          </a>
+          <a href="https://wa.me/524774950232" target="_blank" rel="noopener noreferrer"
+            className="text-[13px] text-white/40 hover:text-white transition-colors uppercase tracking-wider font-semibold">
+            WhatsApp
+          </a>
+        </div>
+        <p className="text-[11px] text-white/20 uppercase tracking-[.15em]">
+          2025 BOTA-NA por Saul y Aranza
+        </p>
       </footer>
       <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} onAddToCart={showToast} />
       <CartModal isOpen={cartOpen} onClose={() => setCartOpen(false)} />
