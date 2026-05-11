@@ -19,10 +19,6 @@
   --font-head: 'Bebas Neue', sans-serif;
   --font-body: 'DM Sans', sans-serif;
   --font-mono: 'Space Mono', monospace;
-  --r: 1.2rem;
-  --r2: 1.6rem;
-  --r3: 2.4rem;
-  --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
 * { box-sizing: border-box; }
@@ -32,39 +28,53 @@ body {
   color: var(--white);
   font-family: var(--font-body);
   overflow-x: hidden;
+  /* Space for mobile bottom nav */
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Noise grain overlay */
+/* Mobile bottom nav space */
+@media (max-width: 639px) {
+  body {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Noise grain */
 body::after {
   content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 999;
+  z-index: 998;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
   opacity: 0.025;
 }
 
+/* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--gray2); border-radius: 2px; }
 
-/* Custom classes */
+/* Hide scrollbar on horizontal scroll areas */
+.scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
+
+/* Fonts */
 .font-head { font-family: var(--font-head); }
 .font-mono { font-family: var(--font-mono); }
 
-/* Marquee animation */
+/* Marquee */
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 .animate-marquee { animation: marquee 28s linear infinite; }
 
-/* Slide up animation */
+/* Slide up (modals) */
 @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 .animate-slide-up { animation: slideUp 0.28s ease-out; }
 
-/* Hero background text */
+/* Hero bg text */
 .hero-bg-text {
   font-family: var(--font-head);
-  font-size: clamp(10rem, 22vw, 22rem);
+  font-size: clamp(8rem, 22vw, 22rem);
   color: rgba(255,255,255,0.025);
   position: absolute;
   top: 50%;
@@ -86,4 +96,16 @@ body::after {
   border-top-color: white;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
+}
+
+/* Safe area for bottom nav on iOS */
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Better tap targets on mobile */
+@media (max-width: 639px) {
+  button, a {
+    -webkit-tap-highlight-color: transparent;
+  }
 }
