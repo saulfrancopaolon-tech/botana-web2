@@ -9,13 +9,13 @@ interface GridProps {
   products: Product[]
   onProductClick: (p: Product) => void
   onAddToCart: (p: Product) => void
+  showGroups: boolean
 }
 
-export function ProductGrid({ products, onProductClick, onAddToCart }: GridProps) {
+export function ProductGrid({ products, onProductClick, onAddToCart, showGroups }: GridProps) {
   const { addItem } = useCart()
-  const items = buildGroups(products)
 
-  if (!items.length) {
+  if (!products.length) {
     return (
       <div className="text-center py-20 text-white/30">
         <p className="text-4xl mb-3">🌶</p>
@@ -24,37 +24,51 @@ export function ProductGrid({ products, onProductClick, onAddToCart }: GridProps
     )
   }
 
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-      {items.map(item => {
-        if ("products" in item) {
+  // "Todos" → carousel group cards
+  if (showGroups) {
+    const items = buildGroups(products)
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+        {items.map(item => {
+          if ("products" in item) {
+            return (
+              <GroupCard
+                key={item.groupId}
+                group={item}
+                onProductClick={onProductClick}
+                onAddToCart={p => { addItem(p); onAddToCart(p) }}
+              />
+            )
+          }
           return (
-            <GroupCard
-              key={item.groupId}
-              group={item}
-              onProductClick={onProductClick}
-              onAddToCart={p => { addItem(p); onAddToCart(p) }}
+            <ProductCard
+              key={item.id}
+              product={item}
+              onClick={() => onProductClick(item)}
+              onQuickAdd={e => { e.stopPropagation(); addItem(item); onAddToCart(item) }}
             />
           )
-        }
-        return (
-          <ProductCard
-            key={item.id}
-            product={item}
-            onClick={() => onProductClick(item)}
-            onQuickAdd={e => {
-              e.stopPropagation()
-              addItem(item)
-              onAddToCart(item)
-            }}
-          />
-        )
-      })}
+        })}
+      </div>
+    )
+  }
+
+  // Categoria especifica → una tarjeta por producto
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+      {products.map(p => (
+        <ProductCard
+          key={p.id}
+          product={p}
+          onClick={() => onProductClick(p)}
+          onQuickAdd={e => { e.stopPropagation(); addItem(p); onAddToCart(p) }}
+        />
+      ))}
     </div>
   )
 }
 
-// ── GROUP CARD (carousel) ──
+// ── GROUP CARD (carousel automatico) ──
 interface GroupCardProps {
   group: ProductGroup
   onProductClick: (p: Product) => void
@@ -66,38 +80,35 @@ function GroupCard({ group, onProductClick, onAddToCart }: GroupCardProps) {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const p = group.products[active]
 
-  useEffect(() => {
+  function startAuto() {
     intervalRef.current = setInterval(() => {
       setActive(i => (i + 1) % group.products.length)
     }, 2200)
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current)
-    }
-  }, [group.products.length])
+  }
 
-  function pause() {
+  function stopAuto() {
     if (intervalRef.current) clearInterval(intervalRef.current)
   }
-  function resume() {
-    intervalRef.current = setInterval(() => {
-      setActive(i => (i + 1) % group.products.length)
-    }, 2200)
-  }
+
+  useEffect(() => {
+    startAuto()
+    return stopAuto
+  }, [group.products.length])
 
   return (
     <div
-      className="group bg-[#111] border border-white/[.07] rounded-[1.4rem] overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:border-[#E53E3E]/30 hover:shadow-[0_16px_40px_rgba(0,0,0,.5)]"
-      onTouchStart={pause}
-      onTouchEnd={resume}
-      onMouseEnter={pause}
-      onMouseLeave={resume}
+      className="group bg-[#111] border border-white/[.07] rounded-[1.4rem] overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-[#E53E3E]/30 hover:shadow-[0_16px_40px_rgba(0,0,0,.5)]"
+      onTouchStart={stopAuto}
+      onTouchEnd={startAuto}
+      onMouseEnter={stopAuto}
+      onMouseLeave={startAuto}
     >
-      {/* Image area — click opens product */}
+      {/* Imagen — tap abre producto activo */}
       <div
-        className="aspect-square bg-[#181818] relative overflow-hidden"
+        className="aspect-square bg-[#181818] relative overflow-hidden cursor-pointer"
         onClick={() => onProductClick(p)}
       >
-        <div className="absolute inset-0 flex items-center justify-center text-5xl select-none transition-all duration-300">
+        <div className="absolute inset-0 flex items-center justify-center text-5xl select-none">
           {p.emoji}
         </div>
         <Image
@@ -107,8 +118,7 @@ function GroupCard({ group, onProductClick, onAddToCart }: GroupCardProps) {
           className="object-cover"
           onError={e => { (e.target as HTMLImageElement).style.display = "none" }}
         />
-
-        {/* Top badge */}
+        {/* Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">
           {group.pop && (
             <span className="text-[.55rem] font-black tracking-[.12em] uppercase bg-[#E53E3E] text-white px-2 py-0.5 rounded-full">
@@ -119,8 +129,7 @@ function GroupCard({ group, onProductClick, onAddToCart }: GroupCardProps) {
             {group.products.length} sabores
           </span>
         </div>
-
-        {/* Dot indicators */}
+        {/* Dots */}
         <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
           {group.products.map((_, i) => (
             <button
@@ -137,18 +146,18 @@ function GroupCard({ group, onProductClick, onAddToCart }: GroupCardProps) {
       </div>
 
       {/* Info */}
-      <div className="p-3" onClick={() => onProductClick(p)}>
+      <div className="p-3 cursor-pointer" onClick={() => onProductClick(p)}>
         <div className="font-bold text-[.85rem] text-white leading-tight mb-0.5">
           {p.flavor}
         </div>
-        <div className="text-[.68rem] text-white/35 mb-2 truncate">
+        <div className="text-[.65rem] text-white/30 mb-2 truncate">
           {group.products.map(x => x.flavor).join(" · ")}
         </div>
         <div className="flex items-center justify-between gap-2">
           <span className="font-mono font-bold text-white text-[1rem]">${p.price}</span>
           <button
             onClick={e => { e.stopPropagation(); onAddToCart(p) }}
-            aria-label={"Agregar " + p.name + " al carrito"}
+            aria-label={"Agregar " + p.name}
             className="w-8 h-8 rounded-full bg-[#E53E3E] flex items-center justify-center hover:bg-[#FF5252] hover:scale-110 transition-all flex-shrink-0"
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.8">
@@ -159,7 +168,7 @@ function GroupCard({ group, onProductClick, onAddToCart }: GroupCardProps) {
         </div>
       </div>
 
-      {/* Flavor pills */}
+      {/* Pills de sabores */}
       <div className="px-3 pb-3 flex gap-1.5 overflow-x-auto scrollbar-none">
         {group.products.map((variant, i) => (
           <button
@@ -167,8 +176,8 @@ function GroupCard({ group, onProductClick, onAddToCart }: GroupCardProps) {
             onClick={e => { e.stopPropagation(); setActive(i) }}
             className={
               i === active
-                ? "flex-shrink-0 text-[.6rem] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#E53E3E] text-white transition-all"
-                : "flex-shrink-0 text-[.6rem] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-white/40 transition-all"
+                ? "flex-shrink-0 text-[.58rem] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#E53E3E] text-white transition-all"
+                : "flex-shrink-0 text-[.58rem] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-white/40 transition-all"
             }
           >
             {variant.flavor}
@@ -179,7 +188,7 @@ function GroupCard({ group, onProductClick, onAddToCart }: GroupCardProps) {
   )
 }
 
-// ── SINGLE PRODUCT CARD ──
+// ── TARJETA INDIVIDUAL ──
 interface CardProps {
   product: Product
   onClick: () => void
@@ -231,7 +240,7 @@ function ProductCard({ product: p, onClick, onQuickAdd }: CardProps) {
           <span className="font-mono font-bold text-white text-[1rem]">${p.price}</span>
           <button
             onClick={onQuickAdd}
-            aria-label={"Agregar " + p.name + " al carrito"}
+            aria-label={"Agregar " + p.name}
             className="w-8 h-8 rounded-full bg-[#E53E3E] flex items-center justify-center hover:bg-[#FF5252] hover:scale-110 transition-all flex-shrink-0"
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.8">
