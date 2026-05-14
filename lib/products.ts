@@ -19,7 +19,7 @@ export const PRODUCTS = [
   { id: 17, name: "Agua de Horchata",      desc: "Cremosa agua de horchata con canela. Dulce, fresca y reconfortante.",                  price: 22, cat: "Bebidas",    tags: ["500ml","Natural"], pop: false, spicy: false, natural: true,  emoji: "🥛", img: "/images/71.webp", groupId: "aguas",      flavor: "Horchata"   },
   { id: 16, name: "Chamoyada de Mango",    desc: "Deliciosa combinacion de mango natural y chamoy. La bebida del verano todo el año.",   price: 30, cat: "Bebidas",    tags: ["Fresco","Frutal"], pop: true,  spicy: true,  natural: false, emoji: "🥭", img: "/images/69.webp", groupId: "chamoyadas", flavor: "Mango"      },
   { id: 18, name: "Chamoyada de Fresa",    desc: "Fresa natural con chamoy y chile. Dulce, acida y picante en cada sorbo.",             price: 30, cat: "Bebidas",    tags: ["Fresco","Frutal"], pop: true,  spicy: true,  natural: false, emoji: "🍓", img: "/images/72.webp", groupId: "chamoyadas", flavor: "Fresa"      },
-  { id: 19, name: "Chamoyada de Limón",desc: "Limón con chamoy y chilito. El sabor mas mexicano en vaso.",                       price: 30, cat: "Bebidas",    tags: ["Fresco","Picante"], pop: false, spicy: true,  natural: false, emoji: "🍋‍🟩", img: "/images/73.webp", groupId: "chamoyadas", flavor: "Tamarindo"  },
+  { id: 19, name: "Chamoyada de Limón",desc: "Limón con chamoy y chilito. El sabor mas mexicano en vaso.",                       price: 30, cat: "Bebidas",    tags: ["Fresco","Picante"], pop: false, spicy: true,  natural: false, emoji: "🍋‍🟩", img: "/images/73.webp", groupId: "chamoyadas", flavor: "limón"  },
 ]
 
 export type Product = (typeof PRODUCTS)[number] & { inStock?: boolean }
