@@ -13,6 +13,7 @@ import { ProductModal } from "@/components/product-modal"
 import { CartModal } from "@/components/cart-modal"
 import { LoyaltyModal } from "@/components/loyalty-modal"
 import { WholesaleModal } from "@/components/wholesale-modal"
+import { EventModal } from "@/components/event-modal"
 import { Toast, LoyaltyPromo, WholesaleSection } from "@/components/ui-components"
 
 const SHEETS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSQKeuTywAmniswIKciTQS0hI-fMIm4l0DRiGATcUpA_eff42eVS6171CngdgtGphWUADrllm5dcxe1/pub?output=csv"
@@ -24,6 +25,7 @@ export default function Page() {
   const [cartOpen, setCartOpen] = useState(false)
   const [loyaltyOpen, setLoyaltyOpen] = useState(false)
   const [wholesaleOpen, setWholesaleOpen] = useState(false)
+  const [eventOpen, setEventOpen] = useState(false)
   const [toast, setToast] = useState({ msg: "", show: false })
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null)
   const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(null)
@@ -59,7 +61,6 @@ export default function Page() {
     ? products
     : products.filter(p => p.cat === activeCat)
 
-  // "Todos" muestra carruseles agrupados, categorias muestran tarjetas individuales
   const showGroups = activeCat === "Todos"
 
   const onTouchStart = (e: React.TouchEvent) => {
@@ -108,8 +109,50 @@ export default function Page() {
           showGroups={showGroups}
         />
       </section>
+
+      {/* Evento Banner */}
+      <section className="px-4 py-10 bg-[#111]">
+        <div className="max-w-2xl mx-auto">
+          <div
+            className="relative overflow-hidden rounded-[2rem] p-6 sm:p-8 text-center"
+            style={{ background: "linear-gradient(135deg,rgba(249,115,22,0.15),rgba(229,62,62,0.15))" }}
+          >
+            <div className="absolute inset-0 border border-[#F97316]/20 rounded-[2rem] pointer-events-none" />
+            <div className="text-4xl mb-3">🎉</div>
+            <div className="text-[.68rem] font-black uppercase tracking-[.2em] text-[#F97316] mb-2">Eventos y Fiestas</div>
+            <h2 className="font-head text-[clamp(2rem,6vw,3rem)] leading-none text-white mb-3">
+              Botanas para tu Evento
+            </h2>
+            <p className="text-white/40 text-sm leading-relaxed max-w-md mx-auto mb-6">
+              Precios especiales por volumen, etiquetas personalizadas con el nombre de tu evento y entrega a domicilio. Cotiza en segundos.
+            </p>
+            <div className="flex flex-wrap justify-center gap-2 mb-6">
+              {["10% OFF desde 20 pzas", "20% OFF en 100+", "Etiquetas personalizadas", "Anticipo 50%"].map(tag => (
+                <span key={tag} className="text-[.65rem] font-black uppercase tracking-wider px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/50">
+                  {tag}
+                </span>
+              ))}
+            </div>
+            <button
+              onClick={() => setEventOpen(true)}
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-white font-black text-sm tracking-widest uppercase active:scale-95 transition-all"
+              style={{ background: "linear-gradient(135deg,#F97316,#E53E3E)" }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              Cotizar mi Evento
+            </button>
+          </div>
+        </div>
+      </section>
+
       <LoyaltyPromo onOpen={() => setLoyaltyOpen(true)} />
       <WholesaleSection />
+
       <footer className="border-t border-white/5 py-12 text-center px-4">
         <div className="font-head text-4xl tracking-wide text-white mb-1">
           BOTA<span className="text-red-500">-</span>NA
@@ -131,10 +174,12 @@ export default function Page() {
           2025 BOTA-NA por Saul y Aranza
         </p>
       </footer>
+
       <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} onAddToCart={showToast} />
       <CartModal isOpen={cartOpen} onClose={() => setCartOpen(false)} />
       <LoyaltyModal isOpen={loyaltyOpen} onClose={() => setLoyaltyOpen(false)} />
       <WholesaleModal isOpen={wholesaleOpen} onClose={() => setWholesaleOpen(false)} />
+      <EventModal isOpen={eventOpen} onClose={() => setEventOpen(false)} />
       <Toast message={toast.msg} show={toast.show} />
     </CartProvider>
   )
