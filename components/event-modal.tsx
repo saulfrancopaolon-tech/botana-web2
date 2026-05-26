@@ -22,7 +22,7 @@ const EVENT_PRODUCTS = [
   { id: 17, name: "Agua de Horchata",        emoji: "🥛", cat: "Bebidas",    retail: 22, event: 18, cost: 12.81 },
   { id: 16, name: "Chamoyada de Mango",      emoji: "🥭", cat: "Bebidas",    retail: 30, event: 25, cost: 18.15 },
   { id: 18, name: "Chamoyada de Fresa",      emoji: "🍓", cat: "Bebidas",    retail: 30, event: 25, cost: 18.15 },
-  { id: 19, name: "Chamoyada de Tamarindo",  emoji: "🟤", cat: "Bebidas",    retail: 30, event: 25, cost: 18.15 },
+  { id: 19, name: "Chamoyada de Limón",  emoji: "🍋‍🟩", cat: "Bebidas",    retail: 30, event: 25, cost: 18.15 },
 ]
 
 const LABEL_PRICE = 4
