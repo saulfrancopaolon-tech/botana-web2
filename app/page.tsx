@@ -1,5 +1,4 @@
 "use client"
-
 import { useState, useEffect, useCallback } from "react"
 import { CATEGORIES, PRODUCTS } from "@/lib/products"
 import type { Product } from "@/lib/products"
@@ -93,11 +92,11 @@ export default function Page() {
         onMenuClick={() => document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" })}
         onWholesaleOpen={() => setWholesaleOpen(true)}
       />
-      <div id="menu" className="sticky top-14 z-50 bg-[#0A0A0A]/95 backdrop-blur-xl border-b border-white/5">
+      <div id="menu" className="sticky top-14 z-40 bg-[#0A0A0A]/95 backdrop-blur-xl border-b border-white/5">
         <CategoryTabs categories={CATEGORIES} active={activeCat} onSelect={setActiveCat} />
       </div>
       <section
-        className="max-w-7xl mx-auto px-4 sm:px-6 py-6 pb-20 min-h-[60vh]"
+        className="max-w-7xl mx-auto px-4 sm:px-6 py-6 pb-6 min-h-[60vh]"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -111,24 +110,24 @@ export default function Page() {
       </section>
 
       {/* Evento Banner */}
-      <section className="px-4 py-10 bg-[#111]">
+      <section className="px-4 py-10 sm:py-14">
         <div className="max-w-2xl mx-auto">
           <div
             className="relative overflow-hidden rounded-[2rem] p-6 sm:p-8 text-center"
-            style={{ background: "linear-gradient(135deg,rgba(249,115,22,0.15),rgba(229,62,62,0.15))" }}
+            style={{ background: "linear-gradient(135deg,rgba(249,115,22,0.12),rgba(229,62,62,0.12))" }}
           >
-            <div className="absolute inset-0 border border-[#F97316]/20 rounded-[2rem] pointer-events-none" />
+            <div className="absolute inset-0 border border-[#F97316]/15 rounded-[2rem] pointer-events-none" />
             <div className="text-4xl mb-3">🎉</div>
-            <div className="text-[.68rem] font-black uppercase tracking-[.2em] text-[#F97316] mb-2">Eventos y Fiestas</div>
+            <div className="text-[.65rem] font-black uppercase tracking-[.2em] text-[#F97316] mb-2">Eventos y Fiestas</div>
             <h2 className="font-head text-[clamp(2rem,6vw,3rem)] leading-none text-white mb-3">
               Botanas para tu Evento
             </h2>
-            <p className="text-white/40 text-sm leading-relaxed max-w-md mx-auto mb-6">
-              Precios especiales por volumen, etiquetas personalizadas con el nombre de tu evento y entrega a domicilio. Cotiza en segundos.
+            <p className="text-white/40 text-sm leading-relaxed max-w-md mx-auto mb-5">
+              Precios especiales, descuentos por volumen, etiquetas con el nombre de tu evento y entrega a domicilio.
             </p>
             <div className="flex flex-wrap justify-center gap-2 mb-6">
-              {["10% OFF desde 20 pzas", "20% OFF en 100+", "Etiquetas personalizadas", "Anticipo 50%"].map(tag => (
-                <span key={tag} className="text-[.65rem] font-black uppercase tracking-wider px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/50">
+              {["5% OFF desde 20 pzas", "15% OFF en 100+", "Etiquetas personalizadas", "50% de anticipo"].map(tag => (
+                <span key={tag} className="text-[.62rem] font-black uppercase tracking-wider px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/45">
                   {tag}
                 </span>
               ))}
@@ -151,34 +150,22 @@ export default function Page() {
       </section>
 
       <LoyaltyPromo onOpen={() => setLoyaltyOpen(true)} />
-      <WholesaleSection />
+      <WholesaleSection onEventOpen={() => setEventOpen(true)} />
 
-      <footer className="border-t border-white/5 py-12 text-center px-4">
-        <div className="font-head text-4xl tracking-wide text-white mb-1">
-          BOTA<span className="text-red-500">-</span>NA
+      <footer className="border-t border-white/5 py-12 pb-24 sm:pb-12 text-center px-4">
+        <div className="font-head text-4xl tracking-wide text-white mb-1">BOTA<span className="text-red-500">-</span>NA</div>
+        <p className="text-[11px] text-white/25 uppercase tracking-[.2em] font-bold mb-6">Snacks Premium · La Salle Bajio · Leon, Gto.</p>
+        <div className="flex justify-center gap-6 flex-wrap mb-4">
+          <a href="https://instagram.com/bota.na.mx" target="_blank" rel="noopener noreferrer" className="text-[12px] text-white/40 hover:text-white transition-colors uppercase tracking-wider font-semibold">Instagram</a>
+          <a href="https://wa.me/524774950232" target="_blank" rel="noopener noreferrer" className="text-[12px] text-white/40 hover:text-white transition-colors uppercase tracking-wider font-semibold">WhatsApp</a>
         </div>
-        <p className="text-[11px] text-white/25 uppercase tracking-[.2em] font-bold mb-6">
-          Snacks Premium · La Salle Bajio · Leon, Gto.
-        </p>
-        <div className="flex justify-center gap-6 flex-wrap mb-6">
-          <a href="https://instagram.com/bota.na.mx" target="_blank" rel="noopener noreferrer"
-            className="text-[13px] text-white/40 hover:text-white transition-colors uppercase tracking-wider font-semibold">
-            Instagram
-          </a>
-          <a href="https://wa.me/524774950232" target="_blank" rel="noopener noreferrer"
-            className="text-[13px] text-white/40 hover:text-white transition-colors uppercase tracking-wider font-semibold">
-            WhatsApp
-          </a>
-        </div>
-        <p className="text-[11px] text-white/20 uppercase tracking-[.15em]">
-          2025 BOTA-NA por Saul y Aranza
-        </p>
+        <p className="text-[11px] text-white/15 uppercase tracking-[.15em]">2025 BOTA-NA por Saul y Aranza</p>
       </footer>
 
       <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} onAddToCart={showToast} />
       <CartModal isOpen={cartOpen} onClose={() => setCartOpen(false)} />
       <LoyaltyModal isOpen={loyaltyOpen} onClose={() => setLoyaltyOpen(false)} />
-      <WholesaleModal isOpen={wholesaleOpen} onClose={() => setWholesaleOpen(false)} />
+      <WholesaleModal isOpen={wholesaleOpen} onClose={() => setWholesaleOpen(false)} onEventOpen={() => setEventOpen(true)} />
       <EventModal isOpen={eventOpen} onClose={() => setEventOpen(false)} />
       <Toast message={toast.msg} show={toast.show} />
     </CartProvider>
