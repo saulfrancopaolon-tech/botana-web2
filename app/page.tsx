@@ -1,4 +1,5 @@
 "use client"
+
 import { useState, useEffect, useCallback } from "react"
 import { CATEGORIES, PRODUCTS } from "@/lib/products"
 import type { Product } from "@/lib/products"
@@ -8,7 +9,7 @@ import { NavBar } from "@/components/navbar"
 import { Hero } from "@/components/hero"
 import { CategoryTabs } from "@/components/category-tabs"
 import { ProductGrid } from "@/components/product-grid"
-import { ProductModal } from "@/components/product-modal"
+import { ProductList } from "@/components/product-list"
 import { CartModal } from "@/components/cart-modal"
 import { LoyaltyModal } from "@/components/loyalty-modal"
 import { WholesaleModal } from "@/components/wholesale-modal"
@@ -20,7 +21,6 @@ const SHEETS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSQKeuTywAmn
 export default function Page() {
   const [activeCat, setActiveCat] = useState("Todos")
   const [stockData, setStockData] = useState<Record<number, boolean>>({})
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [cartOpen, setCartOpen] = useState(false)
   const [loyaltyOpen, setLoyaltyOpen] = useState(false)
   const [wholesaleOpen, setWholesaleOpen] = useState(false)
@@ -46,7 +46,12 @@ export default function Page() {
       .catch(() => {})
   }, [])
 
-  const showToast = useCallback((msg: string) => {
+  const showToast = useCallback((p: Product) => {
+    setToast({ msg: p.name + " agregado al carrito", show: true })
+    setTimeout(() => setToast(t => ({ ...t, show: false })), 2800)
+  }, [])
+
+  const showToastMsg = useCallback((msg: string) => {
     setToast({ msg, show: true })
     setTimeout(() => setToast(t => ({ ...t, show: false })), 2800)
   }, [])
@@ -60,7 +65,8 @@ export default function Page() {
     ? products
     : products.filter(p => p.cat === activeCat)
 
-  const showGroups = activeCat === "Todos"
+  // Todos = carousel grid, categoria especifica = lista acordeon
+  const showGrid = activeCat === "Todos"
 
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null)
@@ -92,22 +98,81 @@ export default function Page() {
         onMenuClick={() => document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" })}
         onWholesaleOpen={() => setWholesaleOpen(true)}
       />
-      <div id="menu" className="sticky top-14 z-40 bg-[#0A0A0A]/95 backdrop-blur-xl border-b border-white/5">
-        <CategoryTabs categories={CATEGORIES} active={activeCat} onSelect={setActiveCat} />
+
+      {/* ── MENU SECTION ── */}
+      <div id="menu">
+        {/* Sticky category tabs */}
+        <div className="sticky top-14 z-40 bg-[#0A0A0A]/95 backdrop-blur-xl border-b border-white/5">
+          <CategoryTabs
+            categories={CATEGORIES}
+            active={activeCat}
+            onSelect={cat => {
+              setActiveCat(cat)
+              document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" })
+            }}
+          />
+        </div>
+
+        {/* Category header for non-Todos views */}
+        {activeCat !== "Todos" && (
+          <div
+            className="px-4 sm:px-6 pt-5 pb-3"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+          >
+            <div className="max-w-7xl mx-auto flex items-center justify-between">
+              <div>
+                <h2 className="font-head text-[2rem] leading-none text-white">{activeCat}</h2>
+                <p className="text-[.7rem] text-white/30 mt-0.5">
+                  {filtered.length} productos
+                  <span className="ml-2 text-white/20">Desliza para cambiar categoria</span>
+                </p>
+              </div>
+              {/* Swipe hint dots */}
+              <div className="flex gap-1">
+                {CATEGORIES.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCat(cat)}
+                    className={
+                      "transition-all rounded-full " +
+                      (cat === activeCat
+                        ? "w-4 h-1.5 bg-[#E53E3E]"
+                        : "w-1.5 h-1.5 bg-white/20")
+                    }
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Products */}
+        <section
+          className="max-w-7xl mx-auto px-4 sm:px-6 pb-6 min-h-[60vh]"
+          style={{ paddingTop: activeCat === "Todos" ? "1.5rem" : "0" }}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
+          {showGrid ? (
+            /* Todos: carousel group cards */
+            <ProductGrid
+              products={filtered}
+              onProductClick={() => {}}
+              onAddToCart={p => showToast(p)}
+              showGroups={true}
+            />
+          ) : (
+            /* Categoria: lista acordeon */
+            <ProductList
+              products={filtered}
+              onAddToCart={p => showToast(p)}
+            />
+          )}
+        </section>
       </div>
-      <section
-        className="max-w-7xl mx-auto px-4 sm:px-6 py-6 pb-6 min-h-[60vh]"
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-      >
-        <ProductGrid
-          products={filtered}
-          onProductClick={setSelectedProduct}
-          onAddToCart={p => showToast(p.name + " agregado")}
-          showGroups={showGroups}
-        />
-      </section>
 
       {/* Evento Banner */}
       <section className="px-4 py-10 sm:py-14">
@@ -118,7 +183,9 @@ export default function Page() {
           >
             <div className="absolute inset-0 border border-[#F97316]/15 rounded-[2rem] pointer-events-none" />
             <div className="text-4xl mb-3">🎉</div>
-            <div className="text-[.65rem] font-black uppercase tracking-[.2em] text-[#F97316] mb-2">Eventos y Fiestas</div>
+            <div className="text-[.65rem] font-black uppercase tracking-[.2em] text-[#F97316] mb-2">
+              Eventos y Fiestas
+            </div>
             <h2 className="font-head text-[clamp(2rem,6vw,3rem)] leading-none text-white mb-3">
               Botanas para tu Evento
             </h2>
@@ -126,8 +193,11 @@ export default function Page() {
               Precios especiales, descuentos por volumen, etiquetas con el nombre de tu evento y entrega a domicilio.
             </p>
             <div className="flex flex-wrap justify-center gap-2 mb-6">
-              {["5% OFF desde 20 pzas", "15% OFF en 100+", "Etiquetas personalizadas", "50% de anticipo"].map(tag => (
-                <span key={tag} className="text-[.62rem] font-black uppercase tracking-wider px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/45">
+              {["5% OFF desde 20 pzas", "15% OFF en 100+", "Etiquetas personalizadas", "50% anticipo"].map(tag => (
+                <span
+                  key={tag}
+                  className="text-[.62rem] font-black uppercase tracking-wider px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/45"
+                >
                   {tag}
                 </span>
               ))}
@@ -153,19 +223,42 @@ export default function Page() {
       <WholesaleSection onEventOpen={() => setEventOpen(true)} />
 
       <footer className="border-t border-white/5 py-12 pb-24 sm:pb-12 text-center px-4">
-        <div className="font-head text-4xl tracking-wide text-white mb-1">BOTA<span className="text-red-500">-</span>NA</div>
-        <p className="text-[11px] text-white/25 uppercase tracking-[.2em] font-bold mb-6">Snacks Premium · La Salle Bajio · Leon, Gto.</p>
-        <div className="flex justify-center gap-6 flex-wrap mb-4">
-          <a href="https://instagram.com/bota.na.mx" target="_blank" rel="noopener noreferrer" className="text-[12px] text-white/40 hover:text-white transition-colors uppercase tracking-wider font-semibold">Instagram</a>
-          <a href="https://wa.me/524774950232" target="_blank" rel="noopener noreferrer" className="text-[12px] text-white/40 hover:text-white transition-colors uppercase tracking-wider font-semibold">WhatsApp</a>
+        <div className="font-head text-4xl tracking-wide text-white mb-1">
+          BOTA<span className="text-red-500">-</span>NA
         </div>
-        <p className="text-[11px] text-white/15 uppercase tracking-[.15em]">2025 BOTA-NA por Saul y Aranza</p>
+        <p className="text-[11px] text-white/25 uppercase tracking-[.2em] font-bold mb-6">
+          Snacks Premium · La Salle Bajio · Leon, Gto.
+        </p>
+        <div className="flex justify-center gap-6 flex-wrap mb-4">
+          <a
+            href="https://instagram.com/bota.na.mx"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[12px] text-white/40 hover:text-white transition-colors uppercase tracking-wider font-semibold"
+          >
+            Instagram
+          </a>
+          <a
+            href="https://wa.me/524774950232"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[12px] text-white/40 hover:text-white transition-colors uppercase tracking-wider font-semibold"
+          >
+            WhatsApp
+          </a>
+        </div>
+        <p className="text-[11px] text-white/15 uppercase tracking-[.15em]">
+          2025 BOTA-NA por Saul y Aranza
+        </p>
       </footer>
 
-      <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} onAddToCart={showToast} />
       <CartModal isOpen={cartOpen} onClose={() => setCartOpen(false)} />
       <LoyaltyModal isOpen={loyaltyOpen} onClose={() => setLoyaltyOpen(false)} />
-      <WholesaleModal isOpen={wholesaleOpen} onClose={() => setWholesaleOpen(false)} onEventOpen={() => setEventOpen(true)} />
+      <WholesaleModal
+        isOpen={wholesaleOpen}
+        onClose={() => setWholesaleOpen(false)}
+        onEventOpen={() => { setWholesaleOpen(false); setEventOpen(true) }}
+      />
       <EventModal isOpen={eventOpen} onClose={() => setEventOpen(false)} />
       <Toast message={toast.msg} show={toast.show} />
     </CartProvider>
