@@ -2,26 +2,23 @@
 import React, { useEffect, useRef, ReactNode, CSSProperties } from "react"
 
 // ── useReveal ──────────────────────────────────────────────
-// Adds .visible when element enters viewport
 export function useReveal(threshold = 0.15) {
-  const ref = useRef<HTMLElement | null>(null)
+  const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const el = ref.current
     if (!el) return
-
     const obs = new IntersectionObserver(
       entries => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             entry.target.classList.add("visible")
-            obs.unobserve(entry.target) // fire once
+            obs.unobserve(entry.target)
           }
         })
       },
       { threshold }
     )
-
     obs.observe(el)
     return () => obs.disconnect()
   }, [threshold])
@@ -30,14 +27,12 @@ export function useReveal(threshold = 0.15) {
 }
 
 // ── AnimateIn ──────────────────────────────────────────────
-// Wraps any children with scroll-reveal
 interface AnimateInProps {
   children: ReactNode
   className?: string
   stagger?: boolean
   delay?: number
   style?: CSSProperties
-  as?: keyof React.JSX.IntrinsicElements
 }
 
 export function AnimateIn({
@@ -46,34 +41,32 @@ export function AnimateIn({
   stagger = false,
   delay = 0,
   style,
-  as: Tag = "div",
 }: AnimateInProps) {
   const ref = useReveal()
-
   const baseClass = stagger ? "reveal-stagger" : "reveal"
-  const delayStyle = delay ? { transitionDelay: String(delay) + "ms" } : {}
+  const delayStyle: CSSProperties = delay ? { transitionDelay: String(delay) + "ms" } : {}
 
   return (
-    // @ts-ignore — dynamic tag
-    <Tag
+    <div
       ref={ref}
       className={baseClass + " " + className}
       style={{ ...style, ...delayStyle }}
     >
       {children}
-    </Tag>
+    </div>
   )
 }
 
 // ── ScalePop ──────────────────────────────────────────────
-// Pops in with spring scale on mount
-interface ScalePopProps {
+export function ScalePop({
+  children,
+  className = "",
+  delay = 0,
+}: {
   children: ReactNode
   className?: string
   delay?: number
-}
-
-export function ScalePop({ children, className = "", delay = 0 }: ScalePopProps) {
+}) {
   return (
     <div
       className={"animate-scale-pop " + className}
@@ -119,7 +112,6 @@ export function SkeletonCard() {
 }
 
 // ── PageTransition ─────────────────────────────────────────
-// Wraps page content with fade-in on mount
 export function PageTransition({ children }: { children: ReactNode }) {
   return (
     <div
