@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useRef, ReactNode, CSSProperties } from "react"
+import React, { useEffect, useRef, ReactNode, CSSProperties } from "react"
 
 // ── useReveal ──────────────────────────────────────────────
 // Adds .visible when element enters viewport
@@ -37,7 +37,7 @@ interface AnimateInProps {
   stagger?: boolean
   delay?: number
   style?: CSSProperties
-  as?: keyof JSX.IntrinsicElements
+  as?: keyof React.JSX.IntrinsicElements
 }
 
 export function AnimateIn({
