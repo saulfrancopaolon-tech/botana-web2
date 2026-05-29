@@ -3,6 +3,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ══════════════════════════════════════════
+   TOKENS
+══════════════════════════════════════════ */
 :root {
   --bg: #0A0A0A;
   --bg2: #111111;
@@ -15,31 +18,45 @@
   --white: #FAFAFA;
   --gray: #A0A0A0;
   --gray2: #5A5A5A;
-  --border: rgba(255, 255, 255, 0.08);
+  --border: rgba(255,255,255,0.08);
   --font-head: 'Bebas Neue', sans-serif;
   --font-body: 'DM Sans', sans-serif;
   --font-mono: 'Space Mono', monospace;
+
+  /* iOS-style spring curves */
+  --spring:       cubic-bezier(0.34, 1.56, 0.64, 1);   /* bouncy spring  */
+  --spring-soft:  cubic-bezier(0.25, 0.46, 0.45, 0.94); /* iOS default    */
+  --spring-stiff: cubic-bezier(0.22, 1.00, 0.36, 1.00); /* fast settle    */
+  --ease-out:     cubic-bezier(0.16, 1, 0.3, 1);        /* expo out       */
 }
 
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+/* ══════════════════════════════════════════
+   RESET
+══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; }
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
 body {
   background: var(--bg);
   color: var(--white);
   font-family: var(--font-body);
   overflow-x: hidden;
-  /* Space for mobile bottom nav */
-  padding-bottom: env(safe-area-inset-bottom);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* momentum scroll iOS */
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Mobile bottom nav space */
 @media (max-width: 639px) {
-  body {
-    padding-bottom: calc(64px + env(safe-area-inset-bottom));
-  }
+  body { padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
 }
 
-/* Noise grain */
+/* ══════════════════════════════════════════
+   NOISE GRAIN
+══════════════════════════════════════════ */
 body::after {
   content: '';
   position: fixed;
@@ -50,35 +67,51 @@ body::after {
   opacity: 0.025;
 }
 
-/* Scrollbar */
+/* ══════════════════════════════════════════
+   SCROLLBAR
+══════════════════════════════════════════ */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--gray2); border-radius: 2px; }
-
-/* Hide scrollbar on horizontal scroll areas */
 .scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
 .scrollbar-none::-webkit-scrollbar { display: none; }
 
-/* Fonts */
+/* ══════════════════════════════════════════
+   FONTS
+══════════════════════════════════════════ */
 .font-head { font-family: var(--font-head); }
 .font-mono { font-family: var(--font-mono); }
 
-/* Marquee */
-@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-.animate-marquee { animation: marquee 28s linear infinite; }
+/* ══════════════════════════════════════════
+   TAP / PRESS STATES  (iOS feel)
+══════════════════════════════════════════ */
+button, a {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
 
-/* Slide up (modals) */
-@keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-.animate-slide-up { animation: slideUp 0.28s ease-out; }
+/* All interactive elements scale on press */
+button:active:not(:disabled),
+a:active {
+  transform: scale(0.97);
+  transition: transform 0.1s var(--spring-soft);
+}
 
-/* Hero bg text */
+/* Explicit scale overrides kept intact */
+.active\:scale-95:active  { transform: scale(0.95) !important; }
+.active\:scale-\[\.98\]:active { transform: scale(0.98) !important; }
+.active\:scale-\[\.99\]:active { transform: scale(0.99) !important; }
+.active\:scale-\[\.97\]:active { transform: scale(0.97) !important; }
+
+/* ══════════════════════════════════════════
+   HERO BG TEXT
+══════════════════════════════════════════ */
 .hero-bg-text {
   font-family: var(--font-head);
   font-size: clamp(8rem, 22vw, 22rem);
   color: rgba(255,255,255,0.025);
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 50%; left: 50%;
   transform: translate(-50%, -50%);
   white-space: nowrap;
   letter-spacing: -0.02em;
@@ -86,26 +119,166 @@ body::after {
   user-select: none;
 }
 
+/* ══════════════════════════════════════════
+   KEYFRAMES
+══════════════════════════════════════════ */
+
+/* Marquee */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marquee 28s linear infinite; }
+
+/* Modal slide up (spring) */
+@keyframes slideUp {
+  0%   { transform: translateY(48px) scale(0.98); opacity: 0; }
+  60%  { opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+.animate-slide-up {
+  animation: slideUp 0.45s var(--spring-stiff) forwards;
+}
+
+/* Fade in up — scroll reveal */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fadeInUp 0.55s var(--ease-out) forwards;
+}
+
+/* Fade in — generic */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fadeIn 0.4s var(--spring-soft) forwards;
+}
+
+/* Scale pop (badge / toast appear) */
+@keyframes scalePop {
+  0%   { transform: scale(0.7); opacity: 0; }
+  70%  { transform: scale(1.08); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-scale-pop {
+  animation: scalePop 0.4s var(--spring) forwards;
+}
+
+/* Shimmer (skeleton loader) */
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position:  200% 0; }
+}
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.03) 25%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+}
+
+/* Pulse dot (live indicator) */
+@keyframes pulseDot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.5); opacity: 0.5; }
+}
+.pulse-dot { animation: pulseDot 1.5s ease-in-out infinite; }
+
 /* Spinner */
 @keyframes spin { to { transform: rotate(360deg); } }
 .spinner {
   display: inline-block;
-  width: 18px;
-  height: 18px;
-  border: 2.5px solid rgba(255,255,255,0.2);
+  width: 18px; height: 18px;
+  border: 2.5px solid rgba(255,255,255,0.15);
   border-top-color: white;
   border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+  animation: spin 0.65s linear infinite;
 }
 
-/* Safe area for bottom nav on iOS */
-.safe-area-pb {
-  padding-bottom: env(safe-area-inset-bottom);
+/* Float (hero decoration) */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+.animate-float { animation: float 3s ease-in-out infinite; }
+
+/* ══════════════════════════════════════════
+   SCROLL REVEAL
+   Applied via JS IntersectionObserver
+══════════════════════════════════════════ */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity  0.6s var(--ease-out),
+    transform 0.6s var(--ease-out);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-/* Better tap targets on mobile */
-@media (max-width: 639px) {
-  button, a {
-    -webkit-tap-highlight-color: transparent;
-  }
+/* Stagger children */
+.reveal-stagger > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity  0.5s var(--ease-out),
+    transform 0.5s var(--ease-out);
 }
+.reveal-stagger.visible > *:nth-child(1) { opacity:1; transform:none; transition-delay: 0ms;  }
+.reveal-stagger.visible > *:nth-child(2) { opacity:1; transform:none; transition-delay: 80ms; }
+.reveal-stagger.visible > *:nth-child(3) { opacity:1; transform:none; transition-delay: 160ms;}
+.reveal-stagger.visible > *:nth-child(4) { opacity:1; transform:none; transition-delay: 240ms;}
+.reveal-stagger.visible > *:nth-child(5) { opacity:1; transform:none; transition-delay: 320ms;}
+.reveal-stagger.visible > *:nth-child(6) { opacity:1; transform:none; transition-delay: 400ms;}
+.reveal-stagger.visible > *:nth-child(7) { opacity:1; transform:none; transition-delay: 480ms;}
+.reveal-stagger.visible > *:nth-child(8) { opacity:1; transform:none; transition-delay: 560ms;}
+
+/* ══════════════════════════════════════════
+   ACCORDION EXPAND  (product list)
+══════════════════════════════════════════ */
+.accordion-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.38s var(--spring-soft);
+}
+.accordion-body.open {
+  grid-template-rows: 1fr;
+}
+.accordion-body > div { overflow: hidden; }
+
+/* ══════════════════════════════════════════
+   CARD HOVER LIFT
+══════════════════════════════════════════ */
+.card-lift {
+  transition:
+    transform  0.3s var(--spring-soft),
+    box-shadow 0.3s var(--spring-soft),
+    border-color 0.3s ease;
+}
+.card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 48px rgba(0,0,0,0.55);
+}
+
+/* ══════════════════════════════════════════
+   GLASS MORPHISM
+══════════════════════════════════════════ */
+.glass {
+  background: rgba(17,17,17,0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* ══════════════════════════════════════════
+   SAFE AREA
+══════════════════════════════════════════ */
+.safe-area-pb { padding-bottom: env(safe-area-inset-bottom); }
