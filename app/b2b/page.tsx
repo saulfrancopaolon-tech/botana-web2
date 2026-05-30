@@ -23,10 +23,25 @@ function useReveal() {
   return ref
 }
 
-function Reveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
+function Reveal({ 
+  children, 
+  delay = 0, 
+  className = "", 
+  style 
+}: { 
+  children: React.ReactNode; 
+  delay?: number; 
+  className?: string;
+  style?: React.CSSProperties; // <-- Agregamos el tipo para style
+}) {
   const ref = useReveal()
   return (
-    <div ref={ref} className={"b2b-reveal " + className} style={{ transitionDelay: String(delay) + "ms" }}>
+    <div 
+      ref={ref} 
+      className={"b2b-reveal " + className} 
+      // Combinamos el delay con cualquier otro estilo que le pases
+      style={{ transitionDelay: String(delay) + "ms", ...style }} 
+    >
       {children}
     </div>
   )
