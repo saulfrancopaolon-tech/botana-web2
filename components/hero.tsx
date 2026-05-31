@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useRef } from "react"
+import { useRef } from "react"
 
 interface HeroProps {
   onMenuClick: () => void
@@ -9,25 +9,21 @@ interface HeroProps {
 export function Hero({ onMenuClick, onWholesaleOpen }: HeroProps) {
   const heroRef = useRef<HTMLElement>(null)
 
-  // Parallax on scroll
-  useEffect(() => {
-    const hero = heroRef.current
-    if (!hero) return
-    const onScroll = () => {
-      const y = window.scrollY
-      const bg = hero.querySelector(".hero-parallax") as HTMLElement
-      if (bg) bg.style.transform = "translateY(" + String(y * 0.3) + "px)"
-    }
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => window.removeEventListener("scroll", onScroll)
-  }, [])
+  // Arreglo con los nombres exactos de tus imágenes
+  // Asegúrate de que estos archivos .webp estén dentro de la carpeta "public" de tu proyecto
+  const productImages = [
+    "2.webp", "3.webp", "4.webp", "5.webp", "6.webp", 
+    "7.webp", "8.webp", "9.webp", "10.webp", "11.webp",
+    "12.webp", "13.webp", "14.webp", "15.webp", "18.webp", 
+    "19.webp", "69.webp", "70.webp", "71.webp", "72.webp"
+  ]
 
   return (
     <section
       ref={heroRef}
       className="relative min-h-[65vh] sm:min-h-[92vh] flex items-center justify-center text-center px-5 py-16 sm:py-24 overflow-hidden bg-[#0A0A0A]"
     >
-      {/* Estilos inyectados para la animación infinita de las fotos */}
+      {/* Estilos inyectados para la animación infinita */}
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes scroll-horizontal {
           0% { transform: translateX(0); }
@@ -36,40 +32,49 @@ export function Hero({ onMenuClick, onWholesaleOpen }: HeroProps) {
         .animate-infinite-scroll {
           display: flex;
           width: max-content;
-          /* Ajusta los 40s si quieres que las fotos pasen más rápido o más lento */
-          animation: scroll-horizontal 40s linear infinite; 
+          /* 120s de velocidad porque ahora son muchas imágenes. Ajusta si lo sientes muy rápido/lento */
+          animation: scroll-horizontal 120s linear infinite; 
         }
       `}} />
 
-      {/* Background — parallax layer */}
-      <div className="hero-parallax absolute inset-0 pointer-events-none">
-        
-        {/* 1. Carrusel de imágenes de productos */}
-        <div className="absolute inset-0 z-0 flex items-center opacity-70">
-          <div className="animate-infinite-scroll h-full">
-            {/* GRUPO 1: Reemplaza con las rutas reales de tus productos */}
-            <img src="/cacahuates.jpg" alt="Cacahuates" className="h-full w-[300px] sm:w-[500px] object-cover" />
-            <img src="/papas.jpg" alt="Papas" className="h-full w-[300px] sm:w-[500px] object-cover" />
-            <img src="/gomitas.jpg" alt="Gomitas" className="h-full w-[300px] sm:w-[500px] object-cover" />
-            
-            {/* GRUPO 2: Duplicado exacto para crear el efecto de bucle infinito */}
-            <img src="/cacahuates.jpg" alt="Cacahuates" className="h-full w-[300px] sm:w-[500px] object-cover" />
-            <img src="/papas.jpg" alt="Papas" className="h-full w-[300px] sm:w-[500px] object-cover" />
-            <img src="/gomitas.jpg" alt="Gomitas" className="h-full w-[300px] sm:w-[500px] object-cover" />
-          </div>
-        </div>
+      {/* Background — CARRUSEL ANIMADO (z-0) */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-90">
+        <div className="animate-infinite-scroll flex h-full items-center">
+          
+          {/* GRUPO 1: Renderizado automático de tus 20 fotos */}
+          {productImages.map((img, index) => (
+            <img 
+              key={`group1-${index}`} 
+              src={`/${img}`} 
+              alt={`Botana ${img}`} 
+              className="h-full w-[300px] sm:w-[450px] object-cover" 
+            />
+          ))}
+          
+          {/* GRUPO 2: Duplicado exacto para crear el efecto de bucle infinito (loop) */}
+          {productImages.map((img, index) => (
+            <img 
+              key={`group2-${index}`} 
+              src={`/${img}`} 
+              alt={`Botana ${img} duplicada`} 
+              className="h-full w-[300px] sm:w-[450px] object-cover" 
+            />
+          ))}
 
-        {/* 2. Filtros Overlays (El secreto para que no sea invasivo) */}
-        <div className="absolute inset-0 bg-[#0A0A0A]/75 backdrop-blur-[6px] z-10" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_40%,rgba(229,62,62,0.12)_0%,transparent_70%)] z-20" />
-        
-        {/* 3. Tu texto de fondo original */}
-        <div className="hero-bg-text select-none relative z-30 opacity-10">BOTANA</div>
+        </div>
       </div>
 
-      <div className="relative z-40 max-w-4xl mx-auto">
+      {/* FILTROS OVERLAYS (z-10) — Mantiene la legibilidad sin ser invasivo */}
+      {/* Capa de desenfoque y oscurecimiento para fundir los fondos negros de las fotos con la web */}
+      <div className="absolute inset-0 bg-[#0A0A0A]/75 backdrop-blur-[6px] z-10" />
+      
+      {/* Degradado radial original para mantener la identidad */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_40%,rgba(229,62,62,0.12)_0%,transparent_70%)] z-20" />
 
-        {/* Eyebrow — fade in */}
+      {/* Contenido Principal (z-30) — Texto y Botones */}
+      <div className="relative z-30 max-w-4xl mx-auto">
+
+        {/* Eyebrow */}
         <div
           className="inline-flex items-center gap-2 bg-[#E53E3E]/10 border border-[#E53E3E]/30 rounded-full px-4 py-1.5 text-[.72rem] font-bold tracking-[.15em] uppercase text-[#E53E3E] mb-5 sm:mb-7 animate-fade-in"
           style={{ animationDelay: "100ms", animationFillMode: "both" }}
@@ -78,7 +83,7 @@ export function Hero({ onMenuClick, onWholesaleOpen }: HeroProps) {
           Leon, Gto. · La Salle Bajio
         </div>
 
-        {/* Headline — slide up with spring */}
+        {/* Headline */}
         <h1
           className="font-head text-[clamp(3.5rem,14vw,9rem)] leading-[.93] tracking-wide text-white mb-4 sm:mb-5 animate-fade-in-up drop-shadow-2xl"
           style={{ animationDelay: "200ms", animationFillMode: "both" }}
@@ -87,7 +92,7 @@ export function Hero({ onMenuClick, onWholesaleOpen }: HeroProps) {
         </h1>
 
         <p
-          className="text-[clamp(.9rem,3vw,1.15rem)] text-white/70 max-w-[480px] mx-auto mb-8 sm:mb-10 font-light leading-relaxed animate-fade-in-up"
+          className="text-[clamp(.9rem,3vw,1.15rem)] text-white/70 max-w-[480px] mx-auto mb-8 sm:mb-10 font-light leading-relaxed animate-fade-in-up drop-shadow-md"
           style={{ animationDelay: "320ms", animationFillMode: "both" }}
         >
           Snacks irresistibles. Seleccionados para hacerte la jornada mas sabrosa.
@@ -111,7 +116,7 @@ export function Hero({ onMenuClick, onWholesaleOpen }: HeroProps) {
           </button>
           <button
             onClick={onWholesaleOpen}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full border border-white/15 text-white font-semibold text-[.95rem] tracking-[.06em] uppercase hover:border-white/35 hover:-translate-y-0.5 transition-all bg-black/20 backdrop-blur-md"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full border border-white/15 text-white font-semibold text-[.95rem] tracking-[.06em] uppercase hover:border-white/35 hover:-translate-y-0.5 transition-all bg-[#0A0A0A]/40 backdrop-blur-md"
             style={{ transition: "all 0.3s cubic-bezier(0.34,1.56,0.64,1)" }}
           >
             Oportunidad de Negocio
@@ -128,7 +133,7 @@ export function Hero({ onMenuClick, onWholesaleOpen }: HeroProps) {
               <span className="font-head text-[2.2rem] sm:text-[2.8rem] leading-none text-white block drop-shadow-md">
                 {num}
               </span>
-              <span className="text-[.68rem] text-white/50 uppercase tracking-[.12em] mt-1 block">
+              <span className="text-[.68rem] text-white/60 uppercase tracking-[.12em] mt-1 block">
                 {label}
               </span>
             </div>
