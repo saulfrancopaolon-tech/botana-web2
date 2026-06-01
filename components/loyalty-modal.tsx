@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react"
 import { supabase } from "@/lib/supabase"
 
 const WA = "524774950232"
-const GA_URL = "https://script.google.com/macros/s/AKfycbxOzao3kwRxI_sSiGbsgNXxgCYwbqfMcAlDF1NzyQ77FeL0bKb3fBS3GygUZD3IAZZC8A/exec"
+const GA_URL = "https://script.google.com/macros/s/AKfycby_UMDJTR1biWGV__auY1ke9TIAhPKsI-v82k-nG9ygLk_R8aNUlrpnmnEQ8ekr8Si_uA/exec"
 const STORAGE_KEY = "botana_card"
 
 interface LocalCard {
