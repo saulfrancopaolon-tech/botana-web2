@@ -20,6 +20,9 @@ export const PRODUCTS = [
   { id: 16, name: "Chamoyada de Mango",     desc: "Deliciosa combinacion de mango con chamoy. La bebida del verano todo el ano.",       price: 30, cat: "Bebidas",   tags: ["Fresco", "Frutal"], pop: true,  spicy: true,  natural: false, emoji: "🥭", img: "/images/69.webp", groupId: "chamoyadas",  flavor: "Mango"       },
   { id: 18, name: "Chamoyada de Fresa",     desc: "Fresa natural con chamoy y chile. Dulce, acida y picante en cada sorbo.",           price: 30, cat: "Bebidas",   tags: ["Fresco", "Frutal"], pop: true,  spicy: true,  natural: false, emoji: "🍓", img: "/images/72.webp", groupId: "chamoyadas",  flavor: "Fresa"       },
   { id: 19, name: "Chamoyada de Limon",     desc: "Limon fresco con chamoy y chilito. El clasico sabor mexicano bien frio.",           price: 30, cat: "Bebidas",   tags: ["Fresco", "Picante"], pop: false, spicy: true,  natural: false, emoji: "🍋", img: "/images/73.webp", groupId: "chamoyadas",  flavor: "Limon"       },
+  { id: 20, name: "Jamaica 1 Litro",  desc: "Agua de jamaica natural de 1 litro. Sin conservadores. Rinde para toda la mesa o el dia.",    price: 35, cat: "Bebidas", tags: ["1 Litro","Natural"], pop: true, spicy: false, natural: true, emoji: "🌺", img: "/images/74.webp", groupId: "aguas", flavor: "Jamaica 1L"       },
+  { id: 21, name: "Horchata 1 Litro", desc: "Horchata cremosa con canela en presentacion de 1 litro. Para compartir o durar todo el dia.", price: 35, cat: "Bebidas", tags: ["1 Litro","Natural"], pop: true, spicy: false, natural: true, emoji: "🥛", img: "/images/75.webp", groupId: "aguas", flavor: "Horchata 1L"      },
+
 ]
 
 export type Product = (typeof PRODUCTS)[number] & { inStock?: boolean }
