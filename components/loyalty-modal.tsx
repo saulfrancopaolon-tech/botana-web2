@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react"
 import { supabase } from "@/lib/supabase"
 
 const WA = "524774950232"
-const GA_URL = "https://script.google.com/macros/s/AKfycbwf8QjtB996ZjFQEpAkR6au-AmakyMEV4SDzEPefW5KGY7beCQd_CpigmgTD6S-w7qCwA/exec"
+const GA_URL = "https://script.google.com/macros/s/AKfycbwxPq9pvWyqFtZLLtnQrP8eQwPWylaATnLUTUF0jfSbih_1vWEfnz_u4HZf3dGdarADZQ/exec"
 const STORAGE_KEY = "botana_card"
 
 interface LocalCard {
@@ -180,12 +180,15 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
   async function handleRedeem() {
     if (!card || !code.trim() || codeLoading) return
     const trimmed = code.trim().toUpperCase()
+    
     if (card.usedCodes.includes(trimmed)) {
       setCodeStatus({ msg: "Este codigo ya fue usado", type: "err" })
       return
     }
+    
     setCodeLoading(true)
     setCodeStatus({ msg: "Verificando...", type: "load" })
+    
     try {
       const res = await fetch(GA_URL, {
         method: "POST",
@@ -193,12 +196,21 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
         body: JSON.stringify({ codigo: trimmed, usuario: card.username }),
         redirect: "follow",
       })
-      let result: { success: boolean; message?: string }
-      try {
-        result = await res.json()
-      } catch {
-        result = { success: false, message: "Respuesta invalida" }
+  
+      if (!res.ok) {
+        throw new Error(`Error del servidor: ${res.status}`)
       }
+  
+      const textResult = await res.text()
+      let result: { success: boolean; message?: string }
+      
+      try {
+        result = JSON.parse(textResult)
+      } catch (parseError) {
+        console.error("[BOTANA] Google no devolvió JSON válido:", textResult)
+        throw new Error("Respuesta inválida del servidor")
+      }
+  
       if (result.success) {
         const updated: LocalCard = {
           ...card,
@@ -213,21 +225,9 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
       } else {
         setCodeStatus({ msg: result.message || "Codigo invalido o ya usado", type: "err" })
       }
-    } catch {
-      if (trimmed.startsWith("BOTA-") && trimmed.length >= 8) {
-        const updated: LocalCard = {
-          ...card,
-          points: card.points + 1,
-          usedCodes: [...card.usedCodes, trimmed],
-        }
-        setCard(updated)
-        saveCard(updated)
-        setCode("")
-        setCodeStatus({ msg: "+1 punto agregado!", type: "ok" })
-        upsertToSupabase(updated)
-      } else {
-        setCodeStatus({ msg: "No se pudo verificar. Intenta de nuevo.", type: "err" })
-      }
+    } catch (error) {
+      console.error("[BOTANA] Error en handleRedeem:", error)
+      setCodeStatus({ msg: "Fallo de conexión. Intenta de nuevo.", type: "err" })
     } finally {
       setCodeLoading(false)
     }
