@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react"
 import { supabase } from "@/lib/supabase"
 
 const WA = "524774950232"
-const GA_URL = "https://script.google.com/macros/s/AKfycby_UMDJTR1biWGV__auY1ke9TIAhPKsI-v82k-nG9ygLk_R8aNUlrpnmnEQ8ekr8Si_uA/exec"
+const GA_URL = "https://script.google.com/macros/s/AKfycbyJtUOysmhmBRkijaD3rsrO_He27OvQV-wrWKEmlCuDrvw5PDBZVUuG7Ukmf56iEv8erQ/exec"
 const STORAGE_KEY = "botana_card"
 
 interface LocalCard {
@@ -426,7 +426,7 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
               <input
                 className="flex-1 px-3 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-mono text-sm uppercase tracking-wider outline-none focus:border-[#F97316] transition-colors placeholder:text-white/15 disabled:opacity-50"
                 placeholder="BOTA-XXXX"
-                maxLength={12}
+                maxLength={15} 
                 value={code}
                 onChange={e => {
                   setCode(e.target.value.toUpperCase())
