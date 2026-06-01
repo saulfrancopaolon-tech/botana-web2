@@ -16,7 +16,8 @@ const PRICING = [
   { name: "Chips",              emoji: "🍠", retail: 25, mayoreo: 20, dist: 17 },
   { name: "Gomitas",            emoji: "🐻", retail: 15, mayoreo: 12, dist: 11 },
   { name: "Papas",              emoji: "🔥", retail: 20, mayoreo: 16, dist: 15 },
-  { name: "Aguas",              emoji: "🌺", retail: 22, mayoreo: 18, dist: 17 },
+  { name: "Aguas 500ml", emoji: "🌺", retail: 22, mayoreo: 18, dist: 17 },
+{ name: "Aguas 1 Litro", emoji: "🌺", retail: 35, mayoreo: 31, dist: 28 },
   { name: "Chamoyadas",         emoji: "🥭", retail: 30, mayoreo: 25, dist: 23 },
 ]
 
