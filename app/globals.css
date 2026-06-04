@@ -4,30 +4,45 @@
 @tailwind utilities;
 
 /* ══════════════════════════════════════════
-   TOKENS
+   BOTA-NA COLOR SYSTEM
+   Fondos: negro calido con undertone rojo-cafe (como chile seco)
+   Primario: rojo-naranja vivo (como chile rojo fresco)
+   Acento: ambar-naranja (como chile ancho tostado)
+   Diferenciador: los fondos NO son negro puro — tienen calidez
 ══════════════════════════════════════════ */
 :root {
-  --bg: #0A0A0A;
-  --bg2: #111111;
-  --bg3: #181818;
-  --bg4: #222222;
-  --red: #E53E3E;
-  --red2: #FF5252;
-  --orange: #F97316;
-  --yellow: #FBBF24;
-  --white: #FAFAFA;
-  --gray: #A0A0A0;
-  --gray2: #5A5A5A;
-  --border: rgba(255,255,255,0.08);
+  /* ── Fondos con temperatura cálida ── */
+  --bg:   #0D0907;   /* negro cafe — fondo principal    */
+  --bg2:  #130E09;   /* tarjetas, secciones alternas    */
+  --bg3:  #1A1209;   /* superficies elevadas            */
+  --bg4:  #231608;   /* bordes marcados, hover oscuro   */
+
+  /* ── Rojo principal — chile rojo vivo, no rojo generico ── */
+  --red:  #E8341A;   /* mas naranja-rojo = energia real */
+  --red2: #FF4D2E;   /* hover / estados activos         */
+
+  /* ── Acento calido — ambar como chile ancho ── */
+  --orange: #F5820A;
+  --yellow: #D4A017; /* dorado suave, toque premium     */
+
+  /* ── Texto ── */
+  --white: #FAF6F2;  /* blanco ligeramente calido       */
+  --gray:  #A89E96;  /* gris calido, no gris frio       */
+  --gray2: #6B5E55;  /* gris oscuro calido              */
+
+  /* ── Bordes — teñidos con el rojo de la marca ── */
+  --border:        rgba(232, 52, 26, 0.10);
+  --border-bright: rgba(232, 52, 26, 0.22);
+
   --font-head: 'Bebas Neue', sans-serif;
   --font-body: 'DM Sans', sans-serif;
   --font-mono: 'Space Mono', monospace;
 
-  /* iOS-style spring curves */
-  --spring:       cubic-bezier(0.34, 1.56, 0.64, 1);   /* bouncy spring  */
-  --spring-soft:  cubic-bezier(0.25, 0.46, 0.45, 0.94); /* iOS default    */
-  --spring-stiff: cubic-bezier(0.22, 1.00, 0.36, 1.00); /* fast settle    */
-  --ease-out:     cubic-bezier(0.16, 1, 0.3, 1);        /* expo out       */
+  /* ── Curvas iOS ── */
+  --spring:       cubic-bezier(0.34, 1.56, 0.64, 1);
+  --spring-soft:  cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --spring-stiff: cubic-bezier(0.22, 1.00, 0.36, 1.00);
+  --ease-out:     cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ══════════════════════════════════════════
@@ -45,7 +60,6 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* momentum scroll iOS */
   -webkit-overflow-scrolling: touch;
 }
 
@@ -55,7 +69,7 @@ body {
 }
 
 /* ══════════════════════════════════════════
-   NOISE GRAIN
+   NOISE GRAIN (mas sutil — solo texturiza)
 ══════════════════════════════════════════ */
 body::after {
   content: '';
@@ -63,16 +77,16 @@ body::after {
   inset: 0;
   pointer-events: none;
   z-index: 998;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.03;
 }
 
 /* ══════════════════════════════════════════
    SCROLLBAR
 ══════════════════════════════════════════ */
-::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--gray2); border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 2px; }
 .scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
 .scrollbar-none::-webkit-scrollbar { display: none; }
 
@@ -83,25 +97,20 @@ body::after {
 .font-mono { font-family: var(--font-mono); }
 
 /* ══════════════════════════════════════════
-   TAP / PRESS STATES  (iOS feel)
+   TAP / PRESS
 ══════════════════════════════════════════ */
 button, a {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
-
-/* All interactive elements scale on press */
-button:active:not(:disabled),
-a:active {
+button:active:not(:disabled), a:active {
   transform: scale(0.97);
   transition: transform 0.1s var(--spring-soft);
 }
-
-/* Explicit scale overrides kept intact */
-.active\:scale-95:active  { transform: scale(0.95) !important; }
-.active\:scale-\[\.98\]:active { transform: scale(0.98) !important; }
-.active\:scale-\[\.99\]:active { transform: scale(0.99) !important; }
-.active\:scale-\[\.97\]:active { transform: scale(0.97) !important; }
+.active\:scale-95:active        { transform: scale(0.95) !important; }
+.active\:scale-\[\.98\]:active  { transform: scale(0.98) !important; }
+.active\:scale-\[\.99\]:active  { transform: scale(0.99) !important; }
+.active\:scale-\[\.97\]:active  { transform: scale(0.97) !important; }
 
 /* ══════════════════════════════════════════
    HERO BG TEXT
@@ -109,7 +118,7 @@ a:active {
 .hero-bg-text {
   font-family: var(--font-head);
   font-size: clamp(8rem, 22vw, 22rem);
-  color: rgba(255,255,255,0.025);
+  color: rgba(232, 52, 26, 0.045); /* teñido con el rojo de la marca */
   position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
@@ -122,15 +131,12 @@ a:active {
 /* ══════════════════════════════════════════
    KEYFRAMES
 ══════════════════════════════════════════ */
-
-/* Marquee */
 @keyframes marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
 .animate-marquee { animation: marquee 28s linear infinite; }
 
-/* Modal slide up (spring) */
 @keyframes slideUp {
   0%   { transform: translateY(48px) scale(0.98); opacity: 0; }
   60%  { opacity: 1; }
@@ -140,7 +146,6 @@ a:active {
   animation: slideUp 0.45s var(--spring-stiff) forwards;
 }
 
-/* Fade in up — scroll reveal */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -149,7 +154,6 @@ a:active {
   animation: fadeInUp 0.55s var(--ease-out) forwards;
 }
 
-/* Fade in — generic */
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -158,7 +162,6 @@ a:active {
   animation: fadeIn 0.4s var(--spring-soft) forwards;
 }
 
-/* Scale pop (badge / toast appear) */
 @keyframes scalePop {
   0%   { transform: scale(0.7); opacity: 0; }
   70%  { transform: scale(1.08); }
@@ -168,7 +171,6 @@ a:active {
   animation: scalePop 0.4s var(--spring) forwards;
 }
 
-/* Shimmer (skeleton loader) */
 @keyframes shimmer {
   from { background-position: -200% 0; }
   to   { background-position:  200% 0; }
@@ -176,33 +178,30 @@ a:active {
 .shimmer {
   background: linear-gradient(
     90deg,
-    rgba(255,255,255,0.03) 25%,
-    rgba(255,255,255,0.08) 50%,
-    rgba(255,255,255,0.03) 75%
+    rgba(232,52,26,0.03) 25%,
+    rgba(232,52,26,0.08) 50%,
+    rgba(232,52,26,0.03) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.6s infinite;
 }
 
-/* Pulse dot (live indicator) */
 @keyframes pulseDot {
   0%, 100% { transform: scale(1); opacity: 1; }
   50%       { transform: scale(1.5); opacity: 0.5; }
 }
 .pulse-dot { animation: pulseDot 1.5s ease-in-out infinite; }
 
-/* Spinner */
 @keyframes spin { to { transform: rotate(360deg); } }
 .spinner {
   display: inline-block;
   width: 18px; height: 18px;
-  border: 2.5px solid rgba(255,255,255,0.15);
-  border-top-color: white;
+  border: 2.5px solid rgba(232,52,26,0.15);
+  border-top-color: var(--red);
   border-radius: 50%;
   animation: spin 0.65s linear infinite;
 }
 
-/* Float (hero decoration) */
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50%       { transform: translateY(-8px); }
@@ -211,7 +210,6 @@ a:active {
 
 /* ══════════════════════════════════════════
    SCROLL REVEAL
-   Applied via JS IntersectionObserver
 ══════════════════════════════════════════ */
 .reveal {
   opacity: 0;
@@ -220,12 +218,8 @@ a:active {
     opacity  0.6s var(--ease-out),
     transform 0.6s var(--ease-out);
 }
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
+.reveal.visible { opacity: 1; transform: translateY(0); }
 
-/* Stagger children */
 .reveal-stagger > * {
   opacity: 0;
   transform: translateY(20px);
@@ -233,26 +227,24 @@ a:active {
     opacity  0.5s var(--ease-out),
     transform 0.5s var(--ease-out);
 }
-.reveal-stagger.visible > *:nth-child(1) { opacity:1; transform:none; transition-delay: 0ms;  }
-.reveal-stagger.visible > *:nth-child(2) { opacity:1; transform:none; transition-delay: 80ms; }
-.reveal-stagger.visible > *:nth-child(3) { opacity:1; transform:none; transition-delay: 160ms;}
-.reveal-stagger.visible > *:nth-child(4) { opacity:1; transform:none; transition-delay: 240ms;}
-.reveal-stagger.visible > *:nth-child(5) { opacity:1; transform:none; transition-delay: 320ms;}
-.reveal-stagger.visible > *:nth-child(6) { opacity:1; transform:none; transition-delay: 400ms;}
-.reveal-stagger.visible > *:nth-child(7) { opacity:1; transform:none; transition-delay: 480ms;}
-.reveal-stagger.visible > *:nth-child(8) { opacity:1; transform:none; transition-delay: 560ms;}
+.reveal-stagger.visible > *:nth-child(1)  { opacity:1; transform:none; transition-delay:0ms;   }
+.reveal-stagger.visible > *:nth-child(2)  { opacity:1; transform:none; transition-delay:80ms;  }
+.reveal-stagger.visible > *:nth-child(3)  { opacity:1; transform:none; transition-delay:160ms; }
+.reveal-stagger.visible > *:nth-child(4)  { opacity:1; transform:none; transition-delay:240ms; }
+.reveal-stagger.visible > *:nth-child(5)  { opacity:1; transform:none; transition-delay:320ms; }
+.reveal-stagger.visible > *:nth-child(6)  { opacity:1; transform:none; transition-delay:400ms; }
+.reveal-stagger.visible > *:nth-child(7)  { opacity:1; transform:none; transition-delay:480ms; }
+.reveal-stagger.visible > *:nth-child(8)  { opacity:1; transform:none; transition-delay:560ms; }
 
 /* ══════════════════════════════════════════
-   ACCORDION EXPAND  (product list)
+   ACCORDION
 ══════════════════════════════════════════ */
 .accordion-body {
   display: grid;
   grid-template-rows: 0fr;
   transition: grid-template-rows 0.38s var(--spring-soft);
 }
-.accordion-body.open {
-  grid-template-rows: 1fr;
-}
+.accordion-body.open { grid-template-rows: 1fr; }
 .accordion-body > div { overflow: hidden; }
 
 /* ══════════════════════════════════════════
@@ -262,20 +254,20 @@ a:active {
   transition:
     transform  0.3s var(--spring-soft),
     box-shadow 0.3s var(--spring-soft),
-    border-color 0.3s ease;
+    border-color 0.25s ease;
 }
 .card-lift:hover {
   transform: translateY(-4px);
-  box-shadow: 0 20px 48px rgba(0,0,0,0.55);
+  box-shadow: 0 20px 48px rgba(0,0,0,0.6);
 }
 
 /* ══════════════════════════════════════════
-   GLASS MORPHISM
+   GLASS
 ══════════════════════════════════════════ */
 .glass {
-  background: rgba(17,17,17,0.85);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(19,14,9,0.88);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
 }
 
 /* ══════════════════════════════════════════
