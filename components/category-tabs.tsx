@@ -1,47 +1,57 @@
 "use client"
 
-const CAT_META: Record<string, { emoji: string; color: string }> = {
-  "Todos":      { emoji: "🌶",  color: "#E53E3E" },
-  "Cacahuates": { emoji: "🥜",  color: "#F97316" },
-  "Chips":      { emoji: "🍠",  color: "#FBBF24" },
-  "Gomitas":    { emoji: "🐻",  color: "#ec4899" },
-  "Papas":      { emoji: "🔥",  color: "#E53E3E" },
-  "Bebidas":    { emoji: "🥭",  color: "#22c55e" },
-}
+import { motion } from "framer-motion"
+import { useRef, useEffect } from "react"
 
-interface Props {
-  categories: string[]
-  active: string
-  onSelect: (cat: string) => void
-}
+export function CategoryTabs({ categories, activeCategory, onCategoryChange }: any) {
+  const scrollRef = useRef<HTMLDivElement>(null)
 
-export function CategoryTabs({ categories, active, onSelect }: Props) {
+  useEffect(() => {
+    const activeElement = document.getElementById(`tab-${activeCategory}`)
+    if (activeElement && scrollRef.current) {
+      const scrollContainer = scrollRef.current
+      const scrollLeft = activeElement.offsetLeft - scrollContainer.offsetWidth / 2 + activeElement.offsetWidth / 2
+      scrollContainer.scrollTo({ left: scrollLeft, behavior: "smooth" })
+    }
+  }, [activeCategory])
+
   return (
-    <div className="flex gap-2 overflow-x-auto scrollbar-none px-4 sm:px-6 py-3">
-      {categories.map(cat => {
-        const meta = CAT_META[cat] ?? { emoji: "🌶", color: "#E53E3E" }
-        const isActive = cat === active
-        return (
-          <button
-            key={cat}
-            onClick={() => onSelect(cat)}
-            className={
-              "flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-[.72rem] font-black uppercase tracking-wider border transition-all " +
-              (isActive
-                ? "text-white border-transparent"
-                : "border-white/10 text-white/45 hover:text-white hover:border-white/25 bg-transparent")
-            }
-            style={
-              isActive
-                ? { background: meta.color + "22", borderColor: meta.color + "55", color: "white" }
-                : {}
-            }
-          >
-            <span className="text-base leading-none">{meta.emoji}</span>
-            {cat}
-          </button>
-        )
-      })}
+    <div className="relative w-full px-4 overflow-hidden h-[50px]">
+      <div 
+        ref={scrollRef}
+        className="flex overflow-x-auto no-scrollbar items-center pb-8 -mb-8 pt-2"
+      >
+        <div className="flex bg-zinc-900/40 p-1.5 rounded-full border border-white/5 backdrop-blur-md shrink-0">
+          {categories.map((category: string) => {
+            const isActive = activeCategory === category
+            return (
+              <button
+                key={category}
+                id={`tab-${category}`}
+                /* 1. AGREGAMOS type="button" para que no haga submit */
+                type="button" 
+                onClick={(e) => {
+                  /* 2. EVITAMOS cualquier comportamiento por defecto */
+                  e.preventDefault(); 
+                  onCategoryChange(category);
+                }}
+                className={`relative flex-shrink-0 px-6 py-2.5 text-[9px] font-black uppercase tracking-[0.2em] transition-colors duration-300 ${
+                  isActive ? "text-white" : "text-zinc-500"
+                }`}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="activeCategoryTab"
+                    className="absolute inset-0 rounded-full bg-[oklch(0.55_0.15_45)] shadow-lg"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10">{category}</span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
     </div>
   )
 }
