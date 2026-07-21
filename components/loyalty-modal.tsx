@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from "react"
 import { supabase } from "@/lib/supabase"
 
 const WA = "524774950232"
-const GA_URL = "https://script.google.com/macros/s/AKfycbyJtUOysmhmBRkijaD3rsrO_He27OvQV-wrWKEmlCuDrvw5PDBZVUuG7Ukmf56iEv8erQ/exec"
 const STORAGE_KEY = "botana_card"
 
 interface LocalCard {
@@ -63,23 +62,35 @@ async function fetchRemoteCard(username: string): Promise<{ points: number; veri
   }
 }
 
-async function upsertToSupabase(card: LocalCard) {
+// Solo marca is_verified=true. La columna "puntos" ya no se puede escribir
+// desde el navegador (queda bloqueada en Supabase); los puntos ahora solo
+// los suma el backend a través de /api/redeem, cuando se canjea un código
+// o QR generado en el panel de staff.
+async function markVerifiedRemote(username: string) {
   if (!supabase) return
   try {
-    console.log("[BOTANA] Guardando en Supabase:", card.username, "puntos:", card.points)
-    const { error } = await supabase
+    const { data: updatedRows, error: updateError } = await supabase
       .from("clientes_leales")
-      .upsert(
-        { usuario_ig: card.username, puntos: card.points, is_verified: card.verified },
-        { onConflict: "usuario_ig" }
-      )
-    if (error) {
-      console.warn("[BOTANA] Error al guardar en Supabase:", error.code, error.message)
-    } else {
-      console.log("[BOTANA] Guardado en Supabase OK")
+      .update({ is_verified: true })
+      .eq("usuario_ig", username)
+      .select("usuario_ig")
+
+    if (updateError) {
+      console.warn("[BOTANA] Error al verificar en Supabase:", updateError.message)
+      return
+    }
+
+    // Si no existía ninguna fila con ese usuario, se crea una nueva en 0 puntos
+    if (!updatedRows || updatedRows.length === 0) {
+      const { error: insertError } = await supabase
+        .from("clientes_leales")
+        .insert([{ usuario_ig: username, puntos: 0, is_verified: true }])
+      if (insertError) {
+        console.warn("[BOTANA] Error al crear usuario en Supabase:", insertError.message)
+      }
     }
   } catch (e) {
-    console.error("[BOTANA] Excepcion al guardar en Supabase:", e)
+    console.error("[BOTANA] Excepcion al verificar en Supabase:", e)
   }
 }
 
@@ -174,56 +185,41 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
     setCard(updated)
     saveCard(updated)
     setScreen("card")
-    upsertToSupabase(updated)
+    markVerifiedRemote(updated.username)
   }
 
   async function handleRedeem() {
     if (!card || !code.trim() || codeLoading) return
     const trimmed = code.trim().toUpperCase()
-    
+
     if (card.usedCodes.includes(trimmed)) {
       setCodeStatus({ msg: "Este codigo ya fue usado", type: "err" })
       return
     }
-    
+
     setCodeLoading(true)
     setCodeStatus({ msg: "Verificando...", type: "load" })
-    
+
     try {
-      const res = await fetch(GA_URL, {
+      const res = await fetch("/api/redeem", {
         method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ codigo: trimmed, usuario: card.username }),
-        redirect: "follow",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: trimmed, usuario_ig: card.username }),
       })
-  
-      if (!res.ok) {
-        throw new Error(`Error del servidor: ${res.status}`)
-      }
-  
-      const textResult = await res.text()
-      let result: { success: boolean; message?: string }
-      
-      try {
-        result = JSON.parse(textResult)
-      } catch (parseError) {
-        console.error("[BOTANA] Google no devolvió JSON válido:", textResult)
-        throw new Error("Respuesta inválida del servidor")
-      }
-  
-      if (result.success) {
+      const result = await res.json()
+
+      if (res.ok) {
         const updated: LocalCard = {
           ...card,
-          points: card.points + 1,
+          points: result.puntos,
           usedCodes: [...card.usedCodes, trimmed],
         }
         setCard(updated)
         saveCard(updated)
         setCode("")
-        setCodeStatus({ msg: "+1 punto agregado!", type: "ok" })
-        upsertToSupabase(updated)
+        setCodeStatus({ msg: result.message || "+1 punto agregado!", type: "ok" })
       } else {
-        setCodeStatus({ msg: result.message || "Codigo invalido o ya usado", type: "err" })
+        setCodeStatus({ msg: result.error || "Codigo invalido o ya usado", type: "err" })
       }
     } catch (error) {
       console.error("[BOTANA] Error en handleRedeem:", error)
@@ -425,7 +421,7 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
             <div className="flex gap-2">
               <input
                 className="flex-1 px-3 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-mono text-sm uppercase tracking-wider outline-none focus:border-[#F97316] transition-colors placeholder:text-white/15 disabled:opacity-50"
-                placeholder="BOTA-XXXX"
+                placeholder="Código de 6 letras"
                 maxLength={15} 
                 value={code}
                 onChange={e => {
@@ -449,6 +445,9 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
                 )}
               </button>
             </div>
+            <p className="text-center text-[.6rem] text-white/20 mt-2">
+              Pide el código o escanea el QR con quien te atienda
+            </p>
             {codeStatus && (
               <div className={statusClass}>
                 {codeStatus.msg}

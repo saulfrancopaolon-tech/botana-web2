@@ -279,7 +279,7 @@ export default function StaffPage() {
 
   if (checkingSession) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950">
+      <div className="flex min-h-screen items-center justify-center bg-[#0D0907]">
         <Loader2 className="h-6 w-6 animate-spin text-white/40" />
       </div>
     )
@@ -287,10 +287,10 @@ export default function StaffPage() {
 
   if (!authed) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950 p-4">
+      <div className="flex min-h-screen items-center justify-center bg-[#0D0907] p-4">
         <form
           onSubmit={handlePinSubmit}
-          className="w-full max-w-xs rounded-[2rem] border border-white/10 bg-zinc-900 p-6 shadow-2xl"
+          className="w-full max-w-xs rounded-[2rem] border border-white/10 bg-[#1A1209] p-6 shadow-2xl"
         >
           <h1 className="text-center text-lg font-black uppercase tracking-tight text-white">
             Panel de Caja
@@ -303,7 +303,7 @@ export default function StaffPage() {
             placeholder="PIN"
             value={pin}
             onChange={(e) => setPin(e.target.value)}
-            className="mt-6 w-full rounded-xl bg-white/5 border border-white/10 px-4 py-4 text-center text-2xl tracking-[0.4em] text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="mt-6 w-full rounded-xl bg-white/5 border border-white/10 px-4 py-4 text-center text-2xl tracking-[0.4em] text-white focus:outline-none focus:ring-2 focus:ring-[#E53E3E]"
           />
           {pinError && (
             <p className="mt-3 text-center text-xs font-bold text-red-400">{pinError}</p>
@@ -311,7 +311,7 @@ export default function StaffPage() {
           <button
             type="submit"
             disabled={pinLoading || !pin}
-            className="mt-6 w-full rounded-xl bg-gradient-to-r from-pink-600 to-purple-700 py-4 font-black text-white active:scale-95 disabled:opacity-50"
+            className="mt-6 w-full rounded-xl bg-gradient-to-r from-[#E53E3E] to-[#F97316] py-4 font-black text-white active:scale-95 disabled:opacity-50"
           >
             {pinLoading ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : "ENTRAR"}
           </button>
@@ -329,8 +329,8 @@ export default function StaffPage() {
   const qrUrl = origin && qrCode ? `${origin}/canjear?code=${qrCode}` : ""
 
   return (
-    <div className="min-h-screen bg-zinc-950 pb-24">
-      <div className="sticky top-0 z-10 border-b border-white/10 bg-zinc-950/95 backdrop-blur px-4 py-4">
+    <div className="min-h-screen bg-[#0D0907] pb-24">
+      <div className="sticky top-0 z-10 border-b border-white/10 bg-[#0D0907]/95 backdrop-blur px-4 py-4">
         <div className="flex items-center justify-between">
           <h1 className="text-sm font-black uppercase tracking-widest text-white">
             Panel de Caja
@@ -372,7 +372,7 @@ export default function StaffPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleSearchKeyDown}
-              className="w-full rounded-xl bg-white/5 border border-white/10 py-3 pl-10 pr-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+              className="w-full rounded-xl bg-white/5 border border-white/10 py-3 pl-10 pr-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#E53E3E]"
             />
             {searching && (
               <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-zinc-500" />
@@ -439,7 +439,7 @@ export default function StaffPage() {
         {results.map((c) => (
           <div
             key={c.usuario_ig}
-            className="rounded-2xl border border-white/10 bg-zinc-900 p-4"
+            className="rounded-2xl border border-white/10 bg-[#1A1209] p-4"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -451,7 +451,7 @@ export default function StaffPage() {
               <button
                 onClick={() => addPoint(c.usuario_ig)}
                 disabled={busyUser === c.usuario_ig || c.puntos >= 10}
-                className="flex items-center gap-1 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 px-4 py-3 text-xs font-black text-white active:scale-95 disabled:opacity-40"
+                className="flex items-center gap-1 rounded-xl bg-gradient-to-r from-[#F97316] to-[#E53E3E] px-4 py-3 text-xs font-black text-white active:scale-95 disabled:opacity-40"
               >
                 {busyUser === c.usuario_ig ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

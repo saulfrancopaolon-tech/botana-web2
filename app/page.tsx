@@ -1,173 +1,266 @@
 "use client"
 
-import { AboutSection } from "@/components/about-section"
-import { useState, useEffect } from "react"
-import { MenuHeader } from "@/components/menu-header"
+import { useState, useEffect, useCallback } from "react"
+import { CATEGORIES, PRODUCTS } from "@/lib/products"
+import type { Product } from "@/lib/products"
+import { CartProvider } from "@/components/cart-context"
+import { Marquee } from "@/components/marquee"
+import { NavBar } from "@/components/navbar"
+import { Hero } from "@/components/hero"
 import { CategoryTabs } from "@/components/category-tabs"
-import { MenuItem } from "@/components/menu-item"
-import { ProductModal } from "@/components/product-modal"
+import { ProductGrid } from "@/components/product-grid"
+import { ProductList } from "@/components/product-list"
+import { CartModal } from "@/components/cart-modal"
+import { LoyaltyModal } from "@/components/loyalty-modal"
+import { WholesaleModal } from "@/components/wholesale-modal"
+import { EventModal } from "@/components/event-modal"
+import { Toast, LoyaltyPromo, WholesaleSection } from "@/components/ui-components"
 
-const categories = ["🔥 TOP", "Todos", "Cacahuates", "Chips", "Papas", "Gomitas", "Bebidas y más"]
+const SHEETS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSQKeuTywAmniswIKciTQS0hI-fMIm4l0DRiGATcUpA_eff42eVS6171CngdgtGphWUADrllm5dcxe1/pub?output=csv"
 
-const menuItems = [
-  // ... tus items se quedan igual
-  { id: 1, name: "Cacahuates Queso", description: "Cacahuates holandeses crujientes con un irresistible sabor a queso.", price: "$15", image: "/images/2.webp", category: "Cacahuates", tags: ["100 gramos"], isPopular: false, isSpicy: false },
-  { id: 2, name: "Cacahuates Habanero", description: "Cacahuates holandeses con el intenso sabor del chile habanero.", price: "$15", image: "/images/4.webp", category: "Cacahuates", tags: ["100 gramos"], isPopular: false, isSpicy: true },
-  { id: 3, name: "Cacahuates Jalapeño", description: "Cacahuates holandeses con el sabor clasico del chile jalapeño.", price: "$15", image: "/images/3.webp", category: "Cacahuates", tags: ["100 gramos"], isPopular: false, isSpicy: true },
-  { id: 4, name: "Cacahuates Fuego", description: "Cacahuates holandeses con sabor intenso y picante estilo fuego.", price: "$15", image: "/images/5.webp", category: "Cacahuates", tags: ["100 gramos"], isPopular: false, isSpicy: true },
-  { id: 5, name: "Chips Betabel con Chile", description: "Chips crujientes de betabel natural. Snack saludable con un sabor unico.", price: "$25", image: "/images/6.webp", category: "Chips", tags: ["60 gramos", "Natural"], isPopular: true, isSpicy: false },
-  { id: 6, name: "Chips Jicama con Chile", description: "Chips de jicama ligeras y crujientes. El snack perfecto bajo en calorias.", price: "$25", image: "/images/8.webp", category: "Chips", tags: ["60 gramos", "Natural"], isPopular: false, isSpicy: false },
-  { id: 7, name: "Chips Taro", description: "Chips exoticas de taro con un sabor suave y textura unica.", price: "$25", image: "/images/7.webp", category: "Chips", tags: ["60 gramos", "Natural"], isPopular: false, isSpicy: false },
-  { id: 15, name: "Chips Taro Adobado", description: "Crujientes chips de taro con un sazón de adobo artesanal.", price: "$25", image: "/images/10.webp", category: "Chips", tags: ["60 gramos", "Gourmet"], isPopular: false, isSpicy: true },
-  { id: 16, name: "Chips Camote", description: "Láminas de camote natural deshidratadas. Un snack dulce-salado súper crujiente.", price: "$25", image: "/images/19.webp", category: "Chips", tags: ["60 gramos", "Natural"], isPopular: true, isSpicy: false },
-  { id: 8, name: "Papas Naturales", description: "Papas fritas artesanales con sal natural. El clasico sabor crujiente.", price: "$20", image: "/images/13.webp", category: "Papas", tags: ["60 gramos"], isPopular: false, isSpicy: false },
-  { id: 9, name: "Papas Adobadas", description: "Papas sazonadas con adobo mexicano tradicional. Sabor intenso.", price: "$20", image: "/images/14.webp", category: "Papas", tags: ["60 gramos"], isPopular: true, isSpicy: true },
-  { id: 10, name: "Papas Fuego", description: "Papas con el maximo nivel de picante. Solo para los mas valientes.", price: "$20", image: "/images/15.webp", category: "Papas", tags: ["60 gramos"], isPopular: true, isSpicy: true },
-  { id: 11, name: "Gomitas Durazno", description: "Aros de gomita con sabor a durazno. Dulces, suaves y deliciosas.", price: "$15", image: "/images/9.webp", category: "Gomitas", tags: ["100 gramos"], isPopular: false, isSpicy: false },
-  { id: 12, name: "Gomitas Tiburon", description: "Gomitas en forma de tiburon con sabor frutal. Divertidas.", price: "$15", image: "/images/18.webp", category: "Gomitas", tags: ["100 gramos"], isPopular: false, isSpicy: false },
-  { id: 13, name: "Gomitas Pic-Osito", description: "Ositos de gomita suaves por dentro enchilados con chile.", price: "$15", image: "/images/11.webp", category: "Gomitas", tags: ["100 gramos"], isPopular: true, isSpicy: true },
-  { id: 14, name: "Gomitas Gusano Diablo", description: "Gusanos de gomita enchilados sabor pepino. El snack picoso.", price: "$15", image: "/images/12.webp", category: "Gomitas", tags: ["100 gramos"], isPopular: true, isSpicy: true },
-  { id: 17, name: "Mangonada", description: "Deliciosa combinación de mango natural y chamoy.", price: "$30", image: "/images/69.webp", category: "Bebidas y más", tags: ["Fresco", "Frutal"], isPopular: true, isSpicy: true },
-  { id: 18, name: "Agua de Jamaica", description: "Refrescante agua de jamaica natural infusionada en frío.", price: "$22", image: "/images/70.webp", category: "Bebidas y más", tags: ["500ml", "Natural"], isPopular: false, isSpicy: false },
-]
-
-export default function MenuPage() {
-  const [activeCategory, setActiveCategory] = useState("🔥 TOP")
-  const [selectedProduct, setSelectedProduct] = useState<any>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
+export default function Page() {
+  const [activeCat, setActiveCat] = useState("Todos")
   const [stockData, setStockData] = useState<Record<number, boolean>>({})
+  const [cartOpen, setCartOpen] = useState(false)
+  const [loyaltyOpen, setLoyaltyOpen] = useState(false)
+  const [wholesaleOpen, setWholesaleOpen] = useState(false)
+  const [eventOpen, setEventOpen] = useState(false)
+  const [toast, setToast] = useState({ msg: "", show: false })
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null)
+  const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(null)
 
-  // --- LÓGICA DE SWIPE MEJORADA (Anti-clicks fantasmas en iPhone) ---
-  const [touchStart, setTouchStart] = useState<{ x: number, y: number } | null>(null)
-  const [touchEnd, setTouchEnd] = useState<{ x: number, y: number } | null>(null)
-  const minSwipeDistance = 70 // Subimos un poco el umbral para mayor seguridad
+  useEffect(() => {
+    fetch(SHEETS_CSV)
+      .then(r => r.text())
+      .then(csv => {
+        const stock: Record<number, boolean> = {}
+        csv.split("\n").slice(1).forEach(row => {
+          const cols = row.split(",")
+          if (cols.length >= 3) {
+            const id = parseInt(cols[0].trim())
+            if (!isNaN(id)) stock[id] = cols[2].trim().toUpperCase() === "SI"
+          }
+        })
+        setStockData(stock)
+      })
+      .catch(() => {})
+  }, [])
+
+  const showToast = useCallback((p: Product) => {
+    setToast({ msg: p.name + " agregado al carrito", show: true })
+    setTimeout(() => setToast(t => ({ ...t, show: false })), 2800)
+  }, [])
+
+  const showToastMsg = useCallback((msg: string) => {
+    setToast({ msg, show: true })
+    setTimeout(() => setToast(t => ({ ...t, show: false })), 2800)
+  }, [])
+
+  const products: Product[] = PRODUCTS.map(p => ({
+    ...p,
+    inStock: stockData[p.id] !== undefined ? stockData[p.id] : true,
+  }))
+
+  const filtered = activeCat === "Todos"
+    ? products
+    : products.filter(p => p.cat === activeCat)
+
+  // Todos = carousel grid, categoria especifica = lista acordeon
+  const showGrid = activeCat === "Todos"
 
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null)
-    setTouchStart({
-      x: e.targetTouches[0].clientX,
-      y: e.targetTouches[0].clientY
-    })
+    setTouchStart({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY })
   }
-
   const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd({
-      x: e.targetTouches[0].clientX,
-      y: e.targetTouches[0].clientY
-    })
+    setTouchEnd({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY })
   }
-
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return
-
-    const distanceX = touchStart.x - touchEnd.x
-    const distanceY = touchStart.y - touchEnd.y
-    
-    // VERIFICACIÓN CLAVE: ¿Es un movimiento horizontal? 
-    // Si el movimiento vertical es mayor al horizontal, ignoramos el swipe.
-    const isHorizontalSwipe = Math.abs(distanceX) > Math.abs(distanceY)
-    const isEnoughDistance = Math.abs(distanceX) > minSwipeDistance
-
-    if (isHorizontalSwipe && isEnoughDistance) {
-      const currentIndex = categories.indexOf(activeCategory)
-      if (distanceX > 0 && currentIndex < categories.length - 1) {
-        // Swipe a la izquierda (Siguiente)
-        setActiveCategory(categories[currentIndex + 1])
-      } else if (distanceX < 0 && currentIndex > 0) {
-        // Swipe a la derecha (Anterior)
-        setActiveCategory(categories[currentIndex - 1])
-      }
+    const dx = touchStart.x - touchEnd.x
+    const dy = touchStart.y - touchEnd.y
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 70) {
+      const idx = CATEGORIES.indexOf(activeCat)
+      if (dx > 0 && idx < CATEGORIES.length - 1) setActiveCat(CATEGORIES[idx + 1])
+      else if (dx < 0 && idx > 0) setActiveCat(CATEGORIES[idx - 1])
     }
   }
 
-  // --- RESTO DEL CÓDIGO (Stock y Filtrado) ---
-  useEffect(() => {
-    fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSQKeuTywAmniswIKciTQS0hI-fMIm4l0DRiGATcUpA_eff42eVS6171CngdgtGphWUADrllm5dcxe1/pub?output=csv")
-      .then((res) => res.text())
-      .then((csv) => {
-        const rows = csv.split("\n").slice(1)
-        const currentStock: Record<number, boolean> = {}
-        rows.forEach((row) => {
-          const columns = row.split(",")
-          if (columns.length >= 3) {
-            const id = columns[0].trim()
-            const disponible = columns[2].trim()
-            currentStock[Number(id)] = disponible.toUpperCase() === "SI"
-          }
-        })
-        setStockData(currentStock)
-      })
-  }, [])
-
-  const itemsWithStock = menuItems.map((item) => ({
-    ...item,
-    inStock: stockData[item.id] !== undefined ? stockData[item.id] : true,
-  }))
-
-  const filteredItems = 
-    activeCategory === "🔥 TOP" 
-    ? itemsWithStock.filter(item => item.isPopular) 
-    : activeCategory === "Todos"
-    ? itemsWithStock
-    : itemsWithStock.filter((item) => item.category === activeCategory)
-
-  const handleProductClick = (item: any) => {
-    setSelectedProduct(item)
-    setIsModalOpen(true)
-  }
-
   return (
-    <main className="relative min-h-screen bg-zinc-950 text-zinc-50 overflow-x-hidden">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-[500px] bg-white/5 blur-[120px] rounded-full pointer-events-none" />
+    <CartProvider>
+      <Marquee />
+      <NavBar
+        onCartOpen={() => setCartOpen(true)}
+        onLoyaltyOpen={() => setLoyaltyOpen(true)}
+        onWholesaleOpen={() => setWholesaleOpen(true)}
+      />
+      <Hero
+        onMenuClick={() => document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" })}
+        onWholesaleOpen={() => setWholesaleOpen(true)}
+      />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-        <MenuHeader categories={categories} onCategoryChange={setActiveCategory} />
-
-        <section className="pb-4 sm:pb-8 sticky top-[80px] z-20 bg-zinc-950/80 backdrop-blur-md pt-2">
+      {/* ── MENU SECTION ── */}
+      <div id="menu">
+        {/* Sticky category tabs */}
+        <div className="sticky top-14 z-40 bg-[#0A0A0A]/95 backdrop-blur-xl border-b border-white/5">
           <CategoryTabs
-            categories={categories}
-            activeCategory={activeCategory}
-            onCategoryChange={setActiveCategory}
+            categories={CATEGORIES}
+            active={activeCat}
+            onSelect={cat => {
+              setActiveCat(cat)
+              document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" })
+            }}
           />
-        </section>
+        </div>
 
+        {/* Category header for non-Todos views */}
+        {activeCat !== "Todos" && (
+          <div
+            className="px-4 sm:px-6 pt-5 pb-3"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+          >
+            <div className="max-w-7xl mx-auto flex items-center justify-between">
+              <div>
+                <h2 className="font-head text-[2rem] leading-none text-white">{activeCat}</h2>
+                <p className="text-[.7rem] text-white/30 mt-0.5">
+                  {filtered.length} productos
+                  <span className="ml-2 text-white/20">Desliza para cambiar categoria</span>
+                </p>
+              </div>
+              {/* Swipe hint dots */}
+              <div className="flex gap-1">
+                {CATEGORIES.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCat(cat)}
+                    className={
+                      "transition-all rounded-full " +
+                      (cat === activeCat
+                        ? "w-4 h-1.5 bg-[#E53E3E]"
+                        : "w-1.5 h-1.5 bg-white/20")
+                    }
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Products */}
         <section
-          className="pb-16 min-h-[70vh]"
+          className="max-w-7xl mx-auto px-4 sm:px-6 pb-6 min-h-[60vh]"
+          style={{ paddingTop: activeCat === "Todos" ? "1.5rem" : "0" }}
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
-          <div
-            key={activeCategory}
-            className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4 animate-in fade-in slide-in-from-bottom-2 duration-300 ease-out"
-          >
-            {filteredItems.map((item) => (
-              <MenuItem
-                key={item.id}
-                {...item}
-                onClick={() => handleProductClick(item)}
-              />
-            ))}
-          </div>
-
-          {filteredItems.length === 0 && (
-            <div className="py-20 text-center opacity-50">
-              <p>Próximamente más sorpresas...</p>
-            </div>
+          {showGrid ? (
+            /* Todos: carousel group cards */
+            <ProductGrid
+              products={filtered}
+              onProductClick={() => {}}
+              onAddToCart={p => showToast(p)}
+              showGroups={true}
+            />
+          ) : (
+            /* Categoria: lista acordeon */
+            <ProductList
+              products={filtered}
+              onAddToCart={p => showToast(p)}
+            />
           )}
         </section>
-
-        <footer className="border-t border-white/10 py-12 text-center opacity-40">
-          <p className="text-[10px] font-black uppercase tracking-widest">BOTA-NA by Saul & Aranza</p>
-        </footer>
       </div>
 
-      <ProductModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        product={selectedProduct}
+      {/* Evento Banner */}
+      <section className="px-4 py-10 sm:py-14">
+        <div className="max-w-2xl mx-auto">
+          <div
+            className="relative overflow-hidden rounded-[2rem] p-6 sm:p-8 text-center"
+            style={{ background: "linear-gradient(135deg,rgba(249,115,22,0.12),rgba(229,62,62,0.12))" }}
+          >
+            <div className="absolute inset-0 border border-[#F97316]/15 rounded-[2rem] pointer-events-none" />
+            <div className="text-4xl mb-3">🎉</div>
+            <div className="text-[.65rem] font-black uppercase tracking-[.2em] text-[#F97316] mb-2">
+              Eventos y Fiestas
+            </div>
+            <h2 className="font-head text-[clamp(2rem,6vw,3rem)] leading-none text-white mb-3">
+              Botanas para tu Evento
+            </h2>
+            <p className="text-white/40 text-sm leading-relaxed max-w-md mx-auto mb-5">
+              Precios especiales, descuentos por volumen, etiquetas con el nombre de tu evento y entrega a domicilio.
+            </p>
+            <div className="flex flex-wrap justify-center gap-2 mb-6">
+              {["5% OFF desde 20 pzas", "15% OFF en 100+", "Etiquetas personalizadas", "50% anticipo"].map(tag => (
+                <span
+                  key={tag}
+                  className="text-[.62rem] font-black uppercase tracking-wider px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/45"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+            <button
+              onClick={() => setEventOpen(true)}
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-white font-black text-sm tracking-widest uppercase active:scale-95 transition-all"
+              style={{ background: "linear-gradient(135deg,#F97316,#E53E3E)" }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              Cotizar mi Evento
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <LoyaltyPromo onOpen={() => setLoyaltyOpen(true)} />
+      <WholesaleSection onEventOpen={() => setEventOpen(true)} />
+
+      <footer className="border-t border-white/5 py-12 pb-24 sm:pb-12 text-center px-4">
+        <div className="font-head text-4xl tracking-wide text-white mb-1">
+          BOTA<span className="text-red-500">-</span>NA
+        </div>
+        <p className="text-[11px] text-white/25 uppercase tracking-[.2em] font-bold mb-6">
+          Snacks Premium · La Salle Bajio · Leon, Gto.
+        </p>
+        <div className="flex justify-center gap-6 flex-wrap mb-4">
+          <a
+            href="https://instagram.com/bota.na.mx"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[12px] text-white/40 hover:text-white transition-colors uppercase tracking-wider font-semibold"
+          >
+            Instagram
+          </a>
+          <a
+            href="https://wa.me/524774950232"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[12px] text-white/40 hover:text-white transition-colors uppercase tracking-wider font-semibold"
+          >
+            WhatsApp
+          </a>
+        </div>
+        <p className="text-[11px] text-white/15 uppercase tracking-[.15em]">
+          2025 BOTA-NA por Saul y Aranza
+        </p>
+      </footer>
+
+      <CartModal isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+      <LoyaltyModal isOpen={loyaltyOpen} onClose={() => setLoyaltyOpen(false)} />
+      <WholesaleModal
+        isOpen={wholesaleOpen}
+        onClose={() => setWholesaleOpen(false)}
+        onEventOpen={() => { setWholesaleOpen(false); setEventOpen(true) }}
       />
-      <AboutSection />
-    </main>
+      <EventModal isOpen={eventOpen} onClose={() => setEventOpen(false)} />
+      <Toast message={toast.msg} show={toast.show} />
+    </CartProvider>
   )
 }

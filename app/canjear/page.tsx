@@ -117,7 +117,7 @@ function CanjearContent() {
   if (status === "success") {
     return (
       <Screen>
-        <CheckCircle2 className="h-14 w-14 text-green-400" />
+        <CheckCircle2 className="h-14 w-14 text-[#22c55e]" />
         <p className="mt-4 text-center text-lg font-black text-white">{message}</p>
         {points !== null && (
           <p className="mt-1 text-center text-sm font-bold text-zinc-400">
@@ -140,7 +140,7 @@ function CanjearContent() {
 
 function Screen({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 p-6">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#0D0907] p-6">
       {children}
     </div>
   )
