@@ -1,6 +1,9 @@
 "use client"
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
+import { Marquee } from "@/components/marquee"
+import { NavBar } from "@/components/navbar"
+import { EventModal } from "@/components/event-modal"
 
 const WA = "524774950232"
 
@@ -184,6 +187,7 @@ const FAQS = [
 export default function B2BPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const [activeCase, setActiveCase] = useState(0)
+  const [quoteOpen, setQuoteOpen] = useState(false)
 
   return (
     <>
@@ -217,22 +221,9 @@ export default function B2BPage() {
 
       <div className="min-h-screen" style={{ background: "#0A0A0A", color: "#FAFAFA", fontFamily: "'DM Sans',sans-serif", WebkitFontSmoothing: "antialiased" }}>
 
-        {/* ── NAV ── */}
-        <nav style={{ position: "sticky", top: 0, zIndex: 100, height: 56, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 1.25rem", background: "rgba(10,10,10,0.9)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-          <Link href="/" style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: "1.7rem", letterSpacing: ".04em", color: "white", textDecoration: "none" }}>
-            BOTA<span style={{ color: "#E53E3E" }}>-</span>NA
-            <span style={{ marginLeft: 8, fontSize: ".55rem", fontFamily: "'DM Sans',sans-serif", fontWeight: 800, letterSpacing: ".18em", textTransform: "uppercase", color: "#F97316", verticalAlign: "middle" }}>B2B</span>
-          </Link>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <Link href="/" style={{ padding: "8px 16px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.12)", fontSize: ".7rem", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", textDecoration: "none" }}>
-              Ver Menu
-            </Link>
-            <a href={wa("Hola! Vi la pagina de BOTA-NA para negocios y me interesa conocer mas sobre sus opciones de mayoreo/eventos.")} target="_blank" rel="noopener noreferrer"
-              style={{ padding: "8px 16px", borderRadius: 999, background: "#E53E3E", fontSize: ".7rem", fontWeight: 800, letterSpacing: ".1em", textTransform: "uppercase", color: "white", textDecoration: "none" }}>
-              Contactar
-            </a>
-          </div>
-        </nav>
+        {/* ── NAV compartido — el mismo componente que la tienda, para que se sienta como la misma pagina ── */}
+        <Marquee />
+        <NavBar onCartOpen={() => {}} onLoyaltyOpen={() => {}} />
 
         {/* ── HERO ── */}
         <section style={{ position: "relative", minHeight: "90vh", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "5rem 1.25rem 4rem", overflow: "hidden" }}>
@@ -262,21 +253,42 @@ export default function B2BPage() {
               Snacks premium con precio de mayoreo, etiquetas personalizadas para tu evento y entrega puntual. Sin complicaciones.
             </p>
 
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
+            {/* ── Cotizador automatico: la accion principal de la pagina ── */}
+            <div
+              className="b2b-card"
+              style={{ maxWidth: 460, margin: "0 auto 1.5rem", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 24, padding: "1.5rem" }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "center", marginBottom: 14 }}>
+                <span style={{ fontSize: ".65rem", fontWeight: 800, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)" }}>
+                  Cotizador automático
+                </span>
+              </div>
+              <button
+                onClick={() => setQuoteOpen(true)}
+                className="b2b-glow"
+                style={{ width: "100%", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "17px 24px", borderRadius: 999, background: "#E53E3E", color: "white", fontWeight: 800, fontSize: ".92rem", letterSpacing: ".05em", textTransform: "uppercase", border: "none", cursor: "pointer" }}
+              >
+                Cotizar mi pedido ahora
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+              <p style={{ fontSize: ".72rem", color: "rgba(255,255,255,0.35)", marginTop: 12, lineHeight: 1.5 }}>
+                Elige tus productos, agrega extras y recibe tu resumen listo para enviar por WhatsApp. Sin esperar respuesta.
+              </p>
+            </div>
+
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 18, justifyContent: "center", fontSize: ".72rem" }}>
               <a
                 href={wa("Hola! Quiero cotizar botanas para mi evento/negocio con BOTA-NA.")}
                 target="_blank" rel="noopener noreferrer"
-                className="b2b-glow"
-                style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "16px 32px", borderRadius: 999, background: "#E53E3E", color: "white", fontWeight: 800, fontSize: ".9rem", letterSpacing: ".06em", textTransform: "uppercase", textDecoration: "none" }}
+                style={{ color: "rgba(255,255,255,0.4)", fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", textDecoration: "none" }}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-                Cotizar por WhatsApp
+                o escríbenos por WhatsApp
               </a>
               <a
                 href="#paquetes"
-                style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "16px 32px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.15)", color: "white", fontWeight: 600, fontSize: ".9rem", letterSpacing: ".06em", textTransform: "uppercase", textDecoration: "none" }}
+                style={{ color: "rgba(255,255,255,0.4)", fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", textDecoration: "none" }}
               >
-                Ver Paquetes
+                Ver paquetes armados
               </a>
             </div>
 
@@ -595,6 +607,8 @@ export default function B2BPage() {
         </footer>
 
       </div>
+
+      <EventModal isOpen={quoteOpen} onClose={() => setQuoteOpen(false)} />
     </>
   )
 }
