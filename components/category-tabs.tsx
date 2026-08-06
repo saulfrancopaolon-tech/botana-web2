@@ -17,7 +17,7 @@ interface Props {
 
 export function CategoryTabs({ categories, active, onSelect }: Props) {
   return (
-    <div className="flex gap-2 overflow-x-auto scrollbar-none px-4 sm:px-6 py-3">
+    <div className="flex gap-1.5 overflow-x-auto scrollbar-none px-4 sm:px-6 py-2.5">
       {categories.map(cat => {
         const meta = CAT_META[cat] ?? { emoji: "🌶", color: "#E53E3E" }
         const isActive = cat === active
@@ -26,14 +26,17 @@ export function CategoryTabs({ categories, active, onSelect }: Props) {
             key={cat}
             onClick={() => onSelect(cat)}
             className={
-              "flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-[.72rem] font-black uppercase tracking-wider border transition-all " +
+              "flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-[.72rem] font-black uppercase tracking-wider transition-all duration-300 active:scale-95 " +
               (isActive
-                ? "text-white border-transparent"
-                : "border-white/10 text-white/45 hover:text-white hover:border-white/25 bg-transparent")
+                ? "text-white scale-[1.03]"
+                : "text-white/45 hover:text-white/75 bg-white/[.04]")
             }
             style={
               isActive
-                ? { background: meta.color + "22", borderColor: meta.color + "55", color: "white" }
+                ? {
+                    background: meta.color,
+                    boxShadow: "0 4px 16px " + meta.color + "55",
+                  }
                 : {}
             }
           >
