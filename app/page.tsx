@@ -15,6 +15,7 @@ import { LoyaltyModal } from "@/components/loyalty-modal"
 import { WholesaleModal } from "@/components/wholesale-modal"
 import { EventModal } from "@/components/event-modal"
 import { Toast, LoyaltyPromo, WholesaleSection } from "@/components/ui-components"
+import { HomeBlocks } from "@/components/home-blocks"
 
 const SHEETS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSQKeuTywAmniswIKciTQS0hI-fMIm4l0DRiGATcUpA_eff42eVS6171CngdgtGphWUADrllm5dcxe1/pub?output=csv"
 
@@ -99,7 +100,16 @@ export default function Page() {
         onWholesaleOpen={() => setWholesaleOpen(true)}
       />
 
-      {/* ── MENU SECTION ── */}
+      {/* ── HOME · 2 BLOQUES (Tienda General / Mayoreo) ── */}
+      <HomeBlocks
+        onMenuClick={() => document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" })}
+        onLoyaltyOpen={() => setLoyaltyOpen(true)}
+      />
+
+      {/* ── BLOQUE 1 · TIENDA GENERAL (menu + fidelidad) ── */}
+      <div className="px-4 sm:px-6 pt-12 sm:pt-16">
+        <div className="max-w-7xl mx-auto ios-section-label">Bloque 1 · Tienda General</div>
+      </div>
       <div id="menu">
         {/* Sticky category tabs */}
         <div className="sticky top-14 z-40 bg-[#0A0A0A]/95 backdrop-blur-xl border-b border-white/5">
@@ -174,6 +184,13 @@ export default function Page() {
         </section>
       </div>
 
+      <LoyaltyPromo onOpen={() => setLoyaltyOpen(true)} />
+
+      {/* ── BLOQUE 2 · MAYOREO & EVENTOS ── */}
+      <div className="px-4 sm:px-6 pt-4">
+        <div className="max-w-7xl mx-auto ios-section-label">Bloque 2 · Mayoreo &amp; Eventos</div>
+      </div>
+
       {/* Evento Banner */}
       <section className="px-4 py-10 sm:py-14">
         <div className="max-w-2xl mx-auto">
@@ -219,8 +236,20 @@ export default function Page() {
         </div>
       </section>
 
-      <LoyaltyPromo onOpen={() => setLoyaltyOpen(true)} />
       <WholesaleSection onEventOpen={() => setEventOpen(true)} />
+
+      {/* Link al portal completo de mayoreo */}
+      <div className="px-4 pb-14 -mt-6">
+        <div className="max-w-md mx-auto text-center">
+          <a
+            href="/b2b"
+            className="inline-flex items-center gap-2 text-[.72rem] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors"
+          >
+            Ver catálogo completo de mayoreo y paquetes
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
 
       <footer className="border-t border-white/5 py-12 pb-24 sm:pb-12 text-center px-4">
         <div className="font-head text-4xl tracking-wide text-white mb-1">
