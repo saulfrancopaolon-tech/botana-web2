@@ -41,7 +41,9 @@ export function ProductGrid({ products, onAddToCart, showGroups }: GridProps) {
   if (!products.length) {
     return (
       <div className="text-center py-20 text-white/30">
-        <p className="text-4xl mb-3">🌶</p>
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mx-auto mb-3 opacity-40">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
         <p className="text-sm uppercase tracking-widest font-bold">
           Proximamente mas sorpresas...
         </p>
@@ -49,10 +51,10 @@ export function ProductGrid({ products, onAddToCart, showGroups }: GridProps) {
     )
   }
 
-  // showGroups = "Todos" view — category cards
+  // showGroups = "Todos" view — category cards en grid (mas denso y atractivo)
   if (showGroups) {
     return (
-      <div className="space-y-3">
+      <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
         {CAT_ORDER.map(cat => {
           const catProducts = products.filter(p => p.cat === cat)
           if (!catProducts.length) return null
@@ -126,7 +128,7 @@ function CategoryCard({
         onClick={onToggle}
       >
         {/* Big image - left side */}
-        <div className="relative w-36 sm:w-44 flex-shrink-0 overflow-hidden" style={{ minHeight: "130px" }}>
+        <div className="relative w-32 sm:w-36 flex-shrink-0 overflow-hidden" style={{ minHeight: "130px" }}>
           {/* Rotating product images */}
           {products.map((p, i) => (
             <div
