@@ -7,10 +7,9 @@ import { useCart } from "./cart-context"
 interface NavBarProps {
   onCartOpen: () => void
   onLoyaltyOpen: () => void
-  onWholesaleOpen: () => void
 }
 
-export function NavBar({ onCartOpen, onLoyaltyOpen, onWholesaleOpen }: NavBarProps) {
+export function NavBar({ onCartOpen, onLoyaltyOpen }: NavBarProps) {
   const { totalItems } = useCart()
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
