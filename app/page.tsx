@@ -12,10 +12,7 @@ import { ProductGrid } from "@/components/product-grid"
 import { ProductList } from "@/components/product-list"
 import { CartModal } from "@/components/cart-modal"
 import { LoyaltyModal } from "@/components/loyalty-modal"
-import { WholesaleModal } from "@/components/wholesale-modal"
-import { EventModal } from "@/components/event-modal"
-import { Toast, LoyaltyPromo, WholesaleSection } from "@/components/ui-components"
-import { HomeBlocks } from "@/components/home-blocks"
+import { Toast, LoyaltyPromo } from "@/components/ui-components"
 
 const SHEETS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSQKeuTywAmniswIKciTQS0hI-fMIm4l0DRiGATcUpA_eff42eVS6171CngdgtGphWUADrllm5dcxe1/pub?output=csv"
 
@@ -24,8 +21,6 @@ export default function Page() {
   const [stockData, setStockData] = useState<Record<number, boolean>>({})
   const [cartOpen, setCartOpen] = useState(false)
   const [loyaltyOpen, setLoyaltyOpen] = useState(false)
-  const [wholesaleOpen, setWholesaleOpen] = useState(false)
-  const [eventOpen, setEventOpen] = useState(false)
   const [toast, setToast] = useState({ msg: "", show: false })
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null)
   const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(null)
@@ -49,11 +44,6 @@ export default function Page() {
 
   const showToast = useCallback((p: Product) => {
     setToast({ msg: p.name + " agregado al carrito", show: true })
-    setTimeout(() => setToast(t => ({ ...t, show: false })), 2800)
-  }, [])
-
-  const showToastMsg = useCallback((msg: string) => {
-    setToast({ msg, show: true })
     setTimeout(() => setToast(t => ({ ...t, show: false })), 2800)
   }, [])
 
@@ -93,24 +83,15 @@ export default function Page() {
       <NavBar
         onCartOpen={() => setCartOpen(true)}
         onLoyaltyOpen={() => setLoyaltyOpen(true)}
-        onWholesaleOpen={() => setWholesaleOpen(true)}
       />
+
+      {/* ── HERO: protagonista de la pagina ── */}
       <Hero
         onMenuClick={() => document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" })}
-        onWholesaleOpen={() => setWholesaleOpen(true)}
       />
 
-      {/* ── HOME · 2 BLOQUES (Tienda General / Mayoreo) ── */}
-      <HomeBlocks
-        onMenuClick={() => document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" })}
-        onLoyaltyOpen={() => setLoyaltyOpen(true)}
-      />
-
-      {/* ── BLOQUE 1 · TIENDA GENERAL (menu + fidelidad) ── */}
-      <div className="px-4 sm:px-6 pt-12 sm:pt-16">
-        <div className="max-w-7xl mx-auto ios-section-label">Bloque 1 · Tienda General</div>
-      </div>
-      <div id="menu">
+      {/* ── MENU: el producto es lo primero que se ve despues del hero ── */}
+      <div id="menu" className="animate-fade-in">
         {/* Sticky category tabs */}
         <div className="sticky top-14 z-40 bg-[#0A0A0A]/95 backdrop-blur-xl border-b border-white/5">
           <CategoryTabs
@@ -186,70 +167,34 @@ export default function Page() {
 
       <LoyaltyPromo onOpen={() => setLoyaltyOpen(true)} />
 
-      {/* ── BLOQUE 2 · MAYOREO & EVENTOS ── */}
-      <div className="px-4 sm:px-6 pt-4">
-        <div className="max-w-7xl mx-auto ios-section-label">Bloque 2 · Mayoreo &amp; Eventos</div>
-      </div>
-
-      {/* Evento Banner */}
-      <section className="px-4 py-10 sm:py-14">
+      {/* ── CTA unico hacia el portal de Mayoreo ── */}
+      <section className="px-4 pb-16 sm:pb-14">
         <div className="max-w-2xl mx-auto">
-          <div
-            className="relative overflow-hidden rounded-[2rem] p-6 sm:p-8 text-center"
-            style={{ background: "linear-gradient(135deg,rgba(249,115,22,0.12),rgba(229,62,62,0.12))" }}
-          >
-            <div className="absolute inset-0 border border-[#F97316]/15 rounded-[2rem] pointer-events-none" />
-            <div className="text-4xl mb-3">🎉</div>
-            <div className="text-[.65rem] font-black uppercase tracking-[.2em] text-[#F97316] mb-2">
-              Eventos y Fiestas
-            </div>
-            <h2 className="font-head text-[clamp(2rem,6vw,3rem)] leading-none text-white mb-3">
-              Botanas para tu Evento
-            </h2>
-            <p className="text-white/40 text-sm leading-relaxed max-w-md mx-auto mb-5">
-              Precios especiales, descuentos por volumen, etiquetas con el nombre de tu evento y entrega a domicilio.
-            </p>
-            <div className="flex flex-wrap justify-center gap-2 mb-6">
-              {["5% OFF desde 20 pzas", "15% OFF en 100+", "Etiquetas personalizadas", "50% anticipo"].map(tag => (
-                <span
-                  key={tag}
-                  className="text-[.62rem] font-black uppercase tracking-wider px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/45"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-            <button
-              onClick={() => setEventOpen(true)}
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-white font-black text-sm tracking-widest uppercase active:scale-95 transition-all"
-              style={{ background: "linear-gradient(135deg,#F97316,#E53E3E)" }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <rect x="3" y="4" width="18" height="18" rx="2"/>
-                <line x1="16" y1="2" x2="16" y2="6"/>
-                <line x1="8" y1="2" x2="8" y2="6"/>
-                <line x1="3" y1="10" x2="21" y2="10"/>
-              </svg>
-              Cotizar mi Evento
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <WholesaleSection onEventOpen={() => setEventOpen(true)} />
-
-      {/* Link al portal completo de mayoreo */}
-      <div className="px-4 pb-14 -mt-6">
-        <div className="max-w-md mx-auto text-center">
           <a
             href="/b2b"
-            className="inline-flex items-center gap-2 text-[.72rem] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors"
+            className="ios-app-card flex items-center justify-between gap-4 p-5 sm:p-6"
+            style={{ background: "linear-gradient(120deg,#1a1408,#120d09)" }}
           >
-            Ver catálogo completo de mayoreo y paquetes
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            <div>
+              <div className="text-[.62rem] font-black uppercase tracking-[.18em] text-[#F97316] mb-1.5">
+                Para negocios y eventos
+              </div>
+              <div className="font-head text-[1.65rem] leading-none text-white mb-1">
+                ¿Compras por volumen?
+              </div>
+              <p className="text-white/40 text-[.78rem] leading-snug">
+                Cotiza tu pedido de mayoreo o evento en minutos.
+              </p>
+            </div>
+            <div
+              className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0"
+              style={{ background: "linear-gradient(135deg,#F97316,#E53E3E)" }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
           </a>
         </div>
-      </div>
+      </section>
 
       <footer className="border-t border-white/5 py-12 pb-24 sm:pb-12 text-center px-4">
         <div className="font-head text-4xl tracking-wide text-white mb-1">
@@ -283,12 +228,6 @@ export default function Page() {
 
       <CartModal isOpen={cartOpen} onClose={() => setCartOpen(false)} />
       <LoyaltyModal isOpen={loyaltyOpen} onClose={() => setLoyaltyOpen(false)} />
-      <WholesaleModal
-        isOpen={wholesaleOpen}
-        onClose={() => setWholesaleOpen(false)}
-        onEventOpen={() => { setWholesaleOpen(false); setEventOpen(true) }}
-      />
-      <EventModal isOpen={eventOpen} onClose={() => setEventOpen(false)} />
       <Toast message={toast.msg} show={toast.show} />
     </CartProvider>
   )
