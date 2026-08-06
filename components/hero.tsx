@@ -1,13 +1,11 @@
 "use client"
 import { useEffect, useRef } from "react"
-import Link from "next/link"
 
 interface HeroProps {
   onMenuClick: () => void
-  onWholesaleOpen: () => void
 }
 
-export function Hero({ onMenuClick, onWholesaleOpen }: HeroProps) {
+export function Hero({ onMenuClick }: HeroProps) {
   const heroRef = useRef<HTMLElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -217,14 +215,15 @@ export function Hero({ onMenuClick, onWholesaleOpen }: HeroProps) {
             </svg>
             Ver Menu
           </button>
-          <Link
-            href="/b2b"
+          <a
+            href="#menu"
+            onClick={e => { e.preventDefault(); document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" }) }}
             style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "15px 30px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.14)", color: "white", fontWeight: 600, fontSize: ".9rem", letterSpacing: ".06em", textTransform: "uppercase", background: "transparent", cursor: "pointer", transition: "border-color 0.25s ease" }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.32)" }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.14)" }}
           >
-            Mayoreo y Eventos
-          </Link>
+            Ver Categorías
+          </a>
         </div>
 
         {/* Stats */}
