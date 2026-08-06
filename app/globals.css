@@ -274,3 +274,102 @@ button:active:not(:disabled), a:active {
    SAFE AREA
 ══════════════════════════════════════════ */
 .safe-area-pb { padding-bottom: env(safe-area-inset-bottom); }
+.safe-area-pt { padding-top: env(safe-area-inset-top); }
+
+/* ══════════════════════════════════════════
+   iOS — SEGMENTED CONTROL (Tienda / Mayoreo)
+══════════════════════════════════════════ */
+.ios-segmented {
+  position: relative;
+  display: inline-grid;
+  grid-auto-flow: column;
+  align-items: center;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 980px;
+  padding: 3px;
+  gap: 2px;
+}
+.ios-segmented a,
+.ios-segmented button {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: 980px;
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba(255,255,255,0.5);
+  transition: color 0.3s var(--spring-soft);
+}
+.ios-segmented [data-active="true"] {
+  color: #0A0A0A;
+  background: #FAFAFA;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.35), 0 0 0 0.5px rgba(0,0,0,0.05);
+}
+
+/* ══════════════════════════════════════════
+   iOS — LARGE TITLE (collapses on scroll)
+══════════════════════════════════════════ */
+.ios-large-title {
+  font-family: var(--font-head);
+  letter-spacing: .02em;
+  transform-origin: left center;
+  transition: transform 0.25s var(--spring-soft), opacity 0.25s var(--spring-soft);
+}
+
+/* ══════════════════════════════════════════
+   iOS — GROUPED SECTION HEADER (Ajustes-style)
+══════════════════════════════════════════ */
+.ios-section-label {
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.32);
+  padding: 0 .35rem;
+}
+
+/* ══════════════════════════════════════════
+   iOS — APP CARD (home launcher block)
+══════════════════════════════════════════ */
+.ios-app-card {
+  position: relative;
+  border-radius: 28px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: transform 0.35s var(--spring-soft), box-shadow 0.35s var(--spring-soft);
+  -webkit-tap-highlight-color: transparent;
+}
+.ios-app-card:active {
+  transform: scale(0.975);
+}
+@media (hover: hover) {
+  .ios-app-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+  }
+}
+
+/* iOS icon-style rounded-square badge (superellipse-ish) */
+.ios-icon-badge {
+  border-radius: 22.5%;
+}
+
+/* ══════════════════════════════════════════
+   iOS — TAB BAR ACTIVE PILL
+══════════════════════════════════════════ */
+.ios-tab-active-dot {
+  position: absolute;
+  top: 6px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  transition: opacity 0.25s ease;
+}
