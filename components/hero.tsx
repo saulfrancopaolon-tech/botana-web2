@@ -1,211 +1,125 @@
 "use client"
-import { useEffect, useRef } from "react"
+import { useEffect, useState } from "react"
+import Image from "next/image"
 
 interface HeroProps {
   onMenuClick: () => void
 }
 
+// Productos destacados para el rotador. Fotos con fondo negro puro:
+// con mix-blend-mode "screen" el negro se vuelve transparente y el
+// producto queda flotando sobre el color de fondo — sin editar imagenes.
+const ROTATOR = [
+  { img: "/images/4.webp",  name: "Cacahuate Habanero", glow: "rgba(245,130,10,0.32)" },
+  { img: "/images/6.webp",  name: "Chips de Betabel",   glow: "rgba(232,52,26,0.30)"  },
+  { img: "/images/9.webp",  name: "Gomitas Gusano",     glow: "rgba(236,72,153,0.26)" },
+  { img: "/images/14.webp", name: "Papas Fuego",        glow: "rgba(229,62,62,0.32)"  },
+  { img: "/images/69.webp", name: "Chamoyada de Mango", glow: "rgba(245,130,10,0.26)" },
+]
+
+const ROTATE_MS = 2800
+
 export function Hero({ onMenuClick }: HeroProps) {
-  const heroRef = useRef<HTMLElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [index, setIndex] = useState(0)
 
-  // Canvas particle field
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    let animId: number
-    let W = 0, H = 0
-
-    // Particle definition
-    interface Particle {
-      x: number; y: number
-      vx: number; vy: number
-      radius: number
-      alpha: number
-      alphaDir: number
-      color: string
-    }
-
-    const COLORS = [
-      "rgba(229,62,62,",   // red
-      "rgba(249,115,22,",  // orange
-      "rgba(180,40,40,",   // dark red
-    ]
-
-    let particles: Particle[] = []
-
-    function resize() {
-      W = canvas!.offsetWidth
-      H = canvas!.offsetHeight
-      canvas!.width  = W
-      canvas!.height = H
-      init()
-    }
-
-    function randomParticle(): Particle {
-      const color = COLORS[Math.floor(Math.random() * COLORS.length)]
-      return {
-        x: Math.random() * W,
-        y: Math.random() * H,
-        vx: (Math.random() - 0.5) * 0.25,
-        vy: (Math.random() - 0.5) * 0.25,
-        radius: Math.random() * 1.8 + 0.4,
-        alpha: Math.random() * 0.25 + 0.05,
-        alphaDir: Math.random() > 0.5 ? 1 : -1,
-        color,
-      }
-    }
-
-    function init() {
-      const count = Math.floor((W * H) / 9000)
-      particles = Array.from({ length: Math.min(count, 90) }, randomParticle)
-    }
-
-    // Connection lines between nearby particles
-    function drawConnections() {
-      const MAX_DIST = 130
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x
-          const dy = particles[i].y - particles[j].y
-          const dist = Math.sqrt(dx * dx + dy * dy)
-          if (dist < MAX_DIST) {
-            const opacity = (1 - dist / MAX_DIST) * 0.06
-            ctx!.beginPath()
-            ctx!.moveTo(particles[i].x, particles[i].y)
-            ctx!.lineTo(particles[j].x, particles[j].y)
-            ctx!.strokeStyle = "rgba(229,62,62," + opacity + ")"
-            ctx!.lineWidth = 0.5
-            ctx!.stroke()
-          }
-        }
-      }
-    }
-
-    function tick() {
-      ctx!.clearRect(0, 0, W, H)
-
-      // Draw connections first (behind particles)
-      drawConnections()
-
-      for (const p of particles) {
-        // Move
-        p.x += p.vx
-        p.y += p.vy
-
-        // Wrap edges
-        if (p.x < -2)  p.x = W + 2
-        if (p.x > W+2) p.x = -2
-        if (p.y < -2)  p.y = H + 2
-        if (p.y > H+2) p.y = -2
-
-        // Breathe alpha
-        p.alpha += p.alphaDir * 0.003
-        if (p.alpha > 0.30) p.alphaDir = -1
-        if (p.alpha < 0.04) p.alphaDir =  1
-
-        // Draw dot
-        ctx!.beginPath()
-        ctx!.arc(p.x, p.y, p.radius, 0, Math.PI * 2)
-        ctx!.fillStyle = p.color + p.alpha + ")"
-        ctx!.fill()
-      }
-
-      animId = requestAnimationFrame(tick)
-    }
-
-    resize()
-    tick()
-
-    const ro = new ResizeObserver(resize)
-    ro.observe(canvas)
-
-    return () => {
-      cancelAnimationFrame(animId)
-      ro.disconnect()
-    }
+    const id = setInterval(() => setIndex(i => (i + 1) % ROTATOR.length), ROTATE_MS)
+    return () => clearInterval(id)
   }, [])
 
-  // Parallax on scroll
-  useEffect(() => {
-    const hero = heroRef.current
-    if (!hero) return
-    const layer = hero.querySelector(".hero-bg-layer") as HTMLElement
-    const onScroll = () => {
-      if (layer) layer.style.transform = "translateY(" + String(window.scrollY * 0.22) + "px)"
-    }
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => window.removeEventListener("scroll", onScroll)
-  }, [])
+  const leftIdx  = (index + ROTATOR.length - 1) % ROTATOR.length
+  const rightIdx = (index + 1) % ROTATOR.length
 
   return (
     <section
-      ref={heroRef}
-      style={{ position: "relative", minHeight: "88vh", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "4rem 1.25rem 3rem", overflow: "hidden" }}
+      style={{ position: "relative", minHeight: "92vh", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "4rem 1.25rem 3rem", overflow: "hidden" }}
     >
-      {/* ── BACKGROUND ── */}
-      <div className="hero-bg-layer" style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
-
-        {/* Particle canvas */}
-        <canvas
-          ref={canvasRef}
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-        />
-
-        {/* Radial glow — red center */}
-        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 60% 50% at 50% 44%, rgba(229,62,62,0.10) 0%, transparent 68%)" }} />
-
-        {/* Subtle top arc */}
-        <div style={{ position: "absolute", top: "-30%", left: "50%", transform: "translateX(-50%)", width: "110%", height: "60%", borderRadius: "50%", background: "radial-gradient(ellipse at 50% 0%, rgba(249,115,22,0.06) 0%, transparent 70%)", pointerEvents: "none" }} />
-
-        {/* Faint large bg text */}
-        <div style={{ position: "absolute", fontFamily: "'Bebas Neue',sans-serif", fontSize: "clamp(8rem,22vw,22rem)", color: "rgba(229,62,62,0.04)", top: "50%", left: "50%", transform: "translate(-50%,-50%)", whiteSpace: "nowrap", letterSpacing: "-.02em", userSelect: "none", pointerEvents: "none" }}>
-          BOTANA
-        </div>
-
-        {/* Vignette — fades edges so canvas doesnt distract */}
-        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 80% at 50% 50%, transparent 40%, rgba(10,10,10,0.88) 100%)" }} />
-      </div>
+      {/* ── Glow de fondo — transiciona de color segun el producto activo (una sola propiedad, muy barato) ── */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          background: "radial-gradient(ellipse 62% 56% at 50% 44%, " + ROTATOR[index].glow + ", transparent 72%)",
+          transition: "background 1.1s ease",
+        }}
+      />
+      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 85% 85% at 50% 50%, transparent 46%, rgba(10,10,10,0.86) 100%)", pointerEvents: "none" }} />
 
       {/* ── CONTENT ── */}
-      <div style={{ position: "relative", zIndex: 10, maxWidth: 820 }}>
+      <div style={{ position: "relative", zIndex: 10, maxWidth: 820, width: "100%" }}>
 
         {/* Eyebrow */}
         <div
           className="animate-fade-in"
-          style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(229,62,62,0.1)", border: "1px solid rgba(229,62,62,0.28)", borderRadius: 999, padding: "6px 16px", fontSize: ".7rem", fontWeight: 800, letterSpacing: ".18em", textTransform: "uppercase", color: "#E53E3E", marginBottom: "1.75rem", animationDelay: "80ms", animationFillMode: "both" }}
+          style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(229,62,62,0.1)", border: "1px solid rgba(229,62,62,0.28)", borderRadius: 999, padding: "6px 16px", fontSize: ".7rem", fontWeight: 800, letterSpacing: ".18em", textTransform: "uppercase", color: "#E53E3E", marginBottom: "1.5rem", animationDelay: "80ms", animationFillMode: "both" }}
         >
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#E53E3E", display: "inline-block", animation: "pulseDot 1.5s ease-in-out infinite" }} />
           Leon, Gto. · La Salle Bajio
         </div>
 
-        {/* Headline */}
+        {/* ── ROTADOR DE PRODUCTOS — protagonista visual ── */}
+        <div
+          className="animate-fade-in"
+          style={{ position: "relative", width: "clamp(230px,50vw,360px)", aspectRatio: "1/1", margin: "0 auto 1.25rem", animationDelay: "140ms", animationFillMode: "both" }}
+        >
+          {/* Peek lateral izquierdo */}
+          <div className="hero-side-peek hero-side-peek-l">
+            <Image src={ROTATOR[leftIdx].img} alt="" fill sizes="200px" className="hero-rotator-img-el" style={{ objectFit: "contain" }} />
+          </div>
+          {/* Peek lateral derecho */}
+          <div className="hero-side-peek hero-side-peek-r">
+            <Image src={ROTATOR[rightIdx].img} alt="" fill sizes="200px" className="hero-rotator-img-el" style={{ objectFit: "contain" }} />
+          </div>
+
+          {/* Producto central — crossfade entre todos, sin recargar ni parpadear */}
+          {ROTATOR.map((p, i) => (
+            <div key={p.img} className={"hero-rotator-stage" + (i === index ? " active" : "")}>
+              <Image
+                src={p.img}
+                alt={p.name}
+                fill
+                sizes="360px"
+                priority={i === 0}
+                className="hero-rotator-img-el"
+                style={{ objectFit: "contain" }}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Nombre del producto activo */}
+        <div style={{ height: 20, marginBottom: "1.75rem" }}>
+          <span key={index} className="animate-fade-in" style={{ fontSize: ".72rem", fontWeight: 800, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", animationDuration: "0.5s" }}>
+            {ROTATOR[index].name}
+          </span>
+        </div>
+
+        {/* Headline — mas compacta, ya no compite con la animacion */}
         <h1
           className="animate-fade-in-up"
-          style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: "clamp(3.8rem,13vw,9rem)", lineHeight: .92, letterSpacing: ".02em", color: "white", marginBottom: "1.1rem", animationDelay: "180ms", animationFillMode: "both" }}
+          style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: "clamp(2.6rem,8vw,4.5rem)", lineHeight: .95, letterSpacing: ".02em", color: "white", marginBottom: "0.9rem", animationDelay: "220ms", animationFillMode: "both" }}
         >
-          El Sabor<br />Que <span style={{ color: "#E53E3E" }}>Mueve</span>
+          Snacks Premium <span style={{ color: "#E53E3E" }}>Hechos para Compartir</span>
         </h1>
 
         {/* Sub */}
         <p
           className="animate-fade-in-up"
-          style={{ fontSize: "clamp(.9rem,2.8vw,1.1rem)", color: "rgba(255,255,255,0.46)", maxWidth: 460, margin: "0 auto 2.5rem", fontWeight: 300, lineHeight: 1.75, animationDelay: "300ms", animationFillMode: "both" }}
+          style={{ fontSize: "clamp(.88rem,2.6vw,1rem)", color: "rgba(255,255,255,0.46)", maxWidth: 420, margin: "0 auto 2.25rem", fontWeight: 300, lineHeight: 1.7, animationDelay: "300ms", animationFillMode: "both" }}
         >
-          Snacks irresistibles seleccionados para hacerte la jornada mas sabrosa.
+          Cacahuates, chips, gomitas, papas y bebidas. Pide en linea y recoge en La Salle Bajio.
         </p>
 
-        {/* CTAs */}
+        {/* CTA */}
         <div
           className="animate-fade-in-up"
-          style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center", animationDelay: "420ms", animationFillMode: "both" }}
+          style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center", animationDelay: "380ms", animationFillMode: "both" }}
         >
           <button
             onClick={onMenuClick}
-            style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "15px 30px", borderRadius: 999, background: "#E53E3E", color: "white", fontWeight: 800, fontSize: ".9rem", letterSpacing: ".06em", textTransform: "uppercase", border: "none", cursor: "pointer", boxShadow: "0 8px 28px rgba(229,62,62,0.35)", transition: "all 0.3s cubic-bezier(0.34,1.56,0.64,1)" }}
+            style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "15px 30px", borderRadius: 999, background: "#E53E3E", color: "white", fontWeight: 800, fontSize: ".9rem", letterSpacing: ".06em", textTransform: "uppercase", border: "none", cursor: "pointer", boxShadow: "0 8px 28px rgba(229,62,62,0.35)", transition: "transform 0.25s var(--spring-soft), box-shadow 0.25s var(--spring-soft)" }}
             onMouseEnter={e => { const b = e.currentTarget; b.style.transform = "translateY(-2px)"; b.style.boxShadow = "0 14px 36px rgba(229,62,62,0.45)" }}
             onMouseLeave={e => { const b = e.currentTarget; b.style.transform = "none"; b.style.boxShadow = "0 8px 28px rgba(229,62,62,0.35)" }}
           >
@@ -215,21 +129,12 @@ export function Hero({ onMenuClick }: HeroProps) {
             </svg>
             Ver Menu
           </button>
-          <a
-            href="#menu"
-            onClick={e => { e.preventDefault(); document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" }) }}
-            style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "15px 30px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.14)", color: "white", fontWeight: 600, fontSize: ".9rem", letterSpacing: ".06em", textTransform: "uppercase", background: "transparent", cursor: "pointer", transition: "border-color 0.25s ease" }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.32)" }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.14)" }}
-          >
-            Ver Categorías
-          </a>
         </div>
 
         {/* Stats */}
         <div
           className="animate-fade-in"
-          style={{ display: "flex", justifyContent: "center", gap: "clamp(1.5rem,5vw,4rem)", marginTop: "3.5rem", flexWrap: "wrap", animationDelay: "580ms", animationFillMode: "both" }}
+          style={{ display: "flex", justifyContent: "center", gap: "clamp(1.5rem,5vw,4rem)", marginTop: "3rem", flexWrap: "wrap", animationDelay: "460ms", animationFillMode: "both" }}
         >
           {[["16+", "Productos"], ["$15", "Desde"], ["10pts", "Premio"]].map(([num, label]) => (
             <div key={label} style={{ textAlign: "center" }}>
