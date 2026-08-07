@@ -271,6 +271,46 @@ button:active:not(:disabled), a:active {
 }
 
 /* ══════════════════════════════════════════
+   HERO — ROTADOR DE PRODUCTOS
+   Solo opacity/transform (compositable, barato).
+   Los fondos de las fotos son negro puro (0,0,0):
+   mix-blend-mode "screen" los vuelve invisibles.
+══════════════════════════════════════════ */
+.hero-rotator-stage {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(1.07);
+  transition: opacity 0.9s var(--ease-out), transform 0.9s var(--ease-out);
+  will-change: opacity, transform;
+}
+.hero-rotator-stage.active {
+  opacity: 1;
+  transform: scale(1);
+}
+.hero-rotator-img-el {
+  mix-blend-mode: screen;
+}
+.hero-side-peek {
+  position: absolute;
+  width: 46%;
+  aspect-ratio: 1 / 1;
+  opacity: 0.4;
+  pointer-events: none;
+  transition: opacity 1s ease;
+}
+.hero-side-peek-l {
+  left: -6%;
+  bottom: -4%;
+  transform: rotate(-18deg);
+}
+.hero-side-peek-r {
+  right: -6%;
+  bottom: -4%;
+  transform: rotate(18deg);
+}
+
+/* ══════════════════════════════════════════
    SAFE AREA
 ══════════════════════════════════════════ */
 .safe-area-pb { padding-bottom: env(safe-area-inset-bottom); }
