@@ -32,6 +32,8 @@ export default function StaffPage() {
 
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<Customer[]>([])
+  const [browsing, setBrowsing] = useState(true)
+  const [loadingList, setLoadingList] = useState(false)
 
   // --- Estado de la pestaña QR / Código ---
   const [qrCode, setQrCode] = useState("")
@@ -68,16 +70,21 @@ export default function StaffPage() {
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    if (query.trim().length < 2) {
-      setResults([])
-      return
-    }
     debounceRef.current = setTimeout(() => runSearch(query), 250)
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query])
+
+  // Carga la lista completa de clientes en cuanto entras a la pestaña
+  // "Buscar", asi no dependes de recordar el usuario exacto de alguien.
+  useEffect(() => {
+    if (authed && tab === "search" && results.length === 0 && !query) {
+      runSearch("")
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authed, tab])
 
   useEffect(() => {
     if (typeof window !== "undefined") setOrigin(window.location.origin)
@@ -146,16 +153,28 @@ export default function StaffPage() {
     }
   }
 
+  const [listError, setListError] = useState("")
+
   const runSearch = async (q: string) => {
+    if (q.trim().length === 0) setLoadingList(true)
     setSearching(true)
+    setListError("")
     try {
       const res = await fetch(`/api/staff/customers?q=${encodeURIComponent(q)}`)
       const data = await res.json()
+      if (!res.ok) {
+        setResults([])
+        setListError(data.error || `Error del servidor (${res.status})`)
+        return
+      }
       setResults(data.customers || [])
-    } catch {
+      setBrowsing(Boolean(data.browsing))
+    } catch (e) {
       setResults([])
+      setListError("No se pudo conectar con el servidor.")
     } finally {
       setSearching(false)
+      setLoadingList(false)
     }
   }
 
@@ -207,8 +226,8 @@ export default function StaffPage() {
       if (res.ok) {
         if (data.created) {
           setQuery("")
-          setResults([])
           setToast(`@${usuario_ig} creado con 1 punto ✅`)
+          runSearch("")
         } else {
           afterMutation(data.customer, `+1 punto a @${usuario_ig} ✅`)
         }
@@ -368,7 +387,7 @@ export default function StaffPage() {
             <input
               ref={searchInputRef}
               type="text"
-              placeholder="Buscar por usuario de Instagram..."
+              placeholder="Buscar cliente (o dejalo vacio para ver todos)..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleSearchKeyDown}
@@ -436,6 +455,29 @@ export default function StaffPage() {
 
       {tab === "search" && (
       <div className="px-4 py-4 space-y-3">
+        {listError && (
+          <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4">
+            <p className="text-xs font-black uppercase tracking-widest text-red-400 mb-1">
+              Error al cargar clientes
+            </p>
+            <p className="text-xs text-red-200/80 break-words">{listError}</p>
+          </div>
+        )}
+
+        {!loadingList && results.length > 0 && (
+          <p className="px-1 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+            {browsing
+              ? `Todos los clientes (${results.length}) · ordenados por puntos`
+              : `${results.length} resultado${results.length === 1 ? "" : "s"} para "${query.trim()}"`}
+          </p>
+        )}
+
+        {loadingList && (
+          <div className="flex justify-center py-10">
+            <Loader2 className="h-6 w-6 animate-spin text-white/40" />
+          </div>
+        )}
+
         {results.map((c) => (
           <div
             key={c.usuario_ig}
@@ -498,9 +540,15 @@ export default function StaffPage() {
           </button>
         )}
 
-        {query.trim().length < 2 && (
+        {!listError && !loadingList && !searching && results.length === 0 && query.trim().length > 0 && !showCreateNew && (
           <p className="mt-10 text-center text-xs text-zinc-600">
-            Escribe al menos 2 letras del usuario de Instagram del cliente.
+            Sin resultados para "{query.trim()}". Escribe al menos 3 letras para crear un cliente nuevo.
+          </p>
+        )}
+
+        {!listError && !loadingList && !searching && results.length === 0 && query.trim().length === 0 && (
+          <p className="mt-10 text-center text-xs text-zinc-600">
+            Todavia no hay clientes registrados. En cuanto alguien active su BOTA-Card, va a aparecer aqui.
           </p>
         )}
       </div>
