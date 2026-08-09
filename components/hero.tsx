@@ -1,108 +1,84 @@
 "use client"
 import { useEffect, useState } from "react"
-import Image from "next/image"
 
 interface HeroProps {
   onMenuClick: () => void
 }
 
-// Productos destacados para el rotador. Fotos con fondo negro puro:
-// con mix-blend-mode "screen" el negro se vuelve transparente y el
-// producto queda flotando sobre el color de fondo — sin editar imagenes.
-const ROTATOR = [
-  { img: "/images/4.webp",  name: "Cacahuate Habanero", glow: "rgba(245,130,10,0.32)" },
-  { img: "/images/6.webp",  name: "Chips de Betabel",   glow: "rgba(232,52,26,0.30)"  },
-  { img: "/images/9.webp",  name: "Gomitas Gusano",     glow: "rgba(236,72,153,0.26)" },
-  { img: "/images/14.webp", name: "Papas Fuego",        glow: "rgba(229,62,62,0.32)"  },
-  { img: "/images/69.webp", name: "Chamoyada de Mango", glow: "rgba(245,130,10,0.26)" },
+// ── Frases rotativas del hero ────────────────────────────────────────
+// Cortas (una linea) para que la animacion no ocupe espacio de mas.
+// Cada una lleva su propio tono de resplandor — siempre dentro de la
+// paleta de marca (rojos/naranjas), para verse profesional y coherente.
+const PHRASES: { text: string; glow: string }[] = [
+  { text: "El antojo que no puede esperar",     glow: "rgba(229,62,62,0.32)"  },
+  { text: "Se acaba rapido. Siempre.",           glow: "rgba(245,130,10,0.30)" },
+  { text: "Picante, crocante, imposible de soltar", glow: "rgba(229,62,62,0.28)" },
+  { text: "Tu break sabe mejor aqui",     glow: "rgba(251,146,60,0.30)" },
+  { text: "La bolsa nunca alcanza",              glow: "rgba(229,62,62,0.32)"  },
+  { text: "El sabor que piden dos veces",        glow: "rgba(245,130,10,0.28)" },
+  { text: "Antojo detectado. Resuelvelo ya",     glow: "rgba(229,62,62,0.30)"  },
+  { text: "De la mochila a la boca en segundos", glow: "rgba(251,146,60,0.28)" },
 ]
 
-const ROTATE_MS = 2800
+const ROTATE_MS = 2600
 
 export function Hero({ onMenuClick }: HeroProps) {
   const [index, setIndex] = useState(0)
 
   useEffect(() => {
-    const id = setInterval(() => setIndex(i => (i + 1) % ROTATOR.length), ROTATE_MS)
+    const id = setInterval(() => setIndex(i => (i + 1) % PHRASES.length), ROTATE_MS)
     return () => clearInterval(id)
   }, [])
 
-  const leftIdx  = (index + ROTATOR.length - 1) % ROTATOR.length
-  const rightIdx = (index + 1) % ROTATOR.length
+  const prevIndex = (index - 1 + PHRASES.length) % PHRASES.length
 
   return (
     <section
-      style={{ position: "relative", minHeight: "92vh", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "4rem 1.25rem 3rem", overflow: "hidden" }}
+      style={{ position: "relative", minHeight: "82vh", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "4rem 1.25rem 3rem", overflow: "hidden" }}
     >
-      {/* ── Glow de fondo — transiciona de color segun el producto activo (una sola propiedad, muy barato) ── */}
+      {/* ── Glow de fondo — transiciona de color con cada frase (una sola propiedad, muy barato) ── */}
       <div
         aria-hidden="true"
         style={{
           position: "absolute",
           inset: 0,
           pointerEvents: "none",
-          background: "radial-gradient(ellipse 62% 56% at 50% 44%, " + ROTATOR[index].glow + ", transparent 72%)",
+          background: "radial-gradient(ellipse 60% 46% at 50% 42%, " + PHRASES[index].glow + ", transparent 72%)",
           transition: "background 1.1s ease",
         }}
       />
-      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 85% 85% at 50% 50%, transparent 46%, rgba(10,10,10,0.86) 100%)", pointerEvents: "none" }} />
 
       {/* ── CONTENT ── */}
-      <div style={{ position: "relative", zIndex: 10, maxWidth: 820, width: "100%" }}>
+      <div style={{ position: "relative", zIndex: 10, maxWidth: 760, width: "100%" }}>
 
         {/* Eyebrow */}
         <div
           className="animate-fade-in"
-          style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(229,62,62,0.1)", border: "1px solid rgba(229,62,62,0.28)", borderRadius: 999, padding: "6px 16px", fontSize: ".7rem", fontWeight: 800, letterSpacing: ".18em", textTransform: "uppercase", color: "#E53E3E", marginBottom: "1.5rem", animationDelay: "80ms", animationFillMode: "both" }}
+          style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(229,62,62,0.1)", border: "1px solid rgba(229,62,62,0.28)", borderRadius: 999, padding: "6px 16px", fontSize: ".7rem", fontWeight: 800, letterSpacing: ".18em", textTransform: "uppercase", color: "#E53E3E", marginBottom: "1.75rem", animationDelay: "80ms", animationFillMode: "both" }}
         >
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#E53E3E", display: "inline-block", animation: "pulseDot 1.5s ease-in-out infinite" }} />
           Leon, Gto. · La Salle Bajio
         </div>
 
-        {/* ── ROTADOR DE PRODUCTOS — protagonista visual ── */}
-        <div
-          className="animate-fade-in"
-          style={{ position: "relative", width: "clamp(230px,50vw,360px)", aspectRatio: "1/1", margin: "0 auto 1.25rem", animationDelay: "140ms", animationFillMode: "both" }}
-        >
-          {/* Peek lateral izquierdo */}
-          <div className="hero-side-peek hero-side-peek-l">
-            <Image src={ROTATOR[leftIdx].img} alt="" fill sizes="200px" className="hero-rotator-img-el" style={{ objectFit: "contain" }} />
-          </div>
-          {/* Peek lateral derecho */}
-          <div className="hero-side-peek hero-side-peek-r">
-            <Image src={ROTATOR[rightIdx].img} alt="" fill sizes="200px" className="hero-rotator-img-el" style={{ objectFit: "contain" }} />
-          </div>
-
-          {/* Producto central — crossfade entre todos, sin recargar ni parpadear */}
-          {ROTATOR.map((p, i) => (
-            <div key={p.img} className={"hero-rotator-stage" + (i === index ? " active" : "")}>
-              <Image
-                src={p.img}
-                alt={p.name}
-                fill
-                sizes="360px"
-                priority={i === 0}
-                className="hero-rotator-img-el"
-                style={{ objectFit: "contain" }}
-              />
-            </div>
+        {/* ── FRASE ANIMADA — protagonista visual, estilo iOS (spring + blur) ── */}
+        <div className="hero-phrase-stage animate-fade-in" style={{ animationDelay: "140ms", animationFillMode: "both" }}>
+          {PHRASES.map((p, i) => (
+            <span
+              key={p.text}
+              className={"hero-phrase-item" + (i === index ? " active" : i === prevIndex ? " prev" : "")}
+            >
+              {p.text}
+            </span>
           ))}
         </div>
 
-        {/* Nombre del producto activo */}
-        <div style={{ height: 20, marginBottom: "1.75rem" }}>
-          <span key={index} className="animate-fade-in" style={{ fontSize: ".72rem", fontWeight: 800, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", animationDuration: "0.5s" }}>
-            {ROTATOR[index].name}
-          </span>
-        </div>
-
-        {/* Headline — mas compacta, ya no compite con la animacion */}
-        <h1
+        {/* Wordmark chico debajo — la marca siempre visible, sin competir */}
+        <div
           className="animate-fade-in-up"
-          style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: "clamp(2.6rem,8vw,4.5rem)", lineHeight: .95, letterSpacing: ".02em", color: "white", marginBottom: "0.9rem", animationDelay: "220ms", animationFillMode: "both" }}
+          style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: "1.1rem", letterSpacing: ".22em", color: "rgba(255,255,255,0.3)", marginBottom: "1.75rem", animationDelay: "220ms", animationFillMode: "both" }}
         >
-          Snacks Premium <span style={{ color: "#E53E3E" }}>Hechos para Compartir</span>
-        </h1>
+          BOTA<span style={{ color: "#E53E3E" }}>-</span>NA · SNACKS PREMIUM
+        </div>
 
         {/* Sub */}
         <p
