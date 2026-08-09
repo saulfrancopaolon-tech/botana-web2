@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react"
 import { CATEGORIES, PRODUCTS } from "@/lib/products"
 import type { Product } from "@/lib/products"
 import { CartProvider } from "@/components/cart-context"
-import { Marquee } from "@/components/marquee"
 import { NavBar } from "@/components/navbar"
 import { Hero } from "@/components/hero"
 import { CategoryTabs } from "@/components/category-tabs"
@@ -79,7 +78,6 @@ export default function Page() {
 
   return (
     <CartProvider>
-      <Marquee />
       <NavBar
         onCartOpen={() => setCartOpen(true)}
         onLoyaltyOpen={() => setLoyaltyOpen(true)}
