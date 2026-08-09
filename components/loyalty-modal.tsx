@@ -1,6 +1,5 @@
 "use client"
 import { useState, useEffect, useRef } from "react"
-import { supabase } from "@/lib/supabase"
 
 const WA = "524774950232"
 const STORAGE_KEY = "botana_card"
@@ -34,63 +33,37 @@ function clearCard() {
 }
 
 async function fetchRemoteCard(username: string): Promise<{ points: number; verified: boolean } | null> {
-  if (!supabase) {
-    console.warn("[BOTANA] Supabase no esta configurado - revisa las variables de entorno")
-    return null
-  }
   try {
-    console.log("[BOTANA] Buscando usuario en Supabase:", username)
-    const { data, error } = await supabase
-      .from("clientes_leales")
-      .select("puntos, is_verified")
-      .eq("usuario_ig", username)
-      .single()
-    if (error) {
-      console.warn("[BOTANA] Error al leer Supabase:", error.code, error.message)
+    const res = await fetch(`/api/card?usuario_ig=${encodeURIComponent(username)}`)
+    const data = await res.json()
+    if (!res.ok || !data.customer) {
       return null
     }
-    if (!data) {
-      console.log("[BOTANA] Usuario no encontrado en Supabase")
-      return null
-    }
-    const row = data as { puntos: number; is_verified: boolean }
-    console.log("[BOTANA] Usuario encontrado - puntos:", row.puntos, "verificado:", row.is_verified)
+    const row = data.customer as { puntos: number; is_verified: boolean }
     return { points: row.puntos ?? 0, verified: row.is_verified ?? false }
   } catch (e) {
-    console.error("[BOTANA] Excepcion al leer Supabase:", e)
+    console.error("[BOTANA] Excepcion al leer tarjeta:", e)
     return null
   }
 }
 
-// Solo marca is_verified=true. La columna "puntos" ya no se puede escribir
-// desde el navegador (queda bloqueada en Supabase); los puntos ahora solo
-// los suma el backend a través de /api/redeem, cuando se canjea un código
-// o QR generado en el panel de staff.
+// Activa (o crea) la tarjeta del cliente. Esto pasa por el servidor
+// (/api/activate), que usa la service role key y por lo tanto SIEMPRE
+// puede escribir en Supabase — no depende de que las politicas RLS
+// permitan escritura anonima desde el navegador.
 async function markVerifiedRemote(username: string) {
-  if (!supabase) return
   try {
-    const { data: updatedRows, error: updateError } = await supabase
-      .from("clientes_leales")
-      .update({ is_verified: true })
-      .eq("usuario_ig", username)
-      .select("usuario_ig")
-
-    if (updateError) {
-      console.warn("[BOTANA] Error al verificar en Supabase:", updateError.message)
-      return
-    }
-
-    // Si no existía ninguna fila con ese usuario, se crea una nueva en 0 puntos
-    if (!updatedRows || updatedRows.length === 0) {
-      const { error: insertError } = await supabase
-        .from("clientes_leales")
-        .insert([{ usuario_ig: username, puntos: 0, is_verified: true }])
-      if (insertError) {
-        console.warn("[BOTANA] Error al crear usuario en Supabase:", insertError.message)
-      }
+    const res = await fetch("/api/activate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ usuario_ig: username }),
+    })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      console.warn("[BOTANA] Error al activar:", data.error)
     }
   } catch (e) {
-    console.error("[BOTANA] Excepcion al verificar en Supabase:", e)
+    console.error("[BOTANA] Excepcion al activar:", e)
   }
 }
 
