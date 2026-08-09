@@ -271,50 +271,20 @@ button:active:not(:disabled), a:active {
 }
 
 /* ══════════════════════════════════════════
-   HERO — FRASE ANIMADA (estilo iOS: spring + blur)
-   Solo opacity/transform/filter (compositable).
-   Altura fija = no salta el layout al cambiar texto.
+   HERO — GLOW detras del logo
+   Una sola propiedad (opacity), frecuencia baja: costo casi nulo.
 ══════════════════════════════════════════ */
-.hero-phrase-stage {
-  position: relative;
-  height: clamp(3.4rem, 15vw, 4.4rem);
-  max-width: 640px;
-  margin: 0 auto 0.85rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-.hero-phrase-item {
+.hero-glow-pulse {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 0.5rem;
-  font-family: var(--font-head);
-  font-size: clamp(1.3rem, 5vw, 2.5rem);
-  line-height: 1.05;
-  letter-spacing: .01em;
-  color: white;
-  white-space: normal;
-  opacity: 0;
-  transform: translateY(22px) scale(.96);
-  filter: blur(10px);
-  transition: opacity 0.55s cubic-bezier(.34,1.56,.64,1),
-              transform 0.55s cubic-bezier(.34,1.56,.64,1),
-              filter 0.45s ease;
-  will-change: opacity, transform, filter;
+  pointer-events: none;
+  background: radial-gradient(ellipse 52% 42% at 50% 50%, rgba(229,62,62,0.24), transparent 70%);
+  animation: heroGlowPulse 5s ease-in-out infinite;
+  will-change: opacity;
 }
-.hero-phrase-item.active {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  filter: blur(0);
-}
-.hero-phrase-item.prev {
-  opacity: 0;
-  transform: translateY(-22px) scale(.96);
-  filter: blur(10px);
+@keyframes heroGlowPulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
 }
 
 /* ══════════════════════════════════════════
