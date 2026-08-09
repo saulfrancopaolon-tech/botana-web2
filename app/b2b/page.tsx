@@ -1,7 +1,6 @@
 "use client"
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
-import { Marquee } from "@/components/marquee"
 import { NavBar } from "@/components/navbar"
 import { EventModal } from "@/components/event-modal"
 
@@ -222,7 +221,6 @@ export default function B2BPage() {
       <div className="min-h-screen" style={{ background: "#0A0A0A", color: "#FAFAFA", fontFamily: "'DM Sans',sans-serif", WebkitFontSmoothing: "antialiased" }}>
 
         {/* ── NAV compartido — el mismo componente que la tienda, para que se sienta como la misma pagina ── */}
-        <Marquee />
         <NavBar onCartOpen={() => {}} onLoyaltyOpen={() => {}} />
 
         {/* ── HERO ── */}
