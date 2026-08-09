@@ -1,546 +1,232 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import { QRCodeSVG } from "qrcode.react"
-import {
-  CheckCircle2,
-  Loader2,
-  LogOut,
-  Plus,
-  QrCode,
-  RotateCcw,
-  Search,
-  Undo2,
-  UserPlus,
-} from "lucide-react"
+import { useState, useEffect, useCallback } from "react"
+import { CATEGORIES, PRODUCTS } from "@/lib/products"
+import type { Product } from "@/lib/products"
+import { CartProvider } from "@/components/cart-context"
+import { NavBar } from "@/components/navbar"
+import { Hero } from "@/components/hero"
+import { CategoryTabs } from "@/components/category-tabs"
+import { ProductGrid } from "@/components/product-grid"
+import { ProductList } from "@/components/product-list"
+import { CartModal } from "@/components/cart-modal"
+import { LoyaltyModal } from "@/components/loyalty-modal"
+import { Toast, LoyaltyPromo } from "@/components/ui-components"
 
-interface Customer {
-  usuario_ig: string
-  puntos: number
-  is_verified: boolean
-}
+const SHEETS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSQKeuTywAmniswIKciTQS0hI-fMIm4l0DRiGATcUpA_eff42eVS6171CngdgtGphWUADrllm5dcxe1/pub?output=csv"
 
-const CODE_TTL_SECONDS = 180
-
-export default function StaffPage() {
-  const [checkingSession, setCheckingSession] = useState(true)
-  const [authed, setAuthed] = useState(false)
-  const [pin, setPin] = useState("")
-  const [pinError, setPinError] = useState("")
-  const [pinLoading, setPinLoading] = useState(false)
-  const [tab, setTab] = useState<"qr" | "search">("qr")
-
-  const [query, setQuery] = useState("")
-  const [results, setResults] = useState<Customer[]>([])
-  const [browsing, setBrowsing] = useState(true)
-  const [loadingList, setLoadingList] = useState(false)
-
-  // --- Estado de la pestaña QR / Código ---
-  const [qrCode, setQrCode] = useState("")
-  const [qrExpiresAt, setQrExpiresAt] = useState<number | null>(null)
-  const [qrLoading, setQrLoading] = useState(false)
-  const [qrUsedBy, setQrUsedBy] = useState<string | null>(null)
-  const [qrSecondsLeft, setQrSecondsLeft] = useState(CODE_TTL_SECONDS)
-  const [origin, setOrigin] = useState("")
-  const [searching, setSearching] = useState(false)
-  const [busyUser, setBusyUser] = useState<string | null>(null)
-  const [toast, setToast] = useState("")
-  const searchInputRef = useRef<HTMLInputElement>(null)
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+export default function Page() {
+  const [activeCat, setActiveCat] = useState("Todos")
+  const [stockData, setStockData] = useState<Record<number, boolean>>({})
+  const [cartOpen, setCartOpen] = useState(false)
+  const [loyaltyOpen, setLoyaltyOpen] = useState(false)
+  const [toast, setToast] = useState({ msg: "", show: false })
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null)
+  const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(null)
 
   useEffect(() => {
-    fetch("/api/staff/session")
-      .then((r) => r.json())
-      .then((d) => setAuthed(Boolean(d.authed)))
-      .catch(() => setAuthed(false))
-      .finally(() => setCheckingSession(false))
+    fetch(SHEETS_CSV)
+      .then(r => r.text())
+      .then(csv => {
+        const stock: Record<number, boolean> = {}
+        csv.split("\n").slice(1).forEach(row => {
+          const cols = row.split(",")
+          if (cols.length >= 3) {
+            const id = parseInt(cols[0].trim())
+            if (!isNaN(id)) stock[id] = cols[2].trim().toUpperCase() === "SI"
+          }
+        })
+        setStockData(stock)
+      })
+      .catch(() => {})
   }, [])
 
-  useEffect(() => {
-    if (!toast) return
-    const t = setTimeout(() => setToast(""), 2200)
-    return () => clearTimeout(t)
-  }, [toast])
-
-  useEffect(() => {
-    if (authed) {
-      setTimeout(() => searchInputRef.current?.focus(), 50)
-    }
-  }, [authed])
-
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => runSearch(query), 250)
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query])
-
-  // Carga la lista completa de clientes en cuanto entras a la pestaña
-  // "Buscar", asi no dependes de recordar el usuario exacto de alguien.
-  useEffect(() => {
-    if (authed && tab === "search" && results.length === 0 && !query) {
-      runSearch("")
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authed, tab])
-
-  useEffect(() => {
-    if (typeof window !== "undefined") setOrigin(window.location.origin)
+  const showToast = useCallback((p: Product) => {
+    setToast({ msg: p.name + " agregado al carrito", show: true })
+    setTimeout(() => setToast(t => ({ ...t, show: false })), 2800)
   }, [])
 
-  // Genera un código nuevo automáticamente al entrar a la pestaña QR
-  useEffect(() => {
-    if (authed && tab === "qr" && !qrCode) {
-      generateQrCode()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authed, tab])
+  const products: Product[] = PRODUCTS.map(p => ({
+    ...p,
+    inStock: stockData[p.id] !== undefined ? stockData[p.id] : true,
+  }))
 
-  // Cuenta regresiva + auto-regenerar cuando expira
-  useEffect(() => {
-    if (!qrCode || qrUsedBy) return
-    const interval = setInterval(() => {
-      if (!qrExpiresAt) return
-      const secondsLeft = Math.max(0, Math.round((qrExpiresAt - Date.now()) / 1000))
-      setQrSecondsLeft(secondsLeft)
-      if (secondsLeft <= 0) {
-        generateQrCode()
-      }
-    }, 1000)
-    return () => clearInterval(interval)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [qrCode, qrExpiresAt, qrUsedBy])
+  const filtered = activeCat === "Todos"
+    ? products
+    : products.filter(p => p.cat === activeCat)
 
-  // Sondea cada 2s si el cliente ya escaneó/canjeó el código
-  useEffect(() => {
-    if (!qrCode || qrUsedBy) return
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/staff/code-status?code=${qrCode}`)
-        const data = await res.json()
-        if (data.used) {
-          setQrUsedBy(data.used_by || "cliente")
-          setToast(`+1 punto a @${data.used_by} ✅`)
-          setTimeout(() => generateQrCode(), 2500)
-        }
-      } catch {
-        // silencioso: se reintenta en el siguiente ciclo
-      }
-    }, 2000)
-    return () => clearInterval(interval)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [qrCode, qrUsedBy])
+  // Todos = carousel grid, categoria especifica = lista acordeon
+  const showGrid = activeCat === "Todos"
 
-  const generateQrCode = async () => {
-    setQrLoading(true)
-    setQrUsedBy(null)
-    try {
-      const res = await fetch("/api/staff/generate-code", { method: "POST" })
-      const data = await res.json()
-      if (res.ok) {
-        setQrCode(data.code)
-        setQrExpiresAt(new Date(data.expiresAt).getTime())
-        setQrSecondsLeft(CODE_TTL_SECONDS)
-      } else {
-        setToast(data.error || "Error al generar código")
-      }
-    } catch {
-      setToast("Error de conexión")
-    } finally {
-      setQrLoading(false)
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null)
+    setTouchStart({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY })
+  }
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY })
+  }
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    const dx = touchStart.x - touchEnd.x
+    const dy = touchStart.y - touchEnd.y
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 70) {
+      const idx = CATEGORIES.indexOf(activeCat)
+      if (dx > 0 && idx < CATEGORIES.length - 1) setActiveCat(CATEGORIES[idx + 1])
+      else if (dx < 0 && idx > 0) setActiveCat(CATEGORIES[idx - 1])
     }
   }
-
-  const runSearch = async (q: string) => {
-    if (q.trim().length === 0) setLoadingList(true)
-    setSearching(true)
-    try {
-      const res = await fetch(`/api/staff/customers?q=${encodeURIComponent(q)}`)
-      const data = await res.json()
-      setResults(data.customers || [])
-      setBrowsing(Boolean(data.browsing))
-    } catch {
-      setResults([])
-    } finally {
-      setSearching(false)
-      setLoadingList(false)
-    }
-  }
-
-  const handlePinSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setPinLoading(true)
-    setPinError("")
-    try {
-      const res = await fetch("/api/staff/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin }),
-      })
-      const data = await res.json()
-      if (res.ok) {
-        setAuthed(true)
-        setPin("")
-      } else {
-        setPinError(data.error || "PIN incorrecto.")
-      }
-    } catch {
-      setPinError("Error de conexión.")
-    } finally {
-      setPinLoading(false)
-    }
-  }
-
-  const handleLogout = async () => {
-    await fetch("/api/staff/logout", { method: "POST" }).catch(() => {})
-    setAuthed(false)
-  }
-
-  const afterMutation = (customer: Customer, message: string) => {
-    setResults((prev) =>
-      prev.map((c) => (c.usuario_ig === customer.usuario_ig ? customer : c))
-    )
-    setToast(message)
-  }
-
-  const addPoint = async (usuario_ig: string) => {
-    setBusyUser(usuario_ig)
-    try {
-      const res = await fetch("/api/staff/add-point", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usuario_ig }),
-      })
-      const data = await res.json()
-      if (res.ok) {
-        if (data.created) {
-          setQuery("")
-          setToast(`@${usuario_ig} creado con 1 punto ✅`)
-          runSearch("")
-        } else {
-          afterMutation(data.customer, `+1 punto a @${usuario_ig} ✅`)
-        }
-      } else {
-        setToast(data.error || "Error al sumar punto")
-      }
-    } catch {
-      setToast("Error de conexión")
-    } finally {
-      setBusyUser(null)
-      searchInputRef.current?.focus()
-    }
-  }
-
-  const undoPoint = async (usuario_ig: string) => {
-    setBusyUser(usuario_ig)
-    try {
-      const res = await fetch("/api/staff/undo-point", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usuario_ig }),
-      })
-      const data = await res.json()
-      if (res.ok) {
-        afterMutation(data.customer, `Punto deshecho para @${usuario_ig}`)
-      } else {
-        setToast(data.error || "Error al deshacer")
-      }
-    } catch {
-      setToast("Error de conexión")
-    } finally {
-      setBusyUser(null)
-    }
-  }
-
-  const resetCard = async (usuario_ig: string) => {
-    if (!window.confirm(`¿Reiniciar la tarjeta de @${usuario_ig} a 0 puntos?`)) return
-    setBusyUser(usuario_ig)
-    try {
-      const res = await fetch("/api/staff/reset", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usuario_ig }),
-      })
-      const data = await res.json()
-      if (res.ok) {
-        afterMutation(data.customer, `Tarjeta de @${usuario_ig} reiniciada`)
-      } else {
-        setToast(data.error || "Error al reiniciar")
-      }
-    } catch {
-      setToast("Error de conexión")
-    } finally {
-      setBusyUser(null)
-    }
-  }
-
-  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      const cleanQuery = query.trim().toLowerCase().replace("@", "")
-      if (results.length === 1) {
-        addPoint(results[0].usuario_ig)
-      } else if (results.length === 0 && cleanQuery.length >= 3 && !searching) {
-        addPoint(cleanQuery)
-      }
-    }
-  }
-
-  if (checkingSession) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0D0907]">
-        <Loader2 className="h-6 w-6 animate-spin text-white/40" />
-      </div>
-    )
-  }
-
-  if (!authed) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0D0907] p-4">
-        <form
-          onSubmit={handlePinSubmit}
-          className="w-full max-w-xs rounded-[2rem] border border-white/10 bg-[#1A1209] p-6 shadow-2xl"
-        >
-          <h1 className="text-center text-lg font-black uppercase tracking-tight text-white">
-            Panel de Caja
-          </h1>
-          <p className="mt-1 text-center text-xs text-zinc-400">Ingresa el PIN de staff</p>
-          <input
-            type="password"
-            inputMode="numeric"
-            autoFocus
-            placeholder="PIN"
-            value={pin}
-            onChange={(e) => setPin(e.target.value)}
-            className="mt-6 w-full rounded-xl bg-white/5 border border-white/10 px-4 py-4 text-center text-2xl tracking-[0.4em] text-white focus:outline-none focus:ring-2 focus:ring-[#E53E3E]"
-          />
-          {pinError && (
-            <p className="mt-3 text-center text-xs font-bold text-red-400">{pinError}</p>
-          )}
-          <button
-            type="submit"
-            disabled={pinLoading || !pin}
-            className="mt-6 w-full rounded-xl bg-gradient-to-r from-[#E53E3E] to-[#F97316] py-4 font-black text-white active:scale-95 disabled:opacity-50"
-          >
-            {pinLoading ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : "ENTRAR"}
-          </button>
-        </form>
-      </div>
-    )
-  }
-
-  const cleanQuery = query.trim().toLowerCase().replace("@", "")
-  const showCreateNew =
-    !searching && cleanQuery.length >= 3 && results.length === 0
-
-  const qrMinutes = Math.floor(qrSecondsLeft / 60)
-  const qrSeconds = qrSecondsLeft % 60
-  const qrUrl = origin && qrCode ? `${origin}/canjear?code=${qrCode}` : ""
 
   return (
-    <div className="min-h-screen bg-[#0D0907] pb-24">
-      <div className="sticky top-0 z-10 border-b border-white/10 bg-[#0D0907]/95 backdrop-blur px-4 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-sm font-black uppercase tracking-widest text-white">
-            Panel de Caja
-          </h1>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-1 text-[10px] font-bold uppercase text-zinc-500 hover:text-zinc-300"
-          >
-            <LogOut className="h-3.5 w-3.5" /> Salir
-          </button>
+    <CartProvider>
+      <NavBar
+        onCartOpen={() => setCartOpen(true)}
+        onLoyaltyOpen={() => setLoyaltyOpen(true)}
+      />
+
+      {/* ── HERO: protagonista de la pagina ── */}
+      <Hero
+        onMenuClick={() => document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" })}
+      />
+
+      {/* ── MENU: el producto es lo primero que se ve despues del hero ── */}
+      <div id="menu" className="animate-fade-in">
+        {/* Sticky category tabs */}
+        <div className="sticky top-14 z-40 bg-[#0A0A0A]/95 backdrop-blur-xl border-b border-white/5">
+          <CategoryTabs
+            categories={CATEGORIES}
+            active={activeCat}
+            onSelect={cat => {
+              setActiveCat(cat)
+              document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" })
+            }}
+          />
         </div>
 
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <button
-            onClick={() => setTab("qr")}
-            className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-xs font-black uppercase transition-colors ${
-              tab === "qr" ? "bg-white text-black" : "bg-white/5 text-zinc-400 border border-white/10"
-            }`}
-          >
-            <QrCode className="h-3.5 w-3.5" /> QR / Código
-          </button>
-          <button
-            onClick={() => setTab("search")}
-            className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-xs font-black uppercase transition-colors ${
-              tab === "search" ? "bg-white text-black" : "bg-white/5 text-zinc-400 border border-white/10"
-            }`}
-          >
-            <Search className="h-3.5 w-3.5" /> Buscar
-          </button>
-        </div>
-
-        {tab === "search" && (
-          <div className="relative mt-3">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-            <input
-              ref={searchInputRef}
-              type="text"
-              placeholder="Buscar cliente (o dejalo vacio para ver todos)..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={handleSearchKeyDown}
-              className="w-full rounded-xl bg-white/5 border border-white/10 py-3 pl-10 pr-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#E53E3E]"
-            />
-            {searching && (
-              <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-zinc-500" />
-            )}
-          </div>
-        )}
-      </div>
-
-      {tab === "qr" && (
-        <div className="flex flex-col items-center px-4 py-8">
-          {qrUsedBy ? (
-            <div className="flex flex-col items-center">
-              <CheckCircle2 className="h-16 w-16 text-green-400" />
-              <p className="mt-4 text-center text-sm font-black text-white">
-                +1 punto a @{qrUsedBy}
-              </p>
-              <p className="mt-1 text-[10px] uppercase tracking-widest text-zinc-500">
-                Generando el siguiente código...
-              </p>
-            </div>
-          ) : qrCode ? (
-            <>
-              <div className="rounded-3xl bg-white p-5 shadow-2xl">
-                {qrUrl ? (
-                  <QRCodeSVG value={qrUrl} size={220} level="M" />
-                ) : (
-                  <div className="flex h-[220px] w-[220px] items-center justify-center">
-                    <Loader2 className="h-6 w-6 animate-spin text-zinc-400" />
-                  </div>
-                )}
-              </div>
-
-              <p className="mt-5 text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">
-                O escribe este código
-              </p>
-              <p className="mt-1 text-3xl font-black tracking-[0.3em] text-white">{qrCode}</p>
-
-              <p className="mt-3 text-xs font-bold text-zinc-500">
-                Expira en {qrMinutes}:{qrSeconds.toString().padStart(2, "0")}
-              </p>
-
-              <button
-                onClick={generateQrCode}
-                disabled={qrLoading}
-                className="mt-6 flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-[10px] font-bold uppercase text-zinc-300 active:scale-95 disabled:opacity-50"
-              >
-                {qrLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <QrCode className="h-3.5 w-3.5" />}
-                Generar nuevo código
-              </button>
-
-              <p className="mt-8 max-w-xs text-center text-[10px] leading-relaxed text-zinc-600">
-                El cliente escanea el QR con la cámara de su celular y su punto se suma solo.
-                Si no puede escanear, dile el código de arriba para que lo escriba en su tarjeta.
-              </p>
-            </>
-          ) : (
-            <Loader2 className="mt-10 h-8 w-8 animate-spin text-white/40" />
-          )}
-        </div>
-      )}
-
-      {tab === "search" && (
-      <div className="px-4 py-4 space-y-3">
-        {!loadingList && results.length > 0 && (
-          <p className="px-1 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-            {browsing
-              ? `Todos los clientes (${results.length}) · ordenados por puntos`
-              : `${results.length} resultado${results.length === 1 ? "" : "s"} para "${query.trim()}"`}
-          </p>
-        )}
-
-        {loadingList && (
-          <div className="flex justify-center py-10">
-            <Loader2 className="h-6 w-6 animate-spin text-white/40" />
-          </div>
-        )}
-
-        {results.map((c) => (
+        {/* Category header for non-Todos views */}
+        {activeCat !== "Todos" && (
           <div
-            key={c.usuario_ig}
-            className="rounded-2xl border border-white/10 bg-[#1A1209] p-4"
+            className="px-4 sm:px-6 pt-5 pb-3"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
           >
-            <div className="flex items-center justify-between">
+            <div className="max-w-7xl mx-auto flex items-center justify-between">
               <div>
-                <p className="text-sm font-black text-white">@{c.usuario_ig}</p>
-                <p className="text-[10px] uppercase tracking-widest text-zinc-500">
-                  {c.puntos}/10 puntos {c.is_verified ? "· Verificado" : "· Sin activar"}
+                <h2 className="font-head text-[2rem] leading-none text-white">{activeCat}</h2>
+                <p className="text-[.7rem] text-white/30 mt-0.5">
+                  {filtered.length} productos
+                  <span className="ml-2 text-white/20">Desliza para cambiar categoria</span>
                 </p>
               </div>
-              <button
-                onClick={() => addPoint(c.usuario_ig)}
-                disabled={busyUser === c.usuario_ig || c.puntos >= 10}
-                className="flex items-center gap-1 rounded-xl bg-gradient-to-r from-[#F97316] to-[#E53E3E] px-4 py-3 text-xs font-black text-white active:scale-95 disabled:opacity-40"
-              >
-                {busyUser === c.usuario_ig ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <>
-                    <Plus className="h-4 w-4" /> PUNTO
-                  </>
-                )}
-              </button>
-            </div>
-
-            <div className="mt-3 flex gap-2">
-              <button
-                onClick={() => undoPoint(c.usuario_ig)}
-                disabled={busyUser === c.usuario_ig || c.puntos <= 0}
-                className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-white/10 bg-white/5 py-2 text-[10px] font-bold uppercase text-zinc-300 disabled:opacity-30"
-              >
-                <Undo2 className="h-3 w-3" /> Deshacer
-              </button>
-              <button
-                onClick={() => resetCard(c.usuario_ig)}
-                disabled={busyUser === c.usuario_ig}
-                className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-white/10 bg-white/5 py-2 text-[10px] font-bold uppercase text-zinc-300 disabled:opacity-30"
-              >
-                <RotateCcw className="h-3 w-3" /> Reiniciar
-              </button>
+              {/* Swipe hint dots */}
+              <div className="flex gap-1">
+                {CATEGORIES.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCat(cat)}
+                    className={
+                      "transition-all rounded-full " +
+                      (cat === activeCat
+                        ? "w-4 h-1.5 bg-[#E53E3E]"
+                        : "w-1.5 h-1.5 bg-white/20")
+                    }
+                  />
+                ))}
+              </div>
             </div>
           </div>
-        ))}
-
-        {showCreateNew && (
-          <button
-            onClick={() => addPoint(cleanQuery)}
-            disabled={busyUser === cleanQuery}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-white/20 bg-white/5 py-5 text-xs font-bold uppercase text-zinc-300 active:scale-95"
-          >
-            {busyUser === cleanQuery ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <>
-                <UserPlus className="h-4 w-4" /> Crear @{cleanQuery} y sumar 1 punto
-              </>
-            )}
-          </button>
         )}
 
-        {!loadingList && !searching && results.length === 0 && query.trim().length > 0 && !showCreateNew && (
-          <p className="mt-10 text-center text-xs text-zinc-600">
-            Sin resultados para "{query.trim()}". Escribe al menos 3 letras para crear un cliente nuevo.
-          </p>
-        )}
-
-        {!loadingList && !searching && results.length === 0 && query.trim().length === 0 && (
-          <p className="mt-10 text-center text-xs text-zinc-600">
-            Todavia no hay clientes registrados. En cuanto alguien active su BOTA-Card, va a aparecer aqui.
-          </p>
-        )}
+        {/* Products */}
+        <section
+          className="max-w-7xl mx-auto px-4 sm:px-6 pb-6 min-h-[60vh]"
+          style={{ paddingTop: activeCat === "Todos" ? "1.5rem" : "0" }}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
+          {showGrid ? (
+            /* Todos: carousel group cards */
+            <ProductGrid
+              products={filtered}
+              onProductClick={() => {}}
+              onAddToCart={p => showToast(p)}
+              showGroups={true}
+            />
+          ) : (
+            /* Categoria: lista acordeon */
+            <ProductList
+              products={filtered}
+              onAddToCart={p => showToast(p)}
+            />
+          )}
+        </section>
       </div>
-      )}
 
-      {toast && (
-        <div className="fixed bottom-6 left-1/2 z-20 -translate-x-1/2 rounded-full bg-white px-5 py-3 text-xs font-black text-black shadow-2xl">
-          {toast}
+      <LoyaltyPromo onOpen={() => setLoyaltyOpen(true)} />
+
+      {/* ── CTA unico hacia el portal de Mayoreo ── */}
+      <section className="px-4 pt-16 pb-20 sm:pt-20 sm:pb-24 border-t border-white/[.05]">
+        <div className="max-w-2xl mx-auto">
+          <a
+            href="/b2b"
+            className="ios-app-card flex items-center justify-between gap-4 p-5 sm:p-6"
+            style={{ background: "linear-gradient(120deg,#1a1408,#120d09)" }}
+          >
+            <div>
+              <div className="text-[.62rem] font-black uppercase tracking-[.18em] text-[#F97316] mb-1.5">
+                Para negocios y eventos
+              </div>
+              <div className="font-head text-[1.65rem] leading-none text-white mb-1">
+                ¿Compras por volumen?
+              </div>
+              <p className="text-white/40 text-[.78rem] leading-snug">
+                Cotiza tu pedido de mayoreo o evento en minutos.
+              </p>
+            </div>
+            <div
+              className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0"
+              style={{ background: "linear-gradient(135deg,#F97316,#E53E3E)" }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </a>
         </div>
-      )}
-    </div>
+      </section>
+
+      <footer className="border-t border-white/5 py-12 pb-24 sm:pb-12 text-center px-4">
+        <div className="font-head text-4xl tracking-wide text-white mb-1">
+          BOTA<span className="text-red-500">-</span>NA
+        </div>
+        <p className="text-[11px] text-white/25 uppercase tracking-[.2em] font-bold mb-6">
+          Snacks Premium · La Salle Bajio · Leon, Gto.
+        </p>
+        <div className="flex justify-center gap-6 flex-wrap mb-4">
+          <a
+            href="https://instagram.com/bota.na.mx"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[12px] text-white/40 hover:text-white transition-colors uppercase tracking-wider font-semibold"
+          >
+            Instagram
+          </a>
+          <a
+            href="https://wa.me/524774950232"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[12px] text-white/40 hover:text-white transition-colors uppercase tracking-wider font-semibold"
+          >
+            WhatsApp
+          </a>
+        </div>
+        <p className="text-[11px] text-white/15 uppercase tracking-[.15em]">
+          2025 BOTA-NA por Saul y Aranza
+        </p>
+      </footer>
+
+      <CartModal isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+      <LoyaltyModal isOpen={loyaltyOpen} onClose={() => setLoyaltyOpen(false)} />
+      <Toast message={toast.msg} show={toast.show} />
+    </CartProvider>
   )
 }
