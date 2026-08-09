@@ -271,43 +271,50 @@ button:active:not(:disabled), a:active {
 }
 
 /* ══════════════════════════════════════════
-   HERO — ROTADOR DE PRODUCTOS
-   Solo opacity/transform (compositable, barato).
-   Los fondos de las fotos son negro puro (0,0,0):
-   mix-blend-mode "screen" los vuelve invisibles.
+   HERO — FRASE ANIMADA (estilo iOS: spring + blur)
+   Solo opacity/transform/filter (compositable).
+   Altura fija = no salta el layout al cambiar texto.
 ══════════════════════════════════════════ */
-.hero-rotator-stage {
+.hero-phrase-stage {
+  position: relative;
+  height: clamp(3.4rem, 15vw, 4.4rem);
+  max-width: 640px;
+  margin: 0 auto 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.hero-phrase-item {
   position: absolute;
   inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.5rem;
+  font-family: var(--font-head);
+  font-size: clamp(1.3rem, 5vw, 2.5rem);
+  line-height: 1.05;
+  letter-spacing: .01em;
+  color: white;
+  white-space: normal;
   opacity: 0;
-  transform: scale(1.07);
-  transition: opacity 0.9s var(--ease-out), transform 0.9s var(--ease-out);
-  will-change: opacity, transform;
+  transform: translateY(22px) scale(.96);
+  filter: blur(10px);
+  transition: opacity 0.55s cubic-bezier(.34,1.56,.64,1),
+              transform 0.55s cubic-bezier(.34,1.56,.64,1),
+              filter 0.45s ease;
+  will-change: opacity, transform, filter;
 }
-.hero-rotator-stage.active {
+.hero-phrase-item.active {
   opacity: 1;
-  transform: scale(1);
+  transform: translateY(0) scale(1);
+  filter: blur(0);
 }
-.hero-rotator-img-el {
-  mix-blend-mode: screen;
-}
-.hero-side-peek {
-  position: absolute;
-  width: 46%;
-  aspect-ratio: 1 / 1;
-  opacity: 0.4;
-  pointer-events: none;
-  transition: opacity 1s ease;
-}
-.hero-side-peek-l {
-  left: -6%;
-  bottom: -4%;
-  transform: rotate(-18deg);
-}
-.hero-side-peek-r {
-  right: -6%;
-  bottom: -4%;
-  transform: rotate(18deg);
+.hero-phrase-item.prev {
+  opacity: 0;
+  transform: translateY(-22px) scale(.96);
+  filter: blur(10px);
 }
 
 /* ══════════════════════════════════════════
