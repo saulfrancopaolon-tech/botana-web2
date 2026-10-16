@@ -9,9 +9,9 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        head: ["'Bebas Neue'", "sans-serif"],
-        body: ["'DM Sans'", "sans-serif"],
-        mono: ["'Space Mono'", "monospace"],
+        head: ["-apple-system", "BlinkMacSystemFont", "'SF Pro Display'", "Inter", "'Segoe UI'", "Roboto", "system-ui", "sans-serif"],
+        body: ["-apple-system", "BlinkMacSystemFont", "'SF Pro Text'", "Inter", "'Segoe UI'", "Roboto", "system-ui", "sans-serif"],
+        mono: ["ui-monospace", "'SF Mono'", "SFMono-Regular", "Menlo", "Consolas", "monospace"],
       },
       colors: {
         brand: {
