@@ -2,41 +2,71 @@
 
 interface HeroProps {
   onMenuClick: () => void
+  /** Opcional: abre una categoría al tocar un tile (ej. "Botanas") */
+  onPickCategory?: (cat: string) => void
 }
 
-export function Hero({ onMenuClick }: HeroProps) {
-  return (
-    <section
-      style={{ position: "relative", minHeight: "86vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "2rem 1.25rem", overflow: "hidden" }}
-    >
-      {/* Resplandor sutil detras del logo — una sola propiedad (opacity), muy barato */}
-      <div aria-hidden="true" className="hero-glow-pulse" />
+const TILES = [
+  { cat: "Botanas", title: "Takis", sub: "Fuego & Original", emoji: "🌶️", bg: "linear-gradient(145deg,#5B2A86 0%,#C2185B 100%)" },
+  { cat: "Botanas", title: "Barcel", sub: "Chips · Runners", emoji: "🥔", bg: "linear-gradient(145deg,#F59E0B 0%,#EA580C 100%)" },
+  { cat: "Dulces",  title: "Vualá",  sub: "Sorpresa de chocolate", emoji: "🍫", bg: "linear-gradient(145deg,#7C4A2D 0%,#3B1F12 100%)" },
+]
 
-      <div style={{ position: "relative", zIndex: 10 }}>
+export function Hero({ onMenuClick, onPickCategory }: HeroProps) {
+  return (
+    <section className="relative overflow-hidden px-5 pt-14 pb-10 sm:pt-24 sm:pb-16 text-center">
+      <div className="aurora" aria-hidden="true"><i /><i /><i /></div>
+
+      {/* Emojis flotantes (decorativos) */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 select-none">
+        <span className="float-a absolute left-[7%] top-[22%] text-4xl sm:text-6xl opacity-80">🌶️</span>
+        <span className="float-b absolute right-[8%] top-[18%] text-4xl sm:text-6xl opacity-80">🍫</span>
+        <span className="float-c absolute left-[14%] bottom-[30%] text-3xl sm:text-5xl opacity-60 hidden sm:block">🥜</span>
+        <span className="float-a absolute right-[13%] bottom-[34%] text-3xl sm:text-5xl opacity-60 hidden sm:block">🔥</span>
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-4xl">
+        <div className="rise inline-flex items-center gap-2 rounded-full glass-2 px-4 py-1.5 text-[.72rem] font-semibold tracking-wide text-white/80" style={{ animationDelay: "40ms" }}>
+          <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-[#30D158]" />
+          Nuevo · Takis, Barcel y Vualá ya disponibles
+        </div>
+
         <h1
-          className="animate-fade-in-up"
-          style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: "clamp(4.2rem,20vw,11rem)", lineHeight: 0.92, letterSpacing: ".01em", color: "white", margin: 0, animationFillMode: "both" }}
+          className="rise font-head mt-6 text-[clamp(3.4rem,15vw,9rem)] text-grad-soft"
+          style={{ animationDelay: "120ms", lineHeight: 0.95 }}
         >
-          BOTA<span style={{ color: "#E53E3E" }}>-</span>NA
+          Snacks que
+          <br />
+          <span className="text-grad">rompen.</span>
         </h1>
 
-        <div
-          className="animate-fade-in-up"
-          style={{ marginTop: "2.5rem", animationDelay: "140ms", animationFillMode: "both" }}
-        >
-          <button
-            onClick={onMenuClick}
-            style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "16px 34px", borderRadius: 999, background: "#E53E3E", color: "white", fontWeight: 800, fontSize: ".92rem", letterSpacing: ".06em", textTransform: "uppercase", border: "none", cursor: "pointer", boxShadow: "0 8px 28px rgba(229,62,62,0.35)", transition: "transform 0.25s var(--spring-soft), box-shadow 0.25s var(--spring-soft)" }}
-            onMouseEnter={e => { const b = e.currentTarget; b.style.transform = "translateY(-2px)"; b.style.boxShadow = "0 14px 36px rgba(229,62,62,0.45)" }}
-            onMouseLeave={e => { const b = e.currentTarget; b.style.transform = "none"; b.style.boxShadow = "0 8px 28px rgba(229,62,62,0.35)" }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
-              <rect x="9" y="3" width="6" height="4" rx="2"/>
-            </svg>
-            Ver Menu
+        <p className="rise mx-auto mt-6 max-w-xl text-[clamp(1rem,2.6vw,1.25rem)] leading-relaxed text-white/60" style={{ animationDelay: "220ms" }}>
+          Tus botanas favoritas, a un toque. Pide por WhatsApp y recógelas en La Salle Bajío.
+        </p>
+
+        <div className="rise mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row" style={{ animationDelay: "320ms" }}>
+          <button onClick={onMenuClick} className="btn-primary w-full sm:w-auto">
+            Ver el menú
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12l7 7 7-7" /></svg>
           </button>
+          <a href="/b2b" className="btn-ghost w-full sm:w-auto">Compra por mayoreo</a>
         </div>
+      </div>
+
+      {/* Tiles de marcas — bento mini */}
+      <div className="relative z-10 mx-auto mt-14 grid max-w-4xl grid-cols-3 gap-3 sm:gap-4">
+        {TILES.map((t, i) => (
+          <button
+            key={t.title}
+            onClick={() => onPickCategory?.(t.cat)}
+            className="rise group relative overflow-hidden rounded-[24px] sm:rounded-[32px] p-3 pb-4 text-left sm:p-6 transition-transform duration-500 [transition-timing-function:var(--ease-apple)] hover:-translate-y-1.5 active:scale-[.97]"
+            style={{ background: t.bg, animationDelay: String(420 + i * 90) + "ms", boxShadow: "0 24px 50px -24px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.2)" }}
+          >
+            <span className="pimg block text-4xl sm:text-6xl drop-shadow-[0_8px_16px_rgba(0,0,0,.35)] group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-500">{t.emoji}</span>
+            <span className="mt-3 block font-head text-[1.05rem] sm:text-2xl text-white">{t.title}</span>
+            <span className="block text-[.62rem] sm:text-xs font-medium text-white/70 leading-tight mt-0.5">{t.sub}</span>
+          </button>
+        ))}
       </div>
     </section>
   )
