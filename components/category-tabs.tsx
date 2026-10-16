@@ -1,12 +1,9 @@
 "use client"
+import { useEffect, useRef } from "react"
 
-const CAT_META: Record<string, { emoji: string; color: string }> = {
-  "Todos":      { emoji: "🌶",  color: "#E53E3E" },
-  "Cacahuates": { emoji: "🥜",  color: "#F97316" },
-  "Chips":      { emoji: "🍠",  color: "#FBBF24" },
-  "Gomitas":    { emoji: "🐻",  color: "#ec4899" },
-  "Papas":      { emoji: "🔥",  color: "#E53E3E" },
-  "Bebidas":    { emoji: "🥭",  color: "#22c55e" },
+const CAT_EMOJI: Record<string, string> = {
+  Todos: "✨", Botanas: "🌶️", Cacahuates: "🥜", Chips: "🍠",
+  Gomitas: "🐻", Papas: "🔥", Bebidas: "🥭", Dulces: "🍫",
 }
 
 interface Props {
@@ -16,35 +13,29 @@ interface Props {
 }
 
 export function CategoryTabs({ categories, active, onSelect }: Props) {
+  const wrap = useRef<HTMLDivElement>(null)
+
+  // Centra automáticamente la categoría activa (como en apps nativas)
+  useEffect(() => {
+    const el = wrap.current?.querySelector<HTMLElement>('[data-active="true"]')
+    el?.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" })
+  }, [active])
+
   return (
-    <div className="flex gap-1.5 overflow-x-auto scrollbar-none px-4 sm:px-6 py-2.5">
-      {categories.map(cat => {
-        const meta = CAT_META[cat] ?? { emoji: "🌶", color: "#E53E3E" }
-        const isActive = cat === active
-        return (
-          <button
-            key={cat}
-            onClick={() => onSelect(cat)}
-            className={
-              "flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-[.72rem] font-black uppercase tracking-wider transition-all duration-300 active:scale-95 " +
-              (isActive
-                ? "text-white scale-[1.03]"
-                : "text-white/45 hover:text-white/75 bg-white/[.04]")
-            }
-            style={
-              isActive
-                ? {
-                    background: meta.color,
-                    boxShadow: "0 4px 16px " + meta.color + "55",
-                  }
-                : {}
-            }
-          >
-            <span className="text-base leading-none">{meta.emoji}</span>
-            {cat}
-          </button>
-        )
-      })}
+    <div ref={wrap} className="flex gap-2 overflow-x-auto scrollbar-none px-4 sm:px-6 py-3" role="tablist" aria-label="Categorías">
+      {categories.map(cat => (
+        <button
+          key={cat}
+          role="tab"
+          aria-selected={cat === active}
+          data-active={cat === active}
+          onClick={() => onSelect(cat)}
+          className="cat-chip"
+        >
+          <span className="text-[.95rem] leading-none">{CAT_EMOJI[cat] ?? "🌶️"}</span>
+          {cat}
+        </button>
+      ))}
     </div>
   )
 }
