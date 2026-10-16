@@ -25,6 +25,14 @@ const EVENT_PRODUCTS = [
   { id: 19, name: "Chamoyada de Limón",      emoji: "🍋‍🟩", cat: "Bebidas",    retail: 30, event: 25, cost: 18.15 },
   { id: 20, name: "Jamaica 1 Litro",         emoji: "🌺", cat: "Bebidas",    retail: 35, event: 31, cost: 23.56 },
   { id: 21, name: "Horchata 1 Litro",        emoji: "🥛", cat: "Bebidas",    retail: 35, event: 31, cost: 23.56 },
+  // ── Botanas de marca ──  ⚠️ Precios de ejemplo: cámbialos por los tuyos (cost = lo que te cuesta a ti)
+  { id: 22, name: "Chips Barcel Jalapeño",   emoji: "🥔", cat: "Botanas",    retail: 20, event: 17, cost: 0 },
+  { id: 23, name: "Chips Barcel Naturales",  emoji: "🥔", cat: "Botanas",    retail: 20, event: 17, cost: 0 },
+  { id: 24, name: "Chips Barcel Fuego",      emoji: "🔥", cat: "Botanas",    retail: 20, event: 17, cost: 0 },
+  { id: 25, name: "Takis Fuego",             emoji: "🌶️", cat: "Botanas",    retail: 22, event: 19, cost: 0 },
+  { id: 26, name: "Takis Original",          emoji: "🌽", cat: "Botanas",    retail: 22, event: 19, cost: 0 },
+  { id: 27, name: "Runners",                 emoji: "🍿", cat: "Botanas",    retail: 15, event: 13, cost: 0 },
+  { id: 28, name: "Vualá Sorpresa Chocolate",emoji: "🍫", cat: "Dulces",     retail: 20, event: 17, cost: 0 },
 ]
 
 const LABEL_PRICE = 4
