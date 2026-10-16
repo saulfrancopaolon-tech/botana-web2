@@ -1,6 +1,28 @@
-export const CATEGORIES = ["Todos", "Cacahuates", "Chips", "Gomitas", "Papas", "Bebidas"]
+export const CATEGORIES = ["Todos", "Botanas", "Cacahuates", "Chips", "Gomitas", "Papas", "Bebidas", "Dulces"]
 
-export const PRODUCTS = [
+export interface ProductBase {
+  id: number
+  name: string
+  desc: string
+  price: number
+  cat: string
+  tags: string[]
+  pop: boolean
+  spicy: boolean
+  natural: boolean
+  emoji: string
+  img: string
+  groupId: string
+  flavor: string
+  /** "contain" para fotos de empaque con fondo transparente, "cover" para fotos llenas */
+  fit?: "cover" | "contain"
+  /** Marca (solo para productos de marca) */
+  brand?: string
+  /** Muestra la etiqueta "Nuevo" */
+  isNew?: boolean
+}
+
+export const PRODUCTS: ProductBase[] = [
   { id: 1,  name: "Cacahuate Habanero",     desc: "Cacahuates holandeses con el intenso sabor del chile habanero. Crujientes y picosos.", price: 15, cat: "Cacahuates", tags: ["100g"],            pop: true,  spicy: true,  natural: false, emoji: "🥜", img: "/images/4.webp",  groupId: "cacahuates",  flavor: "Habanero"    },
   { id: 2,  name: "Cacahuate Jalapeño",     desc: "Cacahuates holandeses con el sabor clasico del jalapeño. El balance perfecto.",        price: 15, cat: "Cacahuates", tags: ["100g"],            pop: false, spicy: true,  natural: false, emoji: "🥜", img: "/images/3.webp",  groupId: "cacahuates",  flavor: "Jalapeño"    },
   { id: 3,  name: "Cacahuate Fuego",        desc: "Cacahuates holandeses sazonados al estilo fuego. Tradicionales y llenos de sabor.",    price: 15, cat: "Cacahuates", tags: ["100g"],            pop: false, spicy: true,  natural: false, emoji: "🥜", img: "/images/2.webp",  groupId: "cacahuates",  flavor: "Fuego"       },
@@ -23,9 +45,20 @@ export const PRODUCTS = [
   { id: 18, name: "Chamoyada de Fresa",     desc: "Fresa natural con chamoy y chile. Dulce, acida y picante en cada sorbo.",           price: 30, cat: "Bebidas",   tags: ["Fresco", "Frutal"], pop: true,  spicy: true,  natural: false, emoji: "🍓", img: "/images/72.webp", groupId: "chamoyadas",  flavor: "Fresa"       },
   { id: 19, name: "Chamoyada de Limon",     desc: "Limon fresco con chamoy y chilito. El clasico sabor mexicano bien frio.",           price: 30, cat: "Bebidas",   tags: ["Fresco", "Picante"], pop: false, spicy: true,  natural: false, emoji: "🍋", img: "/images/73.webp", groupId: "chamoyadas",  flavor: "Limon"       },
 
+  // ═══════════ NUEVOS — BOTANAS DE MARCA ═══════════
+  // ⚠️ Los precios son de ejemplo: cámbialos por los tuyos.
+  // 📷 Imagen: sube el archivo a /public/images/ con EXACTAMENTE el nombre de "img".
+  { id: 22, name: "Chips Barcel Jalapeño", desc: "Las clásicas Chips de Barcel con el sabor del jalapeño. Crujientes y con el picante justo.", price: 20, cat: "Botanas", tags: ["Barcel"], pop: true,  spicy: true,  natural: false, emoji: "🥔", img: "/images/chips-jalapeno.webp", groupId: "chips-barcel", flavor: "Jalapeño", fit: "contain", brand: "Barcel", isNew: true },
+  { id: 23, name: "Chips Barcel Naturales", desc: "Las Chips de Barcel de siempre, con sal. Simples, crujientes, imposibles de dejar.",       price: 20, cat: "Botanas", tags: ["Barcel"], pop: false, spicy: false, natural: false, emoji: "🥔", img: "/images/chips-naturales.webp", groupId: "chips-barcel", flavor: "Naturales", fit: "contain", brand: "Barcel", isNew: true },
+  { id: 24, name: "Chips Barcel Fuego",     desc: "Chips de Barcel con el picante intenso de Fuego. Para los que no se rajan.",               price: 20, cat: "Botanas", tags: ["Barcel"], pop: true,  spicy: true,  natural: false, emoji: "🔥", img: "/images/chips-fuego.webp",     groupId: "chips-barcel", flavor: "Fuego",     fit: "contain", brand: "Barcel", isNew: true },
+  { id: 25, name: "Takis Fuego",            desc: "Los enrollados más famosos con el picante más intenso. Crujen, pican y enamoran.",         price: 22, cat: "Botanas", tags: ["Takis"],  pop: true,  spicy: true,  natural: false, emoji: "🌶️", img: "/images/takis-fuego.webp",    groupId: "takis",        flavor: "Fuego",     fit: "contain", brand: "Takis",  isNew: true },
+  { id: 26, name: "Takis Original",         desc: "El clásico Takis enrollado y extra crujiente. El sabor original que todos conocen.",       price: 22, cat: "Botanas", tags: ["Takis"],  pop: true,  spicy: false, natural: false, emoji: "🌽", img: "/images/takis-original.webp", groupId: "takis",        flavor: "Original",  fit: "contain", brand: "Takis",  isNew: true },
+  { id: 27, name: "Runners",                desc: "Botana crujiente de Barcel para compartir (o no). Ideal para cualquier momento.",         price: 15, cat: "Botanas", tags: ["Barcel"], pop: false, spicy: false, natural: false, emoji: "🍿", img: "/images/runners.webp",         groupId: "runners",      flavor: "Runners",   fit: "contain", brand: "Barcel", isNew: true },
+  { id: 28, name: "Vualá Sorpresa de Chocolate", desc: "Chocolate con sorpresa adentro. Lo abres, lo disfrutas y descubres qué te tocó.",  price: 20, cat: "Dulces",  tags: ["Chocolate", "Sorpresa"], pop: true, spicy: false, natural: false, emoji: "🍫", img: "/images/vuala.webp", groupId: "vuala", flavor: "Sorpresa", fit: "contain", brand: "Vualá", isNew: true },
+
 ]
 
-export type Product = (typeof PRODUCTS)[number] & { inStock?: boolean }
+export type Product = ProductBase & { inStock?: boolean }
 
 export interface ProductGroup {
   groupId: string
