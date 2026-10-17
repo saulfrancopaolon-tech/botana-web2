@@ -16,12 +16,12 @@ interface GridProps {
 const CAT_ORDER = ["Botanas", "Cacahuates", "Chips", "Gomitas", "Papas", "Bebidas", "Dulces"]
 
 const CAT_SUB: Record<string, string> = {
-  Botanas: "Takis, Barcel y Runners",
+  Botanas: "Takis, fuego y original",
   Cacahuates: "Holandeses, con todo el sabor",
   Chips: "Vegetales crujientes",
   Gomitas: "Dulces, ácidas y enchiladas",
-  Papas: "De suaves a fuego puro",
-  Bebidas: "Aguas frescas y chamoyadas",
+  Papas: "Barcel, Runners y más",
+  Bebidas: "Coca-Cola, aguas y chamoyadas",
   Dulces: "Con sorpresa incluida",
 }
 
