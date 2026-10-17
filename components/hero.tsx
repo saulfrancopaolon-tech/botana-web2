@@ -8,7 +8,7 @@ interface HeroProps {
 
 const TILES = [
   { cat: "Botanas", title: "Takis", sub: "Fuego & Original", emoji: "🌶️", bg: "linear-gradient(145deg,#5B2A86 0%,#C2185B 100%)" },
-  { cat: "Botanas", title: "Barcel", sub: "Chips · Runners", emoji: "🥔", bg: "linear-gradient(145deg,#F59E0B 0%,#EA580C 100%)" },
+  { cat: "Papas", title: "Barcel", sub: "Chips · Runners", emoji: "🥔", bg: "linear-gradient(145deg,#F59E0B 0%,#EA580C 100%)" },
   { cat: "Dulces",  title: "Vualá",  sub: "Sorpresa de chocolate", emoji: "🍫", bg: "linear-gradient(145deg,#7C4A2D 0%,#3B1F12 100%)" },
 ]
 
