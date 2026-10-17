@@ -118,7 +118,7 @@ export default function Page() {
                 inputMode="search"
                 enterKeyHint="search"
                 aria-label="Buscar productos"
-                className="w-full bg-transparent text-[.95rem] text-white placeholder:text-white/35 outline-none"
+                className="w-full bg-transparent text-base text-white placeholder:text-white/35 outline-none"
               />
               {query && (
                 <button onClick={() => setQuery("")} aria-label="Borrar búsqueda" className="grid h-5 w-5 place-items-center rounded-full bg-white/20 text-[.7rem] text-black">✕</button>
