@@ -586,3 +586,87 @@ button, a { min-height: 0; }
 }
 @keyframes glowSpin { to { transform: rotate(360deg); } }
 @media (max-width: 640px) { .gallery-glow { filter: blur(38px); opacity: .4; } }
+
+
+/* ════════════ INTRO DE CARGA: BOTA-NA ════════════ */
+.bn-intro {
+  position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center;
+  touch-action: none; overscroll-behavior: contain; cursor: pointer; overflow: hidden;
+  animation: bnGone .01s linear 2.65s forwards;
+}
+html[data-intro="done"] .bn-intro { display: none; }
+@keyframes bnGone { to { opacity: 0; visibility: hidden; pointer-events: none; } }
+
+/* Telón en dos mitades que se abre al final */
+.bn-curtain { position: absolute; left: 0; right: 0; height: 50.4%; background: #0A0A0B; z-index: 0; will-change: transform; }
+.bn-curtain-top { top: 0; animation: bnUp .85s cubic-bezier(.76, 0, .24, 1) 1.85s forwards; }
+.bn-curtain-bottom { bottom: 0; animation: bnDown .85s cubic-bezier(.76, 0, .24, 1) 1.85s forwards; }
+.bn-curtain-top::after, .bn-curtain-bottom::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, #FF9F0A, #FF3B30, transparent);
+  box-shadow: 0 0 18px 2px rgba(255, 90, 40, .75);
+  opacity: 0; animation: bnSeam .9s ease 1.7s forwards;
+}
+.bn-curtain-top::after { bottom: 0; }
+.bn-curtain-bottom::after { top: 0; }
+@keyframes bnUp   { to { transform: translateY(-101%); } }
+@keyframes bnDown { to { transform: translateY(101%); } }
+@keyframes bnSeam { 0% { opacity: 0; } 35% { opacity: 1; } 100% { opacity: 0; } }
+
+.bn-stage {
+  position: relative; z-index: 1; width: 100%; height: 100%; display: grid; place-content: center; justify-items: center;
+  animation: bnStageOut .5s cubic-bezier(.5, 0, .75, 0) 1.75s forwards;
+}
+@keyframes bnStageOut { to { opacity: 0; transform: scale(1.18); filter: blur(8px); } }
+
+.bn-glow {
+  position: absolute; left: 50%; top: 50%; width: min(95vw, 760px); aspect-ratio: 1; margin: calc(min(95vw, 760px) / -2) 0 0 calc(min(95vw, 760px) / -2);
+  background: radial-gradient(circle, rgba(255, 59, 48, .5), rgba(255, 159, 10, .28) 40%, transparent 68%);
+  filter: blur(34px); animation: bnPulse 2.2s ease-in-out infinite alternate; will-change: transform;
+}
+@keyframes bnPulse { from { transform: scale(.82); opacity: .65; } to { transform: scale(1.12); opacity: 1; } }
+
+/* Letras que suben desde una máscara, con un destello que las recorre */
+.bn-word { position: relative; display: flex; font-size: clamp(3.4rem, 17vw, 9.5rem); line-height: 1; }
+.bn-l { display: inline-block; overflow: hidden; padding: .06em .012em .1em; }
+.bn-l b {
+  display: inline-block; font-weight: 900; letter-spacing: -.03em;
+  transform: translateY(118%) rotate(9deg); opacity: 0; filter: blur(10px);
+  background-image: linear-gradient(100deg, #fff 0 36%, #FFB347 48%, #FF3B30 54%, #fff 66% 100%);
+  background-size: 320% 100%; background-position: 100% 0;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation:
+    bnLetter .8s var(--ease-apple) calc(.15s + var(--i) * .075s) forwards,
+    bnSweep .7s ease-in-out calc(1.05s + var(--i) * .07s);
+}
+.bn-dash b { background-image: var(--grad-brand); background-size: 100% 100%; background-position: 0 0; animation: bnLetter .8s var(--ease-apple) calc(.15s + var(--i) * .075s) forwards; }
+@keyframes bnLetter { to { transform: none; opacity: 1; filter: none; } }
+@keyframes bnSweep  { from { background-position: 100% 0; } to { background-position: 0% 0; } }
+
+/* Productos que caen y se acomodan alrededor */
+.bn-pack {
+  position: absolute; left: 50%; top: 50%; width: clamp(72px, 17vw, 150px); opacity: 0;
+  animation: bnPack .95s cubic-bezier(.34, 1.56, .64, 1) calc(.55s + var(--k) * .09s) forwards;
+  will-change: transform;
+}
+.bn-pack img { width: 100%; height: auto; display: block; filter: drop-shadow(0 14px 20px rgba(0, 0, 0, .55)); animation: bnFloat 2.6s ease-in-out infinite alternate; }
+@keyframes bnPack {
+  from { opacity: 0; transform: translate(-50%, -50%) translate(0, 0) rotate(0deg) scale(.15); }
+  to   { opacity: 1; transform: translate(-50%, -50%) translate(var(--x), var(--y)) rotate(var(--r)) scale(1); }
+}
+@keyframes bnFloat { from { transform: translateY(-6px); } to { transform: translateY(7px); } }
+
+/* Barra de carga + frase */
+.bn-bar { margin-top: clamp(1.4rem, 4vh, 2.4rem); width: min(54vw, 280px); height: 3px; border-radius: 99px; background: rgba(255, 255, 255, .12); overflow: hidden; position: relative; }
+.bn-bar i { position: absolute; inset: 0; background: var(--grad-brand); transform-origin: left; transform: scaleX(0); animation: bnBar 1.45s cubic-bezier(.65, 0, .35, 1) .3s forwards; box-shadow: 0 0 14px rgba(255, 90, 40, .8); }
+@keyframes bnBar { to { transform: scaleX(1); } }
+.bn-sub { margin-top: .9rem; font-size: .68rem; font-weight: 600; letter-spacing: .34em; text-transform: uppercase; color: rgba(255, 255, 255, .45); opacity: 0; animation: bnSub .7s ease .9s forwards; }
+@keyframes bnSub { to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) { .bn-intro { display: none; } }
+
+/* ════════════ SCROLL: aparición de tarjetas ════════════ */
+.sr { opacity: 0; transform: translateY(42px) scale(.94); will-change: transform, opacity;
+  transition: opacity .7s var(--ease-apple), transform .85s var(--ease-apple); }
+.sr-in { opacity: 1; transform: none; will-change: auto; }
+@media (prefers-reduced-motion: reduce) { .sr { opacity: 1 !important; transform: none !important; } }

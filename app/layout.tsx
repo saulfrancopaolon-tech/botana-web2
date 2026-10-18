@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next"
 import { Analytics } from "@vercel/analytics/next"
+import { Intro } from "@/components/intro"
+import { ScrollProgress } from "@/components/scroll-fx"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -26,8 +28,19 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
+      <head>
+        {/* La intro se muestra una vez por sesión: si ya se vio, se oculta antes de pintar */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var d=document.documentElement;if(sessionStorage.getItem('bn-intro')){d.dataset.intro='done'}else{d.dataset.intro='play';sessionStorage.setItem('bn-intro','1')}}catch(e){document.documentElement.dataset.intro='done'}",
+          }}
+        />
+      </head>
       <body>
+        <Intro />
+        <ScrollProgress />
         {children}
         <Analytics />
       </body>

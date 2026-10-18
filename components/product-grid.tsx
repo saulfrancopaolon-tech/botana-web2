@@ -2,6 +2,7 @@
 import type { Product } from "@/lib/products"
 import { ProductCard } from "./product-card"
 import { AnimateIn } from "./animations"
+import { ScrollReveal } from "./scroll-fx"
 import { CategoryIcon, CAT_COLOR, Ico } from "./icons"
 
 interface GridProps {
@@ -67,9 +68,9 @@ export function ProductGrid({ products, onAddToCart, showGroups }: GridProps) {
               </AnimateIn>
               <div className={GRID}>
                 {list.map((p, i) => (
-                  <div key={p.id} className="rise" style={{ animationDelay: String(Math.min(i, 7) * 40) + "ms" }}>
+                  <ScrollReveal key={p.id} delay={(i % 4) * 70} className="h-full">
                     <ProductCard product={p} onAdd={onAddToCart} />
-                  </div>
+                  </ScrollReveal>
                 ))}
               </div>
             </section>
@@ -82,9 +83,9 @@ export function ProductGrid({ products, onAddToCart, showGroups }: GridProps) {
   return (
     <div className={GRID}>
       {tidy(products).map((p, i) => (
-        <div key={p.id} className="rise" style={{ animationDelay: String(Math.min(i, 8) * 40) + "ms" }}>
+        <ScrollReveal key={p.id} delay={(i % 4) * 70} className="h-full">
           <ProductCard product={p} onAdd={onAddToCart} />
-        </div>
+        </ScrollReveal>
       ))}
     </div>
   )
