@@ -12,6 +12,7 @@ import { CartModal } from "@/components/cart-modal"
 import { LoyaltyModal } from "@/components/loyalty-modal"
 import { Toast, LoyaltyPromo } from "@/components/ui-components"
 import { AnimateIn } from "@/components/animations"
+import { Ico } from "@/components/icons"
 
 const SHEETS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSQKeuTywAmniswIKciTQS0hI-fMIm4l0DRiGATcUpA_eff42eVS6171CngdgtGphWUADrllm5dcxe1/pub?output=csv"
 
@@ -65,13 +66,19 @@ export default function Page() {
     return activeCat === "Todos" ? products : products.filter(p => p.cat === activeCat)
   }, [products, activeCat, q, searching])
 
+  const counts = useMemo(() => {
+    const c: Record<string, number> = { Todos: products.length }
+    products.forEach(p => { c[p.cat] = (c[p.cat] ?? 0) + 1 })
+    return c
+  }, [products])
+
   const scrollToMenu = useCallback(() => {
     document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" })
   }, [])
 
-  const pickCategory = useCallback((cat: string) => {
-    setQuery("")
-    setActiveCat(cat)
+  // Al tocar un recuadro de la galería: busca ese producto en el menú
+  const pickProduct = useCallback((p: Product) => {
+    setQuery(p.name)
     setTimeout(scrollToMenu, 30)
   }, [scrollToMenu])
 
@@ -102,31 +109,31 @@ export default function Page() {
     <CartProvider>
       <NavBar onCartOpen={() => setCartOpen(true)} onLoyaltyOpen={() => setLoyaltyOpen(true)} />
 
-      <Hero onMenuClick={scrollToMenu} onPickCategory={pickCategory} />
+      <Hero products={products} onMenuClick={scrollToMenu} onPickProduct={pickProduct} />
 
       {/* ── MENÚ ── */}
-      <main id="menu">
-        {/* Barra pegajosa: buscador + categorías */}
-        <div className="sticky top-14 z-40 border-y border-white/[.06] bg-black/60 backdrop-blur-2xl" style={{ WebkitBackdropFilter: "blur(24px) saturate(180%)" }}>
-          <div className="mx-auto max-w-7xl px-4 pt-3 sm:px-6">
-            <label className="flex items-center gap-2.5 rounded-2xl bg-white/[.07] px-3.5 py-2.5 focus-within:bg-white/[.11] focus-within:ring-1 focus-within:ring-white/20 transition">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.45)" strokeWidth="2.4" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+      <main id="menu" className="scroll-mt-14">
+        {/* Barra flotante: buscador + categorías */}
+        <div className="sticky top-14 z-40 px-3 pt-2 sm:px-6">
+          <div className="glass-2 mx-auto max-w-5xl space-y-2 rounded-[28px] p-2 shadow-[0_24px_60px_-24px_rgba(0,0,0,.9)]">
+            <label className="flex items-center gap-2.5 rounded-[20px] bg-black/30 px-4 py-3 transition focus-within:bg-black/45 focus-within:ring-1 focus-within:ring-white/20">
+              <Ico name="search" size={18} strokeWidth={2.4} className="flex-shrink-0 text-white/45" />
               <input
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                placeholder="Buscar Takis, chips, gomitas…"
+                placeholder="Buscar Takis, chips, Coca-Cola…"
                 inputMode="search"
                 enterKeyHint="search"
                 aria-label="Buscar productos"
-                className="w-full bg-transparent text-base text-white placeholder:text-white/35 outline-none"
+                className="w-full bg-transparent text-base text-white outline-none placeholder:text-white/35"
               />
               {query && (
-                <button onClick={() => setQuery("")} aria-label="Borrar búsqueda" className="grid h-5 w-5 place-items-center rounded-full bg-white/20 text-[.7rem] text-black">✕</button>
+                <button onClick={() => setQuery("")} aria-label="Borrar búsqueda" className="grid h-6 w-6 flex-shrink-0 place-items-center rounded-full bg-white/20 text-white">
+                  <Ico name="close" size={13} strokeWidth={3} />
+                </button>
               )}
             </label>
-          </div>
-          <div className="mx-auto max-w-7xl">
-            <CategoryTabs categories={CATEGORIES} active={searching ? "" : activeCat} onSelect={cat => { setQuery(""); setActiveCat(cat) }} />
+            <CategoryTabs categories={CATEGORIES} active={searching ? "" : activeCat} counts={counts} onSelect={cat => { setQuery(""); setActiveCat(cat) }} />
           </div>
         </div>
 
@@ -154,7 +161,6 @@ export default function Page() {
             products={filtered}
             showGroups={showRails}
             onAddToCart={showToast}
-            onSeeAll={cat => { setActiveCat(cat); setTimeout(scrollToMenu, 30) }}
           />
         </section>
       </main>
@@ -177,7 +183,7 @@ export default function Page() {
             </div>
             <span className="btn-primary relative self-start sm:self-auto">
               Ver mayoreo
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+              <Ico name="arrowRight" size={16} strokeWidth={2.6} />
             </span>
           </a>
         </AnimateIn>
