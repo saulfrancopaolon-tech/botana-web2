@@ -1,5 +1,6 @@
 "use client"
 import { AnimateIn } from "./animations"
+import { Ico } from "./icons"
 
 const WA = "524774950232"
 
@@ -117,20 +118,20 @@ export function WholesaleSection({ onEventOpen }: { onEventOpen?: () => void }) 
           <AnimateIn stagger>
             {[
               {
-                emoji: "🎉",
+                icon: "sparkles",
                 title: "Eventos y Fiestas",
                 desc: "Precios especiales, descuento por volumen y etiquetas personalizadas con el tema de tu evento.",
                 isEvent: true,
               },
               {
-                emoji: "📦",
+                icon: "box",
                 title: "Mayoreo",
                 desc: "Desde 30 piezas con precio especial. Ideal para revender o surtir tu negocio.",
                 msg: "Hola! Me interesa hacer un pedido de MAYOREO con BOTA-NA.",
                 isEvent: false,
               },
               {
-                emoji: "📈",
+                icon: "trend",
                 title: "Distribuidor",
                 desc: "Pedidos recurrentes de 100+ piezas con el mejor precio disponible.",
                 msg: "Hola! Me interesa ser DISTRIBUIDOR de BOTA-NA.",
@@ -141,8 +142,8 @@ export function WholesaleSection({ onEventOpen }: { onEventOpen?: () => void }) 
                 key={card.title}
                 className="bg-[#111] border border-white/[.07] rounded-2xl p-5 flex gap-4 items-start card-lift hover:border-[#E53E3E]/30 cursor-pointer"
               >
-                <div className="w-11 h-11 rounded-xl bg-[#E53E3E]/10 flex items-center justify-center text-xl flex-shrink-0">
-                  {card.emoji}
+                <div className="w-11 h-11 rounded-xl bg-[#E53E3E]/10 flex items-center justify-center text-[#E53E3E] flex-shrink-0">
+                  <Ico name={card.icon} size={22} />
                 </div>
                 <div>
                   <div className="font-black text-white text-sm mb-1">{card.title}</div>
