@@ -2,27 +2,15 @@
 import Image from "next/image"
 import { memo, useState } from "react"
 import { useCart } from "./cart-context"
+import { CategoryIcon, CAT_COLOR, Ico } from "./icons"
 import type { Product } from "@/lib/products"
-
-export const CAT_COLOR: Record<string, string> = {
-  Botanas: "#FF3B30",
-  Cacahuates: "#FF9F0A",
-  Chips: "#FFD60A",
-  Gomitas: "#FF375F",
-  Papas: "#FF453A",
-  Bebidas: "#30D158",
-  Dulces: "#AC8E68",
-}
 
 interface Props {
   product: Product
   onAdd: (p: Product) => void
-  /** Tamaño fijo para rails horizontales */
-  rail?: boolean
-  priority?: boolean
 }
 
-function ProductCardBase({ product: p, onAdd, rail, priority }: Props) {
+function ProductCardBase({ product: p, onAdd }: Props) {
   const { items, addItem } = useCart()
   const [done, setDone] = useState(false)
   const [imgOk, setImgOk] = useState(true)
@@ -40,25 +28,22 @@ function ProductCardBase({ product: p, onAdd, rail, priority }: Props) {
   }
 
   return (
-    <article
-      className={"pcard " + (rail ? "w-[158px] sm:w-[210px] " : "") + (!available ? "opacity-50" : "")}
-    >
+    <article className={"pcard h-full " + (!available ? "opacity-50" : "")}>
       {/* Imagen */}
       <div
         className="relative aspect-[4/5] overflow-hidden"
-        style={{ background: "radial-gradient(120% 90% at 50% 12%, " + color + "38 0%, transparent 62%), #1b1b1e" }}
+        style={{ background: "radial-gradient(120% 90% at 50% 12%, " + color + "40 0%, transparent 62%), #1b1b1e" }}
       >
-        {/* Fallback emoji mientras no haya imagen */}
-        <div className="pimg absolute inset-0 grid place-items-center text-[4.5rem] sm:text-[5.5rem] select-none drop-shadow-[0_12px_20px_rgba(0,0,0,.45)]">
-          {p.emoji}
+        {/* Ícono de respaldo mientras no haya foto */}
+        <div className="pimg absolute inset-0 grid place-items-center text-white/45">
+          <CategoryIcon cat={p.cat} size={64} strokeWidth={1.3} />
         </div>
         {imgOk && (
           <Image
             src={p.img}
             alt={p.name}
             fill
-            sizes="(max-width:640px) 45vw, 220px"
-            priority={priority}
+            sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 23vw"
             onError={() => setImgOk(false)}
             className={"pimg " + (p.fit === "contain" ? "object-contain p-5" : "object-cover")}
           />
@@ -69,11 +54,10 @@ function ProductCardBase({ product: p, onAdd, rail, priority }: Props) {
           {p.isNew && available && (
             <span className="rounded-full bg-white px-2 py-[3px] text-[.6rem] font-bold uppercase tracking-wide text-black">Nuevo</span>
           )}
-          {p.pop && !p.isNew && available && (
-            <span className="rounded-full px-2 py-[3px] text-[.6rem] font-bold uppercase tracking-wide text-white" style={{ background: color }}>Top</span>
-          )}
           {p.spicy && (
-            <span className="glass-2 rounded-full px-2 py-[3px] text-[.6rem] font-semibold text-white/90">🌶 Picante</span>
+            <span className="glass-2 flex items-center gap-1 rounded-full px-2 py-[3px] text-[.6rem] font-semibold text-white/90">
+              <Ico name="flame" size={11} strokeWidth={2.4} style={{ color: "#FF6A3D" }} /> Picante
+            </span>
           )}
           {!available && (
             <span className="rounded-full bg-black/70 px-2 py-[3px] text-[.6rem] font-bold uppercase tracking-wide text-white/70">Agotado</span>
@@ -87,11 +71,11 @@ function ProductCardBase({ product: p, onAdd, rail, priority }: Props) {
         )}
       </div>
 
-      {/* Info */}
+      {/* Info — alturas fijas para que todas las tarjetas se alineen */}
       <div className="flex flex-1 flex-col p-3.5 sm:p-4">
-        {p.brand && <span className="text-[.62rem] font-semibold uppercase tracking-[.14em] text-white/40">{p.brand}</span>}
-        <h3 className="mt-0.5 text-[.95rem] sm:text-base font-semibold leading-tight tracking-tight text-white">{p.name}</h3>
-        <p className="mt-1 line-clamp-2 text-[.72rem] leading-snug text-white/45">{p.desc}</p>
+        <span className="h-3 text-[.62rem] font-semibold uppercase leading-3 tracking-[.14em] text-white/40">{p.brand ?? ""}</span>
+        <h3 className="mt-1 line-clamp-2 min-h-[2.35rem] text-[.92rem] font-semibold leading-[1.15rem] tracking-tight text-white sm:text-[.98rem]">{p.name}</h3>
+        <p className="mt-1 line-clamp-2 min-h-[1.9rem] text-[.7rem] leading-[.95rem] text-white/45">{p.desc}</p>
 
         <div className="mt-auto flex items-center justify-between pt-3.5">
           <div className="leading-none">
@@ -104,11 +88,7 @@ function ProductCardBase({ product: p, onAdd, rail, priority }: Props) {
             aria-label={"Agregar " + p.name + " al carrito"}
             className={"add-btn " + (done ? "done" : "")}
           >
-            {done ? (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7" /></svg>
-            ) : (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
-            )}
+            <Ico name={done ? "check" : "plus"} size={19} strokeWidth={3} />
           </button>
         </div>
       </div>
