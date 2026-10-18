@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useMemo } from "react"
 import Link from "next/link"
 import { NavBar } from "@/components/navbar"
 import { EventModal } from "@/components/event-modal"
+import { Ico, CategoryIcon } from "@/components/icons"
 
 const WA = "524774950232"
 const wa = (msg: string) => "https://wa.me/" + WA + "?text=" + encodeURIComponent(msg)
@@ -62,38 +63,40 @@ const STATS = [
 const BRANDS = ["Takis", "Barcel", "Runners", "Vualá", "BOTA-NA Artesanal", "Cacahuates", "Chips Vegetales", "Gomitas", "Chamoyadas", "Aguas Frescas"]
 
 const BENTO = [
-  { emoji: "📈", title: "Margen de 30–50%", desc: "Precio de distribuidor para que tu negocio gane desde la primera caja.", span: "sm:col-span-2", bg: "linear-gradient(135deg,#0f3d24,#0b1f15)" },
-  { emoji: "🏷️", title: "Etiquetas con tu tema", desc: "Nombre, colores o logo de tu evento en cada pieza.", span: "", bg: "linear-gradient(135deg,#3b1d5a,#1a0f2a)" },
-  { emoji: "⚡", title: "Respuesta en 2 horas", desc: "Cotización lista por WhatsApp, sin vueltas.", span: "", bg: "linear-gradient(135deg,#5a2a0c,#26120a)" },
-  { emoji: "🧾", title: "Factura incluida", desc: "Personas físicas y morales. Solo manda tu RFC.", span: "", bg: "linear-gradient(135deg,#0c3a5a,#0a1a26)" },
-  { emoji: "🍬", title: "Marcas que ya se venden solas", desc: "Takis, Barcel, Runners y Vualá junto a nuestras botanas artesanales: variedad para todos los gustos.", span: "sm:col-span-2", bg: "linear-gradient(135deg,#5a0f14,#26090b)" },
+  { icon: "trend", title: "Margen de 30–50%", desc: "Precio de distribuidor para que tu negocio gane desde la primera caja.", span: "sm:col-span-2", bg: "linear-gradient(135deg,#0f3d24,#0b1f15)" },
+  { icon: "tag", title: "Etiquetas con tu tema", desc: "Nombre, colores o logo de tu evento en cada pieza.", span: "", bg: "linear-gradient(135deg,#3b1d5a,#1a0f2a)" },
+  { icon: "zap", title: "Respuesta en 2 horas", desc: "Cotización lista por WhatsApp, sin vueltas.", span: "", bg: "linear-gradient(135deg,#5a2a0c,#26120a)" },
+  { icon: "receipt", title: "Factura incluida", desc: "Personas físicas y morales. Solo manda tu RFC.", span: "", bg: "linear-gradient(135deg,#0c3a5a,#0a1a26)" },
+  { icon: "sparkles", title: "Marcas que ya se venden solas", desc: "Takis, Barcel, Runners y Vualá junto a nuestras botanas artesanales: variedad para todos los gustos.", span: "sm:col-span-2", bg: "linear-gradient(135deg,#5a0f14,#26090b)" },
 ]
 
 const CASES = [
-  { id: "cafe",  icon: "🏫", tab: "Cafeterías",    title: "Surte tu cafetería o kiosco", desc: "Snacks que los estudiantes realmente piden, con pedidos recurrentes y precio de distribuidor. Tus vitrinas siempre llenas.", cta: "Quiero surtir mi negocio", msg: "Hola! Tengo una cafeteria/kiosco y me interesa surtirme con BOTA-NA de forma recurrente. Quisiera informacion de precios." },
-  { id: "social",icon: "🎂", tab: "Fiestas",       title: "Mesa de botanas para tu fiesta", desc: "Cumpleaños, XV años, bodas y graduaciones con etiquetas personalizadas que sorprenden a tus invitados.", cta: "Cotizar mi evento", msg: "Hola! Quiero botanas para un evento social (cumpleanos/XV/boda). Me interesa la opcion con etiquetas personalizadas." },
-  { id: "corp",  icon: "🏢", tab: "Empresas",      title: "Snacks para tu empresa o congreso", desc: "Reuniones de equipo, ferias y expos. Una mesa premium para impresionar a clientes y colaboradores.", cta: "Cotizar evento corporativo", msg: "Hola! Necesito botanas para un evento corporativo/empresarial. Quisiera una cotizacion para mi organizacion." },
-  { id: "dist",  icon: "📦", tab: "Distribuidores",title: "Empieza tu negocio de snacks", desc: "Precios preferenciales desde 100 piezas. Ganancia del 30–50% sobre tu inversión y soporte directo.", cta: "Quiero ser distribuidor", msg: "Hola! Me interesa ser DISTRIBUIDOR de BOTA-NA. Quisiera informacion sobre precios y condiciones para pedidos grandes." },
+  { id: "cafe",  icon: "coffee", tab: "Cafeterías",    title: "Surte tu cafetería o kiosco", desc: "Snacks que los estudiantes realmente piden, con pedidos recurrentes y precio de distribuidor. Tus vitrinas siempre llenas.", cta: "Quiero surtir mi negocio", msg: "Hola! Tengo una cafeteria/kiosco y me interesa surtirme con BOTA-NA de forma recurrente. Quisiera informacion de precios." },
+  { id: "social",icon: "cake", tab: "Fiestas",       title: "Mesa de botanas para tu fiesta", desc: "Cumpleaños, XV años, bodas y graduaciones con etiquetas personalizadas que sorprenden a tus invitados.", cta: "Cotizar mi evento", msg: "Hola! Quiero botanas para un evento social (cumpleanos/XV/boda). Me interesa la opcion con etiquetas personalizadas." },
+  { id: "corp",  icon: "building", tab: "Empresas",      title: "Snacks para tu empresa o congreso", desc: "Reuniones de equipo, ferias y expos. Una mesa premium para impresionar a clientes y colaboradores.", cta: "Cotizar evento corporativo", msg: "Hola! Necesito botanas para un evento corporativo/empresarial. Quisiera una cotizacion para mi organizacion." },
+  { id: "dist",  icon: "box", tab: "Distribuidores",title: "Empieza tu negocio de snacks", desc: "Precios preferenciales desde 100 piezas. Ganancia del 30–50% sobre tu inversión y soporte directo.", cta: "Quiero ser distribuidor", msg: "Hola! Me interesa ser DISTRIBUIDOR de BOTA-NA. Quisiera informacion sobre precios y condiciones para pedidos grandes." },
 ]
 
 // Precios por nivel — ya eran tuyos. Agrega aquí las botanas de marca cuando tengas tus precios.
 const TIERS = [
-  { emoji: "🥜", name: "Cacahuates", retail: 15, may: 12, dist: 10 },
-  { emoji: "🍠", name: "Chips",      retail: 25, may: 20, dist: 17 },
-  { emoji: "🐻", name: "Gomitas",    retail: 15, may: 12, dist: 11 },
-  { emoji: "🔥", name: "Papas",      retail: 20, may: 16, dist: 15 },
-  { emoji: "🌺", name: "Aguas",      retail: 22, may: 18, dist: 17 },
-  { emoji: "🥭", name: "Chamoyadas", retail: 30, may: 25, dist: 23 },
+  { name: "Cacahuates", retail: 15, may: 12, dist: 10 },
+  { name: "Chips",      retail: 25, may: 20, dist: 17 },
+  { name: "Gomitas",    retail: 15, may: 12, dist: 11 },
+  { name: "Papas",      retail: 20, may: 16, dist: 15 },
+  { name: "Aguas",      retail: 22, may: 18, dist: 17 },
+  { name: "Chamoyadas", retail: 30, may: 25, dist: 23 },
 ]
 
+const TIER_CAT: Record<string, string> = { Cacahuates: "Cacahuates", Chips: "Chips", Gomitas: "Gomitas", Papas: "Papas", Aguas: "Bebidas", Chamoyadas: "Bebidas" }
+
 const PACKAGES = [
-  { id: "facil",  name: "Paquete Fácil",  emoji: "🎈", desc: "Reuniones pequeñas, oficinas o mesas de snacks de hasta 30 personas.", pieces: "50 piezas", price: "$550", note: "precio base", color: "#FF9F0A",
+  { id: "facil",  name: "Paquete Fácil",  icon: "gift", desc: "Reuniones pequeñas, oficinas o mesas de snacks de hasta 30 personas.", pieces: "50 piezas", price: "$550", note: "precio base", color: "#FF9F0A",
     includes: ["Mix de cacahuates y gomitas", "Empaque individual por pieza", "Entrega en La Salle o a domicilio*", "Listo en 3 días hábiles"],
     msg: "Hola! Me interesa el PAQUETE FACIL de 50 piezas para mi evento. Quisiera mas informacion." },
-  { id: "fiesta", name: "Paquete Fiesta", emoji: "🎉", desc: "Cumpleaños, XV años, graduaciones y fiestas de 50–100 personas.", pieces: "100 piezas", price: "$980", note: "incluye etiquetas", color: "#FF3B30", badge: "Más popular",
+  { id: "fiesta", name: "Paquete Fiesta", icon: "sparkles", desc: "Cumpleaños, XV años, graduaciones y fiestas de 50–100 personas.", pieces: "100 piezas", price: "$980", note: "incluye etiquetas", color: "#FF3B30", badge: "Más popular",
     includes: ["Mix completo de toda la variedad", "Etiquetas personalizadas con tu tema", "Empaque individual por pieza", "Entrega a domicilio incluida*", "Listo en 5 días hábiles"],
     msg: "Hola! Me interesa el PAQUETE FIESTA de 100 piezas con etiquetas personalizadas. Quisiera cotizar mi evento." },
-  { id: "pro",    name: "Paquete Pro",    emoji: "🏆", desc: "Bodas, congresos, ferias y eventos corporativos de 100+ personas.", pieces: "200+ piezas", price: "Cotizar", note: "precio especial", color: "#30D158",
+  { id: "pro",    name: "Paquete Pro",    icon: "trophy", desc: "Bodas, congresos, ferias y eventos corporativos de 100+ personas.", pieces: "200+ piezas", price: "Cotizar", note: "precio especial", color: "#30D158",
     includes: ["Catálogo completo a tu elección", "Etiquetas con diseño personalizado", "Entrega coordinada al venue", "Anticipo 50% — resto al entregar", "Soporte directo antes y durante"],
     msg: "Hola! Me interesa el PAQUETE PRO para un evento grande. Quisiera una cotizacion personalizada." },
 ]
@@ -175,7 +178,7 @@ export default function B2BPage() {
             <div className="rise mt-9 flex flex-col items-center gap-3 sm:flex-row lg:justify-start justify-center" style={{ animationDelay: "300ms" }}>
               <button onClick={() => setQuoteOpen(true)} className="btn-primary w-full sm:w-auto">
                 Cotizar mi pedido en 2 min
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                <Ico name="arrowRight" size={16} strokeWidth={2.6} />
               </button>
               <a href={wa("Hola! Quiero cotizar botanas para mi evento/negocio con BOTA-NA.")} target="_blank" rel="noopener noreferrer" className="btn-ghost w-full sm:w-auto">
                 <WaIcon s={17} /> WhatsApp
@@ -185,8 +188,6 @@ export default function B2BPage() {
 
           {/* Tarjeta de cotización de muestra (flotante) */}
           <div className="rise relative mx-auto w-full max-w-sm" style={{ animationDelay: "380ms" }}>
-            <div className="float-a absolute -left-4 -top-6 z-10 text-5xl drop-shadow-xl" aria-hidden="true">🌶️</div>
-            <div className="float-b absolute -right-3 bottom-10 z-10 text-5xl drop-shadow-xl" aria-hidden="true">🍫</div>
             <div className="glass-2 rounded-[32px] p-6 shadow-[0_40px_80px_-30px_rgba(0,0,0,.9)]">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold uppercase tracking-[.14em] text-white/45">Tu cotización</span>
@@ -194,13 +195,13 @@ export default function B2BPage() {
               </div>
               <div className="mt-4 space-y-3">
                 {[
-                  ["🌶️", "Takis Fuego", "x 40"],
-                  ["🥔", "Chips Barcel", "x 30"],
-                  ["🍫", "Vualá Sorpresa", "x 20"],
-                  ["🥜", "Cacahuates", "x 10"],
-                ].map(([e, n, q]) => (
+                  ["Papas", "Takis Fuego", "x 40"],
+                  ["Papas", "Chips Barcel", "x 30"],
+                  ["Dulces", "Vualá Sorpresa", "x 20"],
+                  ["Cacahuates", "Cacahuates", "x 10"],
+                ].map(([c, n, q]) => (
                   <div key={n} className="flex items-center justify-between rounded-2xl bg-white/[.06] px-3.5 py-2.5">
-                    <span className="flex items-center gap-2.5 text-sm font-medium text-white/90"><span className="text-xl">{e}</span>{n}</span>
+                    <span className="flex items-center gap-2.5 text-sm font-medium text-white/90"><span className="grid h-8 w-8 place-items-center rounded-lg bg-white/10 text-white/80"><CategoryIcon cat={c} size={18} /></span>{n}</span>
                     <span className="text-sm font-semibold text-white/50">{q}</span>
                   </div>
                 ))}
@@ -241,7 +242,7 @@ export default function B2BPage() {
             {BENTO.map((b, i) => (
               <Reveal key={b.title} delay={i * 70} className={b.span}>
                 <div className="bento h-full p-6 sm:p-7" style={{ background: b.bg }}>
-                  <div className="text-4xl">{b.emoji}</div>
+                  <div className="grid h-14 w-14 place-items-center rounded-2xl bg-white/10 text-white"><Ico name={b.icon} size={28} strokeWidth={1.7} /></div>
                   <h3 className="mt-5 text-xl font-bold tracking-tight text-white">{b.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-white/55">{b.desc}</p>
                 </div>
@@ -267,7 +268,7 @@ export default function B2BPage() {
               </div>
             </div>
             <div key={activeCase.id} className="bento rise grid items-center gap-8 p-8 sm:grid-cols-[auto_1fr] sm:p-12" style={{ background: "linear-gradient(135deg,#1c1c1f,#141416)" }}>
-              <div className="float-a text-center text-[6rem] leading-none sm:text-[8rem]" aria-hidden="true">{activeCase.icon}</div>
+              <div className="float-a mx-auto grid h-28 w-28 place-items-center rounded-[34px] glass-2 text-white sm:h-36 sm:w-36" aria-hidden="true"><Ico name={activeCase.icon} size={64} strokeWidth={1.3} /></div>
               <div>
                 <h3 className="font-head text-[clamp(1.7rem,4vw,2.6rem)] text-white">{activeCase.title}</h3>
                 <p className="mt-3 max-w-xl text-base leading-relaxed text-white/55">{activeCase.desc}</p>
@@ -299,7 +300,7 @@ export default function B2BPage() {
                 const off = Math.round((1 - price / r.retail) * 100)
                 return (
                   <div key={r.name} className="bento p-5 text-center">
-                    <div className="text-3xl">{r.emoji}</div>
+                    <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-white/[.07] text-white"><CategoryIcon cat={TIER_CAT[r.name]} size={26} /></div>
                     <div className="mt-2 text-sm font-semibold text-white/80">{r.name}</div>
                     <div className="mt-3 flex items-baseline justify-center gap-2">
                       <span className="text-3xl font-extrabold tracking-tight text-white">${price}</span>
@@ -312,7 +313,7 @@ export default function B2BPage() {
               {/* Botanas de marca: precio por cotización */}
               <div className="bento col-span-2 flex flex-col items-center justify-between gap-3 p-5 text-center sm:col-span-3 sm:flex-row sm:text-left" style={{ background: "linear-gradient(135deg,#3b1d5a,#1a0f2a)" }}>
                 <div className="flex items-center gap-4">
-                  <span className="text-4xl">🌶️🍫</span>
+                  <span className="grid h-12 w-12 flex-shrink-0 place-items-center rounded-2xl bg-white/10 text-white"><Ico name="flame" size={24} /></span>
                   <div>
                     <div className="font-bold text-white">Takis · Barcel · Runners · Vualá</div>
                     <div className="text-sm text-white/50">Precio de mayoreo según volumen — cotiza y te respondemos hoy.</div>
@@ -334,7 +335,7 @@ export default function B2BPage() {
             <div className="bento p-6 sm:p-9">
               <div className="flex flex-wrap justify-center gap-2">
                 {TIERS.map((t, i) => (
-                  <button key={t.name} onClick={() => setCalcCat(i)} className="cat-chip" data-active={i === calcCat}>{t.emoji} {t.name}</button>
+                  <button key={t.name} onClick={() => setCalcCat(i)} className="cat-chip" data-active={i === calcCat}><CategoryIcon cat={TIER_CAT[t.name]} size={16} /> {t.name}</button>
                 ))}
               </div>
 
@@ -372,7 +373,7 @@ export default function B2BPage() {
               <Reveal key={pkg.id} delay={i * 90}>
                 <div className="bento relative flex h-full flex-col p-7 sm:p-8" style={pkg.badge ? { borderColor: pkg.color + "66", boxShadow: "0 0 0 1px " + pkg.color + "33, 0 30px 80px -30px " + pkg.color + "66" } : undefined}>
                   {pkg.badge && <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-3.5 py-1 text-[.65rem] font-bold uppercase tracking-wider text-white" style={{ background: pkg.color }}>{pkg.badge}</span>}
-                  <div className="text-4xl">{pkg.emoji}</div>
+                  <div className="grid h-14 w-14 place-items-center rounded-2xl text-white" style={{ background: pkg.color + "33", color: pkg.color }}><Ico name={pkg.icon} size={28} strokeWidth={1.8} /></div>
                   <h3 className="font-head mt-4 text-2xl text-white">{pkg.name}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-white/45">{pkg.desc}</p>
                   <div className="my-6 border-y border-white/[.07] py-5">
@@ -381,7 +382,7 @@ export default function B2BPage() {
                   </div>
                   <ul className="flex-1 space-y-2.5">
                     {pkg.includes.map(it => (
-                      <li key={it} className="flex gap-2.5 text-sm text-white/65"><span style={{ color: pkg.color }}>✓</span>{it}</li>
+                      <li key={it} className="flex gap-2.5 text-sm text-white/65"><Ico name="check" size={16} strokeWidth={3} className="mt-0.5 flex-shrink-0" style={{ color: pkg.color }} />{it}</li>
                     ))}
                   </ul>
                   <p className="mt-4 text-[.65rem] text-white/25">*Entrega cotizada por separado según distancia</p>
@@ -445,7 +446,7 @@ export default function B2BPage() {
       <section className="relative overflow-hidden px-5 py-24 sm:py-32">
         <div className="aurora" aria-hidden="true"><i /><i /><i /></div>
         <Reveal className="relative z-10 mx-auto max-w-2xl text-center">
-          <div className="float-a mb-4 inline-block text-6xl" aria-hidden="true">🌶️</div>
+          <div className="float-a mx-auto mb-5 grid h-16 w-16 place-items-center rounded-[22px] text-white" style={{ background: "var(--grad-brand)" }} aria-hidden="true"><Ico name="flame" size={32} /></div>
           <h2 className="font-head text-[clamp(2.6rem,8vw,5rem)] text-grad-soft" style={{ lineHeight: 1 }}>¿Listo para<br /><span className="text-grad">arrancar?</span></h2>
           <p className="mx-auto mt-5 max-w-md text-base text-white/55">Escríbenos hoy. En menos de 2 horas tienes tu cotización lista.</p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
