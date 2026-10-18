@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect, useRef } from "react"
+import { Ico, CategoryIcon } from "./icons"
 
 const WA = "524774950232"
 const STORAGE_KEY = "botana_card"
@@ -229,7 +230,7 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
     return (
       <div className="pt-3">
         <div className="text-center mb-7">
-          <div className="text-5xl mb-3">🎁</div>
+          <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-3xl bg-white/[.07] text-white/70"><Ico name="gift" size={30} /></div>
           <h2 className="font-head text-[2rem] leading-none mb-1">Tu BOTA-Card</h2>
           <p className="text-white/40 text-sm leading-relaxed">
             Acumula puntos con cada compra.
@@ -284,7 +285,7 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
     return (
       <div className="pt-3">
         <div className="text-center mb-7">
-          <div className="text-5xl mb-3">📱</div>
+          <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-3xl bg-white/[.07] text-white/70"><Ico name="phone" size={30} /></div>
           <h2 className="font-head text-[2rem] leading-none mb-1">Activa tu Tarjeta</h2>
           <p className="text-white/40 text-sm">
             {"Hola @" + card.username + ", siguenos en Instagram para activar tus puntos"}
@@ -343,7 +344,7 @@ export function LoyaltyModal({ isOpen, onClose }: Props) {
     return (
       <div className="pt-2">
         <div className="text-center mb-5">
-          <div className="text-4xl mb-2">🥜</div>
+          <div className="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-2xl bg-white/[.07] text-white/70"><CategoryIcon cat="Cacahuates" size={26} /></div>
           <h2 className="font-head text-[2rem] leading-none mb-1">Mi BOTA-Card</h2>
           <p className="text-[.68rem] text-white/25 uppercase tracking-[.15em] font-mono">
             {"@" + card.username}
