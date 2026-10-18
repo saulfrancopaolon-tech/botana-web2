@@ -58,8 +58,8 @@ export const PRODUCTS: ProductBase[] = [
 
   // ═══════════ REFRESCOS ═══════════
   // 📷 Imágenes: /public/images/coca-cola.webp y /public/images/coca-cola-zero.webp
-  { id: 29, name: "Coca-Cola",      desc: "Coca-Cola original bien fría. Lata de 355 ml.",        price: 15, cat: "Bebidas", tags: ["355 ml"], pop: true,  spicy: false, natural: false, emoji: "🥤", img: "/images/coca-cola.webp",      groupId: "refrescos", flavor: "Coca-Cola",      fit: "contain", brand: "Coca-Cola", isNew: true },
-  { id: 30, name: "Coca-Cola Zero", desc: "Todo el sabor, cero azúcar. Lata de 355 ml bien fría.", price: 15, cat: "Bebidas", tags: ["355 ml"], pop: false, spicy: false, natural: false, emoji: "🥤", img: "/images/coca-cola-zero.webp", groupId: "refrescos", flavor: "Coca-Cola Zero", fit: "contain", brand: "Coca-Cola", isNew: true },
+  { id: 29, name: "Coca-Cola",      desc: "Coca-Cola original bien fría. Botella de 355 ml.",        price: 15, cat: "Bebidas", tags: ["355 ml"], pop: true,  spicy: false, natural: false, emoji: "🥤", img: "/images/coca-cola.webp",      groupId: "refrescos", flavor: "Coca-Cola",      fit: "contain", brand: "Coca-Cola", isNew: true },
+  { id: 30, name: "Coca-Cola Zero", desc: "Todo el sabor, cero azúcar. Botella de 355 ml bien fría.", price: 15, cat: "Bebidas", tags: ["355 ml"], pop: false, spicy: false, natural: false, emoji: "🥤", img: "/images/coca-cola-zero.webp", groupId: "refrescos", flavor: "Coca-Cola Zero", fit: "contain", brand: "Coca-Cola", isNew: true },
 
 ]
 
