@@ -556,6 +556,33 @@ button, a { min-height: 0; }
   .btn-primary:hover, .btn-ghost:hover { transform: none; }
 }
 
-/* Entrada de un recuadro de la galería */
-.tile-in { animation: tileIn .8s var(--ease-apple) both; }
-@keyframes tileIn { from { opacity: 0; transform: scale(.88); filter: blur(8px); } to { opacity: 1; transform: none; filter: none; } }
+/* ═════ Galería de portada: giro 3D + entrada en cascada ═════ */
+.flip-scene { perspective: 1100px; }
+.flip-lift { transition: transform .55s var(--ease-apple), box-shadow .55s var(--ease-apple); will-change: transform; }
+.flip-inner {
+  position: relative; width: 100%; height: 100%;
+  transform-style: preserve-3d; -webkit-transform-style: preserve-3d;
+  transition-property: transform; transition-timing-function: cubic-bezier(.45, 0, .2, 1);
+  will-change: transform;
+}
+.flip-face {
+  position: absolute; inset: 0;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  border-radius: inherit;
+}
+.tile-enter { animation: tileEnter .9s var(--ease-apple) both; }
+@keyframes tileEnter {
+  from { opacity: 0; transform: translateY(30px) scale(.84) rotate(-3deg); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Resplandor que gira lentamente detrás de la galería */
+.gallery-glow {
+  position: absolute; inset: -12%; z-index: 0; pointer-events: none; border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(255,59,48,.55), rgba(255,159,10,.5), rgba(191,90,242,.4), rgba(10,132,255,.4), rgba(255,59,48,.55));
+  filter: blur(60px); opacity: .5;
+  animation: glowSpin 26s linear infinite;
+  will-change: transform;
+}
+@keyframes glowSpin { to { transform: rotate(360deg); } }
+@media (max-width: 640px) { .gallery-glow { filter: blur(38px); opacity: .4; } }
