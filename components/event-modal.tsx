@@ -1,4 +1,5 @@
 "use client"
+import { CategoryIcon } from "./icons"
 import { useState, useEffect } from "react"
 
 const WA = "524774950232"
@@ -29,8 +30,8 @@ const EVENT_PRODUCTS = [
   { id: 22, name: "Chips Barcel Jalapeño",   emoji: "🥔", cat: "Papas"   ,    retail: 20, event: 17, cost: 0 },
   { id: 23, name: "Chips Barcel Naturales",  emoji: "🥔", cat: "Papas"   ,    retail: 20, event: 17, cost: 0 },
   { id: 24, name: "Chips Barcel Fuego",      emoji: "🔥", cat: "Papas"   ,    retail: 20, event: 17, cost: 0 },
-  { id: 25, name: "Takis Fuego",             emoji: "🌶️", cat: "Botanas",    retail: 20, event: 17, cost: 0 },
-  { id: 26, name: "Takis Original",          emoji: "🌽", cat: "Botanas",    retail: 20, event: 17, cost: 0 },
+  { id: 25, name: "Takis Fuego",             emoji: "🌶️", cat: "Papas",       retail: 20, event: 17, cost: 0 },
+  { id: 26, name: "Takis Original",          emoji: "🌽", cat: "Papas",       retail: 20, event: 17, cost: 0 },
   { id: 27, name: "Runners",                 emoji: "🍿", cat: "Papas"   ,    retail: 20, event: 17, cost: 0 },
   { id: 29, name: "Coca-Cola 355 ml",         emoji: "🥤", cat: "Bebidas",    retail: 15, event: 13, cost: 0 },
   { id: 30, name: "Coca-Cola Zero 355 ml",    emoji: "🥤", cat: "Bebidas",    retail: 15, event: 13, cost: 0 },
@@ -249,7 +250,7 @@ export function EventModal({ isOpen, onClose }: Props) {
                   const qty = getQty(p.id)
                   return (
                     <div key={p.id} className={"flex items-center gap-3 p-3 rounded-2xl border transition-all " + (qty > 0 ? "bg-[#E53E3E]/8 border-[#E53E3E]/30" : "bg-white/[.03] border-white/[.07]")}>
-                      <span className="text-2xl flex-shrink-0">{p.emoji}</span>
+                      <span className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-xl bg-white/[.07] text-white/80"><CategoryIcon cat={p.cat} size={22} /></span>
                       <div className="flex-1 min-w-0">
                         <div className="font-bold text-[.8rem] text-white truncate">{p.name}</div>
                         <div className="flex items-center gap-2 mt-0.5">
@@ -334,7 +335,7 @@ export function EventModal({ isOpen, onClose }: Props) {
                     if (!p) return null
                     return (
                       <div key={sel.id} className="flex justify-between items-center text-sm">
-                        <span className="text-white/60">{p.emoji} {p.name} x{String(sel.qty)}</span>
+                        <span className="text-white/60">{p.name} x{String(sel.qty)}</span>
                         <span className="font-mono font-bold">${p.event * sel.qty}</span>
                       </div>
                     )
