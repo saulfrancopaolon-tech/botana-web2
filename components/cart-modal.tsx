@@ -1,5 +1,6 @@
 "use client"
 import { useEffect } from "react"
+import { Ico, CategoryIcon } from "./icons"
 import { useCart } from "./cart-context"
 
 const WA = "524774950232"
@@ -23,7 +24,7 @@ export function CartModal({ isOpen, onClose }: Props) {
   if (!isOpen) return null
 
   const waMsg = encodeURIComponent(
-    "🌶 *Pedido BOTA-NA*\n\n" +
+    "*Pedido BOTA-NA*\n\n" +
     items.map(i => `• ${i.name} x${i.qty} — $${i.price * i.qty}`).join("\n") +
     `\n\n*Total: $${totalPrice} MXN*\n\nSoy de La Salle Bajío y quisiera ordenar. ¡Gracias!`
   )
@@ -45,7 +46,7 @@ export function CartModal({ isOpen, onClose }: Props) {
 
         {items.length === 0 ? (
           <div className="text-center py-12 text-white/30">
-            <div className="text-5xl mb-3">🛒</div>
+            <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-3xl bg-white/[.06] text-white/40"><Ico name="cart" size={30} /></div>
             <p className="text-sm uppercase tracking-widest font-bold">Tu carrito está vacío</p>
             <p className="text-xs mt-1 text-white/20">Agrega algo del menú</p>
           </div>
@@ -54,7 +55,7 @@ export function CartModal({ isOpen, onClose }: Props) {
             <div className="space-y-1">
               {items.map((item, idx) => (
                 <div key={item.id} className="flex items-center gap-3 py-3 border-b border-white/5 last:border-0">
-                  <div className="w-12 h-12 rounded-xl bg-[#181818] flex items-center justify-center text-2xl flex-shrink-0">{item.emoji}</div>
+                  <div className="w-12 h-12 rounded-xl bg-[#181818] flex items-center justify-center text-white/60 flex-shrink-0"><CategoryIcon cat={item.cat} size={24} /></div>
                   <div className="flex-1 min-w-0">
                     <div className="font-bold text-sm truncate">{item.name}</div>
                     <div className="text-white/35 text-xs">Cantidad: {item.qty}</div>
