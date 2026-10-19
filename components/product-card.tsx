@@ -78,17 +78,18 @@ function ProductCardBase({ product: p, onAdd }: Props) {
         <p className="mt-1 line-clamp-2 min-h-[1.9rem] text-[.7rem] leading-[.95rem] text-white/45">{p.desc}</p>
 
         <div className="mt-auto flex items-center justify-between pt-3.5">
-          <div className="leading-none">
-            <span className="text-lg font-bold tracking-tight text-white">${p.price}</span>
-            {p.tags[0] && <span className="ml-1.5 text-[.65rem] text-white/35">{p.tags[0]}</span>}
+          <div className="min-w-0 leading-none">
+            <span className="text-[1.05rem] font-bold tracking-tight text-white sm:text-lg">${p.price}</span>
+            {p.tags[0] && <span className="ml-1.5 hidden text-[.65rem] text-white/35 sm:inline">{p.tags[0]}</span>}
           </div>
           <button
             onClick={add}
             disabled={!available}
             aria-label={"Agregar " + p.name + " al carrito"}
-            className={"add-btn " + (done ? "done" : "")}
+            className={"add-pill " + (done ? "done" : "")}
           >
-            <Ico name={done ? "check" : "plus"} size={19} strokeWidth={3} />
+            <Ico name={done ? "check" : "plus"} size={16} strokeWidth={3} />
+            {done ? "Listo" : "Agregar"}
           </button>
         </div>
       </div>
