@@ -26,6 +26,7 @@ const P: Record<string, ReactNode> = {
   close: <path d="M18 6 6 18M6 6l12 12" />,
   check: <path d="M20 6 9 17l-5-5" />,
   plus: <path d="M12 5v14M5 12h14" />,
+  minus: <path d="M5 12h14" />,
   arrowRight: <path d="M5 12h14M12 5l7 7-7 7" />,
   arrowDown: <path d="M12 5v14M5 12l7 7 7-7" />,
   cart: <><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6" /></>,

@@ -8,9 +8,11 @@ import type { Product } from "@/lib/products"
 interface Props {
   product: Product
   onAdd: (p: Product) => void
+  /** Al tocar la tarjeta (no el botón Agregar) se abre el detalle */
+  onOpen?: (p: Product) => void
 }
 
-function ProductCardBase({ product: p, onAdd }: Props) {
+function ProductCardBase({ product: p, onAdd, onOpen }: Props) {
   const { items, addItem } = useCart()
   const [done, setDone] = useState(false)
   const [imgOk, setImgOk] = useState(true)
@@ -28,7 +30,13 @@ function ProductCardBase({ product: p, onAdd }: Props) {
   }
 
   return (
-    <article className={"pcard h-full " + (!available ? "opacity-50" : "")}>
+    <article
+      className={"pcard h-full " + (onOpen ? "cursor-pointer " : "") + (!available ? "opacity-50" : "")}
+      onClick={onOpen ? () => onOpen(p) : undefined}
+      onKeyDown={onOpen ? e => { if (e.key === "Enter" && e.target === e.currentTarget) onOpen(p) } : undefined}
+      tabIndex={onOpen ? 0 : undefined}
+      aria-label={onOpen ? "Ver detalles de " + p.name : undefined}
+    >
       {/* Imagen */}
       <div
         className="relative aspect-[4/5] overflow-hidden"

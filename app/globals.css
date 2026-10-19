@@ -701,3 +701,101 @@ html[data-intro="done"] .bn-intro { display: none; }
 .add-pill:disabled { opacity: .4; pointer-events: none; }
 .add-pill.done { background: #30D158; color: #fff; animation: pop .45s var(--spring); }
 @media (hover: hover) { .add-pill:hover { transform: scale(1.05); } }
+
+
+/* ═══════════════════════════════════════════════════════
+   Sistema iOS — tokens, vidrio, botones y utilidades
+   (versión corregida: CSS puro, sin @apply de clases que no existen)
+═══════════════════════════════════════════════════════ */
+:root {
+  --ios-system-blue: #0A84FF;
+  --ios-system-green: #30D158;
+  --ios-system-red: #FF453A;
+  --ios-system-orange: #FF9F0A;
+  --ios-system-yellow: #FFD60A;
+  --ios-system-purple: #BF5AF2;
+  --ios-system-pink: #FF375F;
+  --ios-system-teal: #64D2FF;
+  --ios-radius-sm: 8px;
+  --ios-radius-pill: 999px;
+  --ios-radius-header: 20px;
+  --ios-shadow-sm: 0 1px 3px rgba(0, 0, 0, .35);
+  --ios-shadow-md: 0 4px 12px rgba(0, 0, 0, .4);
+  --ios-shadow-xl: 0 20px 50px -12px rgba(0, 0, 0, .7);
+  --ios-font-size: 17px;
+  --ios-font-size-sm: 15px;
+  --ios-font-size-title: 21px;
+  --ios-font-size-large-title: 34px;
+  --ios-transition-fast: 150ms cubic-bezier(.25, .46, .45, .94);
+  --ios-transition-moderate: 200ms cubic-bezier(.25, .46, .45, .94);
+  --ios-transition-slow: 300ms cubic-bezier(.25, .46, .45, .94);
+  --ios-transition-bounce: 400ms cubic-bezier(.68, -.55, .265, 1.55);
+}
+
+/* Vidrio: tres intensidades (glass-2 ya existe más arriba) */
+.glass-3 {
+  background: rgba(40, 40, 44, .72);
+  backdrop-filter: blur(32px) saturate(190%);
+  -webkit-backdrop-filter: blur(32px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, .14);
+}
+
+/* Botones estilo iOS */
+.btn-ios {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border-radius: 12px; font-weight: 600; touch-action: manipulation;
+  transition: transform var(--ios-transition-fast), background var(--ios-transition-moderate), opacity var(--ios-transition-moderate);
+}
+.btn-ios:active { transform: scale(.97); }
+.btn-ios:disabled { opacity: .5; pointer-events: none; }
+.btn-ios-primary { background: var(--ios-system-blue); color: #fff; }
+.btn-ios-primary:hover { background: #3395ff; }
+.btn-ios-primary:active { background: #0070e0; }
+.btn-ios-secondary { background: rgba(255, 255, 255, .1); color: #fff; }
+.btn-ios-secondary:hover { background: rgba(255, 255, 255, .16); }
+.btn-ios-outline { border: 1px solid rgba(255, 255, 255, .2); color: #fff; }
+.btn-ios-outline:hover { background: rgba(255, 255, 255, .06); }
+
+/* Interruptor (toggle) estilo iOS: <button class="btn-ios-toggle checked"> */
+.btn-ios-toggle { position: relative; width: 51px; height: 31px; border-radius: 99px; background: rgba(255, 255, 255, .18); transition: background .25s; flex-shrink: 0; }
+.btn-ios-toggle::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; box-shadow: 0 3px 8px rgba(0, 0, 0, .35); transition: transform .3s var(--spring); }
+.btn-ios-toggle.checked { background: var(--ios-system-green); }
+.btn-ios-toggle.checked::after { transform: translateX(20px); }
+
+/* Retroalimentación táctil (igual que .tap) */
+.tap-feedback { transition: transform .22s var(--ease-apple); }
+.tap-feedback:active { transform: scale(.97); }
+
+/* Retrasos de animación */
+.animation-delay-100 { animation-delay: 100ms; }
+.animation-delay-200 { animation-delay: 200ms; }
+.animation-delay-300 { animation-delay: 300ms; }
+.animation-delay-400 { animation-delay: 400ms; }
+.animation-delay-500 { animation-delay: 500ms; }
+.animation-delay-600 { animation-delay: 600ms; }
+.animation-delay-800 { animation-delay: 800ms; }
+.animation-delay-1000 { animation-delay: 1000ms; }
+
+/* Para desactivar transiciones en un elemento puntual */
+.reduce-motion, .reduce-motion * { transition: none !important; animation: none !important; }
+
+/* Transición entre páginas (solo opacidad) */
+.page-in { animation: pageIn .4s ease both; }
+@keyframes pageIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* Hoja de detalle del producto */
+.sheet-backdrop { animation: sheetFade .3s ease both; }
+.sheet-backdrop.is-out { animation: sheetFadeOut .26s ease both; }
+.sheet-panel { animation: sheetUp .45s var(--ease-apple) both; will-change: transform; }
+.sheet-panel.is-out { animation: sheetDown .26s cubic-bezier(.5, 0, .75, 0) both; }
+@keyframes sheetFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sheetFadeOut { to { opacity: 0; } }
+@keyframes sheetUp { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes sheetDown { to { transform: translateY(100%); } }
+@media (min-width: 640px) {
+  .sheet-panel { animation-name: sheetPop; }
+  .sheet-panel.is-out { animation-name: sheetPopOut; }
+  @keyframes sheetPop { from { opacity: 0; transform: scale(.94) translateY(16px); } to { opacity: 1; transform: none; } }
+  @keyframes sheetPopOut { to { opacity: 0; transform: scale(.96); } }
+}
+@media (prefers-reduced-motion: reduce) { .page-in, .sheet-panel, .sheet-backdrop { animation: none !important; } }

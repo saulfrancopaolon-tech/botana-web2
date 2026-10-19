@@ -13,6 +13,7 @@ import { LoyaltyModal } from "@/components/loyalty-modal"
 import { Toast, LoyaltyPromo } from "@/components/ui-components"
 import { AnimateIn } from "@/components/animations"
 import { Ico } from "@/components/icons"
+import { ProductSheet } from "@/components/product-sheet"
 
 const SHEETS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSQKeuTywAmniswIKciTQS0hI-fMIm4l0DRiGATcUpA_eff42eVS6171CngdgtGphWUADrllm5dcxe1/pub?output=csv"
 
@@ -22,6 +23,7 @@ export default function Page() {
   const [stockData, setStockData] = useState<Record<number, boolean>>({})
   const [cartOpen, setCartOpen] = useState(false)
   const [loyaltyOpen, setLoyaltyOpen] = useState(false)
+  const [detail, setDetail] = useState<Product | null>(null)
   const [toast, setToast] = useState({ msg: "", show: false })
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const touch = useRef<{ x: number; y: number; dx: number; dy: number } | null>(null)
@@ -161,6 +163,7 @@ export default function Page() {
             products={filtered}
             showGroups={showRails}
             onAddToCart={showToast}
+            onOpenProduct={setDetail}
           />
         </section>
       </main>
@@ -200,6 +203,7 @@ export default function Page() {
         <p className="mt-6 text-[11px] text-white/20">2025 BOTA-NA por Saúl y Aranza</p>
       </footer>
 
+      <ProductSheet product={detail} onClose={() => setDetail(null)} onAdded={showToast} />
       <CartModal isOpen={cartOpen} onClose={() => setCartOpen(false)} />
       <LoyaltyModal isOpen={loyaltyOpen} onClose={() => setLoyaltyOpen(false)} />
       <Toast message={toast.msg} show={toast.show} />

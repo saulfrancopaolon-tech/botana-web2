@@ -15,23 +15,22 @@ export function Hero({ products, onMenuClick, onPickProduct }: HeroProps) {
   const textRef = useRef<HTMLDivElement>(null)
   const galRef = useRef<HTMLDivElement>(null)
 
-  // Parallax: al hacer scroll el texto sube y se desvanece, y la galería se encoge y se inclina
+  // Parallax: el texto se mueve más lento que la página y se desvanece; la galería crece un poco
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
     let raf = 0
     const run = () => {
       raf = 0
       const y = window.scrollY
-      const h = window.innerHeight * 0.9
-      if (y > h * 1.3) return
-      const p = Math.min(Math.max(y / h, 0), 1)
+      const h = window.innerHeight
+      if (y > h * 1.6) return
       if (textRef.current) {
-        textRef.current.style.transform = "translate3d(0," + p * -70 + "px,0)"
-        textRef.current.style.opacity = String(1 - p * 0.9)
+        textRef.current.style.transform = "translate3d(0," + y * 0.3 + "px,0)"
+        textRef.current.style.opacity = String(Math.max(0, 1 - y / (h * 1.1)))
       }
       if (galRef.current) {
-        galRef.current.style.transform = "translate3d(0," + p * -40 + "px,0) scale(" + (1 - p * 0.08) + ") rotate(" + p * -2 + "deg)"
-        galRef.current.style.opacity = String(1 - p * 0.55)
+        galRef.current.style.transform = "translate3d(0," + y * 0.12 + "px,0) scale(" + (1 + Math.min(y, h) * 0.00012) + ")"
+        galRef.current.style.opacity = String(Math.max(0, 1 - y / (h * 1.5)))
       }
     }
     const onScroll = () => { if (!raf) raf = requestAnimationFrame(run) }
