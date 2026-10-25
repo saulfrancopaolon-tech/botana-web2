@@ -3,6 +3,7 @@ import type { Product } from "@/lib/products"
 import { ProductCard } from "./product-card"
 import { AnimateIn } from "./animations"
 import { ScrollReveal } from "./scroll-fx"
+import { collapseVariants } from "@/lib/variants"
 import { CategoryIcon, CAT_COLOR, Ico } from "./icons"
 
 interface GridProps {
@@ -12,6 +13,8 @@ interface GridProps {
   showGroups: boolean
   /** Abre el detalle de un producto */
   onOpenProduct?: (p: Product) => void
+  /** Abre el menú de sabor de un grupo (ej. Vualá) */
+  onPickFlavor?: (variants: Product[]) => void
 }
 
 const CAT_ORDER = ["Papas", "Cacahuates", "Chips", "Gomitas", "Bebidas", "Dulces"]
@@ -36,7 +39,7 @@ const tidy = (list: Product[]) => [...list].sort((a, b) => rank(a) - rank(b))
 
 const GRID = "grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4"
 
-export function ProductGrid({ products, onAddToCart, showGroups, onOpenProduct }: GridProps) {
+export function ProductGrid({ products, onAddToCart, showGroups, onOpenProduct, onPickFlavor }: GridProps) {
   if (!products.length) {
     return (
       <div className="py-24 text-center">
@@ -51,7 +54,7 @@ export function ProductGrid({ products, onAddToCart, showGroups, onOpenProduct }
     return (
       <div className="space-y-14 sm:space-y-16">
         {CAT_ORDER.map(cat => {
-          const list = tidy(products.filter(p => p.cat === cat))
+          const list = collapseVariants(tidy(products.filter(p => p.cat === cat)))
           if (!list.length) return null
           const color = CAT_COLOR[cat]
           return (
@@ -69,9 +72,9 @@ export function ProductGrid({ products, onAddToCart, showGroups, onOpenProduct }
                 </header>
               </AnimateIn>
               <div className={GRID}>
-                {list.map((p, i) => (
-                  <ScrollReveal key={p.id} delay={(i % 4) * 70} className="h-full">
-                    <ProductCard product={p} onAdd={onAddToCart} onOpen={onOpenProduct} />
+                {list.map((it, i) => (
+                  <ScrollReveal key={it.product.id} delay={(i % 4) * 70} className="h-full">
+                    <ProductCard product={it.product} variants={it.variants} onAdd={onAddToCart} onOpen={onOpenProduct} onPickFlavor={onPickFlavor} />
                   </ScrollReveal>
                 ))}
               </div>
@@ -84,9 +87,9 @@ export function ProductGrid({ products, onAddToCart, showGroups, onOpenProduct }
 
   return (
     <div className={GRID}>
-      {tidy(products).map((p, i) => (
-        <ScrollReveal key={p.id} delay={(i % 4) * 70} className="h-full">
-          <ProductCard product={p} onAdd={onAddToCart} onOpen={onOpenProduct} />
+      {collapseVariants(tidy(products)).map((it, i) => (
+        <ScrollReveal key={it.product.id} delay={(i % 4) * 70} className="h-full">
+          <ProductCard product={it.product} variants={it.variants} onAdd={onAddToCart} onOpen={onOpenProduct} onPickFlavor={onPickFlavor} />
         </ScrollReveal>
       ))}
     </div>

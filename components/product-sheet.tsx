@@ -7,6 +7,8 @@ import type { Product } from "@/lib/products"
 
 interface Props {
   product: Product | null
+  /** Sabores del grupo (ej. Vualá); si hay más de uno se muestra el selector */
+  variants?: Product[]
   onClose: () => void
   onAdded: (p: Product) => void
 }
@@ -16,17 +18,18 @@ interface Props {
  * y aparece centrada en pantallas grandes. Se cierra con la X, tocando fuera,
  * con Escape o deslizando hacia abajo.
  */
-export function ProductSheet({ product, onClose, onAdded }: Props) {
+export function ProductSheet({ product, variants, onClose, onAdded }: Props) {
   const { addItem } = useCart()
   const [qty, setQty] = useState(1)
   const [closing, setClosing] = useState(false)
   const [imgOk, setImgOk] = useState(true)
+  const [sel, setSel] = useState<number | null>(null)
   const panel = useRef<HTMLDivElement>(null)
   const drag = useRef<{ y0: number; dy: number } | null>(null)
 
   // Reinicia el estado cada vez que se abre un producto distinto
   useEffect(() => {
-    if (product) { setQty(1); setClosing(false); setImgOk(true) }
+    if (product) { setQty(1); setClosing(false); setImgOk(true); setSel(product.id) }
   }, [product])
 
   const close = useCallback(() => {
@@ -46,7 +49,8 @@ export function ProductSheet({ product, onClose, onAdded }: Props) {
   }, [product, close])
 
   if (!product) return null
-  const p = product
+  const list = variants && variants.length > 1 ? variants : null
+  const p = list ? (list.find(v => v.id === sel) ?? product) : product
   const color = CAT_COLOR[p.cat] ?? "#FF3B30"
   const available = p.inStock !== false
 
@@ -93,7 +97,7 @@ export function ProductSheet({ product, onClose, onAdded }: Props) {
           onTouchEnd={onTouchEnd}
         >
           <span className="absolute left-1/2 top-2.5 z-10 h-1.5 w-10 -translate-x-1/2 rounded-full bg-white/30 sm:hidden" />
-          <div className="absolute inset-0 grid place-items-center text-white/45"><CategoryIcon cat={p.cat} size={84} strokeWidth={1.2} /></div>
+          {!imgOk && <div className="absolute inset-0 grid place-items-center text-white/45"><CategoryIcon cat={p.cat} size={84} strokeWidth={1.2} /></div>}
           {imgOk && (
             <Image src={p.img} alt={p.name} fill sizes="448px" onError={() => setImgOk(false)} className={p.fit === "contain" ? "object-contain p-6" : "object-cover"} />
           )}
@@ -105,7 +109,7 @@ export function ProductSheet({ product, onClose, onAdded }: Props) {
         {/* Información */}
         <div className="px-5 pt-4">
           {p.brand && <div className="text-[.68rem] font-semibold uppercase tracking-[.16em] text-white/40">{p.brand}</div>}
-          <h2 className="font-head mt-1 text-[1.9rem] text-white">{p.name}</h2>
+          <h2 className="font-head mt-1 text-[1.9rem] text-white">{list ? (product.baseName ?? p.name) : p.name}</h2>
 
           <div className="mt-3 flex flex-wrap gap-1.5">
             <span className="rounded-full px-2.5 py-1 text-[.68rem] font-semibold text-white" style={{ background: color + "CC" }}>{p.cat}</span>
@@ -117,6 +121,28 @@ export function ProductSheet({ product, onClose, onAdded }: Props) {
             {p.tags.map(t => <span key={t} className="rounded-full bg-white/10 px-2.5 py-1 text-[.68rem] font-semibold text-white/70">{t}</span>)}
             {!available && <span className="rounded-full bg-white/10 px-2.5 py-1 text-[.68rem] font-bold uppercase text-white/60">Agotado</span>}
           </div>
+
+          {list && (
+            <div className="mt-4">
+              <div className="mb-2 text-[.68rem] font-semibold uppercase tracking-[.16em] text-white/40">Sabor</div>
+              <div className="flex flex-wrap gap-2">
+                {list.map(v => {
+                  const ok = v.inStock !== false
+                  const on = v.id === p.id
+                  return (
+                    <button
+                      key={v.id}
+                      onClick={() => ok && setSel(v.id)}
+                      disabled={!ok}
+                      className={"tap rounded-full px-4 py-2 text-sm font-semibold transition-colors " + (on ? "bg-white text-black" : "bg-white/10 text-white/80") + (ok ? "" : " opacity-40 line-through")}
+                    >
+                      {v.flavor}{!ok ? " · Agotado" : ""}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
           <p className="mt-3 text-sm leading-relaxed text-white/55">{p.desc}</p>
 

@@ -20,6 +20,12 @@ export interface ProductBase {
   brand?: string
   /** Muestra la etiqueta "Nuevo" */
   isNew?: boolean
+  /** Productos con el mismo variantGroup se muestran como UNA tarjeta con menú de sabor */
+  variantGroup?: string
+  /** Nombre de la tarjeta agrupada (sin el sabor) */
+  baseName?: string
+  /** Descripción de la tarjeta agrupada */
+  baseDesc?: string
 }
 
 export const PRODUCTS: ProductBase[] = [
@@ -54,7 +60,10 @@ export const PRODUCTS: ProductBase[] = [
   { id: 25, name: "Takis Fuego",            desc: "Los enrollados más famosos con el picante más intenso. Crujen, pican y enamoran.",         price: 20, cat: "Papas", tags: ["Takis"],  pop: true,  spicy: true,  natural: false, emoji: "🌶️", img: "/images/takis-fuego.webp",    groupId: "takis",        flavor: "Fuego",     fit: "contain", brand: "Takis",  isNew: true },
   { id: 26, name: "Takis Original",         desc: "El clásico Takis enrollado y extra crujiente. El sabor original que todos conocen.",       price: 20, cat: "Papas", tags: ["Takis"],  pop: true,  spicy: false, natural: false, emoji: "🌽", img: "/images/takis-original.webp", groupId: "takis",        flavor: "Original",  fit: "contain", brand: "Takis",  isNew: true },
   { id: 27, name: "Runners",                desc: "Botana crujiente de Barcel para compartir (o no). Ideal para cualquier momento.",         price: 20, cat: "Papas", tags: ["Barcel"], pop: false, spicy: false, natural: false, emoji: "🍿", img: "/images/runners.webp",         groupId: "runners",      flavor: "Runners",   fit: "contain", brand: "Barcel", isNew: true },
-  { id: 28, name: "Vualá Sorpresa de Chocolate", desc: "Chocolate con sorpresa adentro. Lo abres, lo disfrutas y descubres qué te tocó.",  price: 25, cat: "Dulces",  tags: ["Chocolate", "Sorpresa"], pop: true, spicy: false, natural: false, emoji: "🍫", img: "/images/vuala.webp", groupId: "vuala", flavor: "Sorpresa", fit: "contain", brand: "Vualá", isNew: true },
+  // Vualá: un producto por sabor (cada uno con su propio ID para controlar disponibilidad en tu Google Sheet)
+  { id: 28, name: "Vualá Sorpresa Chocolate", desc: "Mini cuernitos rellenos sabor a chocolate. Lo abres, lo disfrutas y descubres tu sorpresa.", price: 25, cat: "Dulces", tags: ["Sorpresa"], pop: true, spicy: false, natural: false, emoji: "🍫", img: "/images/vuala.webp", groupId: "vuala", flavor: "Chocolate", fit: "contain", brand: "Vualá", isNew: true, variantGroup: "vuala", baseName: "Vualá Sorpresa", baseDesc: "Mini cuernitos rellenos con sorpresa. Elige tu sabor: chocolate, vainilla o cajeta." },
+  { id: 32, name: "Vualá Sorpresa Vainilla", desc: "Mini cuernitos rellenos sabor a vainilla. Suaves, dulces y con sorpresa incluida.", price: 25, cat: "Dulces", tags: ["Sorpresa"], pop: false, spicy: false, natural: false, emoji: "🍫", img: "/images/vuala.webp", groupId: "vuala", flavor: "Vainilla", fit: "contain", brand: "Vualá", isNew: true, variantGroup: "vuala", baseName: "Vualá Sorpresa", baseDesc: "Mini cuernitos rellenos con sorpresa. Elige tu sabor: chocolate, vainilla o cajeta." },
+  { id: 33, name: "Vualá Sorpresa Cajeta", desc: "Mini cuernitos rellenos sabor a cajeta. El clásico dulce de leche en cada mordida.", price: 25, cat: "Dulces", tags: ["Sorpresa"], pop: false, spicy: false, natural: false, emoji: "🍫", img: "/images/vuala.webp", groupId: "vuala", flavor: "Cajeta", fit: "contain", brand: "Vualá", isNew: true, variantGroup: "vuala", baseName: "Vualá Sorpresa", baseDesc: "Mini cuernitos rellenos con sorpresa. Elige tu sabor: chocolate, vainilla o cajeta." },
 
   // ═══════════ REFRESCOS ═══════════
   // 📷 Imágenes: /public/images/coca-cola.webp y /public/images/coca-cola-zero.webp

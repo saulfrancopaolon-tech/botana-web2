@@ -1,10 +1,12 @@
 "use client"
 import { CategoryIcon } from "./icons"
+import { eventPricing, costOf, retailOf } from "@/lib/pricing"
 import { useState, useEffect } from "react"
 
 const WA = "524774950232"
 
-const EVENT_PRODUCTS = [
+// "event" aquí es el precio base preferido; lib/pricing.ts lo sube si no alcanza el margen con tus costos.
+const RAW_EVENT_PRODUCTS = [
   { id: 1,  name: "Cacahuate Habanero",      emoji: "🥜", cat: "Cacahuates", retail: 15, event: 12, cost: 6.80  },
   { id: 2,  name: "Cacahuate Jalapeño",      emoji: "🥜", cat: "Cacahuates", retail: 15, event: 12, cost: 6.80  },
   { id: 3,  name: "Cacahuate Fuego",         emoji: "🥜", cat: "Cacahuates", retail: 15, event: 12, cost: 6.80  },
@@ -37,7 +39,17 @@ const EVENT_PRODUCTS = [
   { id: 30, name: "Coca-Cola Zero 355 ml",    emoji: "🥤", cat: "Bebidas",    retail: 15, event: 13, cost: 0 },
   { id: 31, name: "Chupa Chups Xtremes",      emoji: "🍬", cat: "Gomitas",    retail: 20, event: 17, cost: 0 },
   { id: 28, name: "Vualá Sorpresa Chocolate",emoji: "🍫", cat: "Dulces",     retail: 20, event: 17, cost: 0 },
+  { id: 32, name: "Vualá Sorpresa Vainilla", emoji: "🍫", cat: "Dulces",     retail: 25, event: 25, cost: 0 },
+  { id: 33, name: "Vualá Sorpresa Cajeta",   emoji: "🍫", cat: "Dulces",     retail: 25, event: 25, cost: 0 },
 ]
+
+/** Lista final: precio del menú como referencia, costos reales y precio de evento con margen asegurado */
+const EVENT_PRODUCTS = RAW_EVENT_PRODUCTS.map(p => {
+  const retail = retailOf(p.id, p.retail)
+  const cost = costOf(p.id, p.cost)
+  const { event, noDisc } = eventPricing(p.event, retail, cost)
+  return { ...p, retail, cost, event, noDisc }
+})
 
 const LABEL_PRICE = 4
 const DEPOSIT_PCT = 0.5
@@ -98,7 +110,11 @@ export function EventModal({ isOpen, onClose }: Props) {
     const p = EVENT_PRODUCTS.find(x => x.id === sel.id)
     return s + (p ? p.event * sel.qty : 0)
   }, 0)
-  const descuentoMonto = Math.round(subtotalProductos * discount)
+  const subtotalDescontable = selections.reduce((s, sel) => {
+    const p = EVENT_PRODUCTS.find(x => x.id === sel.id)
+    return s + (p && !p.noDisc ? p.event * sel.qty : 0)
+  }, 0)
+  const descuentoMonto = Math.round(subtotalDescontable * discount)
   const subtotalConDescuento = subtotalProductos - descuentoMonto
   const totalLabels = wantLabels ? totalUnits * LABEL_PRICE : 0
   const total = subtotalConDescuento + totalLabels
@@ -256,7 +272,7 @@ export function EventModal({ isOpen, onClose }: Props) {
                         <div className="font-bold text-[.8rem] text-white truncate">{p.name}</div>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="text-[.7rem] font-black text-[#FF5252] font-mono">${p.event}/pza</span>
-                          <span className="text-[.6rem] text-white/20 line-through font-mono">${p.retail}</span>
+                          {p.retail > p.event && <span className="text-[.6rem] text-white/20 line-through font-mono">${p.retail}</span>}
                         </div>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">

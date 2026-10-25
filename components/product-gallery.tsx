@@ -32,9 +32,11 @@ function Face({ p, big, onPick }: { p: Product; big: boolean; onPick: (p: Produc
       className="group relative block h-full w-full overflow-hidden rounded-[18px] text-left sm:rounded-[24px]"
       style={{ background: "radial-gradient(110% 90% at 50% 15%, " + color + "55 0%, transparent 65%), #17171a", boxShadow: "inset 0 0 0 1px rgba(255,255,255,.08)" }}
     >
-      <span className="absolute inset-0 grid place-items-center text-white/55">
-        <CategoryIcon cat={p.cat} size={big ? 64 : 34} strokeWidth={1.4} />
-      </span>
+      {!imgOk && (
+        <span className="absolute inset-0 grid place-items-center text-white/55">
+          <CategoryIcon cat={p.cat} size={big ? 64 : 34} strokeWidth={1.4} />
+        </span>
+      )}
       {imgOk && (
         <Image
           src={p.img}
@@ -48,7 +50,7 @@ function Face({ p, big, onPick }: { p: Product; big: boolean; onPick: (p: Produc
       {/* Brillo suave en la esquina */}
       <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[.10] via-transparent to-transparent" />
       <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent px-2.5 pb-2 pt-6 sm:px-3.5 sm:pb-3">
-        <span className={"block truncate font-semibold leading-tight text-white " + (big ? "text-sm sm:text-base" : "text-[.62rem] sm:text-xs")}>{p.name}</span>
+        <span className={"block truncate font-semibold leading-tight text-white " + (big ? "text-sm sm:text-base" : "text-[.62rem] sm:text-xs")}>{p.baseName ?? p.name}</span>
         {big && <span className="mt-0.5 block text-[.65rem] text-white/55">${p.price}</span>}
       </span>
     </button>

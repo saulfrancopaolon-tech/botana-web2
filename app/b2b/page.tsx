@@ -4,6 +4,7 @@ import Link from "next/link"
 import { NavBar } from "@/components/navbar"
 import { EventModal } from "@/components/event-modal"
 import { Ico, CategoryIcon } from "@/components/icons"
+import { WHOLESALE_ROWS, NO_VOLUME_NAMES, PRICE_FACIL, PRICE_FIESTA } from "@/lib/pricing"
 
 const WA = "524774950232"
 const wa = (msg: string) => "https://wa.me/" + WA + "?text=" + encodeURIComponent(msg)
@@ -63,7 +64,7 @@ const STATS = [
 const BRANDS = ["Takis", "Barcel", "Runners", "Vualá", "BOTA-NA Artesanal", "Cacahuates", "Chips Vegetales", "Gomitas", "Chamoyadas", "Aguas Frescas"]
 
 const BENTO = [
-  { icon: "trend", title: "Margen de 30–50%", desc: "Precio de distribuidor para que tu negocio gane desde la primera caja.", span: "sm:col-span-2", bg: "linear-gradient(135deg,#0f3d24,#0b1f15)" },
+  { icon: "trend", title: "Gana hasta 50%", desc: "Precio de distribuidor para que tu negocio gane desde la primera caja.", span: "sm:col-span-2", bg: "linear-gradient(135deg,#0f3d24,#0b1f15)" },
   { icon: "tag", title: "Etiquetas con tu tema", desc: "Nombre, colores o logo de tu evento en cada pieza.", span: "", bg: "linear-gradient(135deg,#3b1d5a,#1a0f2a)" },
   { icon: "zap", title: "Respuesta en 2 horas", desc: "Cotización lista por WhatsApp, sin vueltas.", span: "", bg: "linear-gradient(135deg,#5a2a0c,#26120a)" },
   { icon: "receipt", title: "Factura incluida", desc: "Personas físicas y morales. Solo manda tu RFC.", span: "", bg: "linear-gradient(135deg,#0c3a5a,#0a1a26)" },
@@ -74,26 +75,17 @@ const CASES = [
   { id: "cafe",  icon: "coffee", tab: "Cafeterías",    title: "Surte tu cafetería o kiosco", desc: "Snacks que los estudiantes realmente piden, con pedidos recurrentes y precio de distribuidor. Tus vitrinas siempre llenas.", cta: "Quiero surtir mi negocio", msg: "Hola! Tengo una cafeteria/kiosco y me interesa surtirme con BOTA-NA de forma recurrente. Quisiera informacion de precios." },
   { id: "social",icon: "cake", tab: "Fiestas",       title: "Mesa de botanas para tu fiesta", desc: "Cumpleaños, XV años, bodas y graduaciones con etiquetas personalizadas que sorprenden a tus invitados.", cta: "Cotizar mi evento", msg: "Hola! Quiero botanas para un evento social (cumpleanos/XV/boda). Me interesa la opcion con etiquetas personalizadas." },
   { id: "corp",  icon: "building", tab: "Empresas",      title: "Snacks para tu empresa o congreso", desc: "Reuniones de equipo, ferias y expos. Una mesa premium para impresionar a clientes y colaboradores.", cta: "Cotizar evento corporativo", msg: "Hola! Necesito botanas para un evento corporativo/empresarial. Quisiera una cotizacion para mi organizacion." },
-  { id: "dist",  icon: "box", tab: "Distribuidores",title: "Empieza tu negocio de snacks", desc: "Precios preferenciales desde 100 piezas. Ganancia del 30–50% sobre tu inversión y soporte directo.", cta: "Quiero ser distribuidor", msg: "Hola! Me interesa ser DISTRIBUIDOR de BOTA-NA. Quisiera informacion sobre precios y condiciones para pedidos grandes." },
+  { id: "dist",  icon: "box", tab: "Distribuidores",title: "Empieza tu negocio de snacks", desc: "Precios preferenciales desde 100 piezas. Hasta 50% de ganancia sobre tu inversión y soporte directo.", cta: "Quiero ser distribuidor", msg: "Hola! Me interesa ser DISTRIBUIDOR de BOTA-NA. Quisiera informacion sobre precios y condiciones para pedidos grandes." },
 ]
 
-// Precios por nivel — ya eran tuyos. Agrega aquí las botanas de marca cuando tengas tus precios.
-const TIERS = [
-  { name: "Cacahuates", retail: 15, may: 12, dist: 10 },
-  { name: "Chips",      retail: 25, may: 20, dist: 17 },
-  { name: "Gomitas",    retail: 15, may: 12, dist: 11 },
-  { name: "Papas",      retail: 20, may: 16, dist: 15 },
-  { name: "Aguas",      retail: 22, may: 18, dist: 17 },
-  { name: "Chamoyadas", retail: 30, may: 25, dist: 23 },
-]
-
-const TIER_CAT: Record<string, string> = { Cacahuates: "Cacahuates", Chips: "Chips", Gomitas: "Gomitas", Papas: "Papas", Aguas: "Bebidas", Chamoyadas: "Bebidas" }
+// Precios por nivel: se calculan en lib/pricing.ts a partir de tus costos reales (margen mínimo asegurado).
+const TIERS = WHOLESALE_ROWS
 
 const PACKAGES = [
-  { id: "facil",  name: "Paquete Fácil",  icon: "gift", desc: "Reuniones pequeñas, oficinas o mesas de snacks de hasta 30 personas.", pieces: "50 piezas", price: "$550", note: "precio base", color: "#FF9F0A",
+  { id: "facil",  name: "Paquete Fácil",  icon: "gift", desc: "Reuniones pequeñas, oficinas o mesas de snacks de hasta 30 personas.", pieces: "50 piezas", price: "$" + PRICE_FACIL.toLocaleString("es-MX"), note: "precio base", color: "#FF9F0A",
     includes: ["Mix de cacahuates y gomitas", "Empaque individual por pieza", "Entrega en La Salle o a domicilio*", "Listo en 3 días hábiles"],
     msg: "Hola! Me interesa el PAQUETE FACIL de 50 piezas para mi evento. Quisiera mas informacion." },
-  { id: "fiesta", name: "Paquete Fiesta", icon: "sparkles", desc: "Cumpleaños, XV años, graduaciones y fiestas de 50–100 personas.", pieces: "100 piezas", price: "$980", note: "incluye etiquetas", color: "#FF3B30", badge: "Más popular",
+  { id: "fiesta", name: "Paquete Fiesta", icon: "sparkles", desc: "Cumpleaños, XV años, graduaciones y fiestas de 50–100 personas.", pieces: "100 piezas", price: "$" + PRICE_FIESTA.toLocaleString("es-MX"), note: "incluye etiquetas", color: "#FF3B30", badge: "Más popular",
     includes: ["Mix completo de toda la variedad", "Etiquetas personalizadas con tu tema", "Empaque individual por pieza", "Entrega a domicilio incluida*", "Listo en 5 días hábiles"],
     msg: "Hola! Me interesa el PAQUETE FIESTA de 100 piezas con etiquetas personalizadas. Quisiera cotizar mi evento." },
   { id: "pro",    name: "Paquete Pro",    icon: "trophy", desc: "Bodas, congresos, ferias y eventos corporativos de 100+ personas.", pieces: "200+ piezas", price: "Cotizar", note: "precio especial", color: "#30D158",
@@ -300,27 +292,29 @@ export default function B2BPage() {
                 const off = Math.round((1 - price / r.retail) * 100)
                 return (
                   <div key={r.name} className="bento p-5 text-center">
-                    <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-white/[.07] text-white"><CategoryIcon cat={TIER_CAT[r.name]} size={26} /></div>
+                    <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-white/[.07] text-white"><CategoryIcon cat={r.cat} size={26} /></div>
                     <div className="mt-2 text-sm font-semibold text-white/80">{r.name}</div>
                     <div className="mt-3 flex items-baseline justify-center gap-2">
                       <span className="text-3xl font-extrabold tracking-tight text-white">${price}</span>
                       <span className="text-xs text-white/30 line-through">${r.retail}</span>
                     </div>
-                    <span className={"mt-2 inline-block rounded-full px-2.5 py-0.5 text-[.65rem] font-bold " + (tier === "may" ? "bg-[#FF9F0A]/15 text-[#FF9F0A]" : "bg-[#30D158]/15 text-[#30D158]")}>-{off}%</span>
+                    <span className={"mt-2 inline-block rounded-full px-2.5 py-0.5 text-[.65rem] font-bold " + (tier === "may" ? "bg-[#FF9F0A]/15 text-[#FF9F0A]" : "bg-[#30D158]/15 text-[#30D158]")}>{off > 0 ? "-" + off + "%" : "Precio normal"}</span>
                   </div>
                 )
               })}
-              {/* Botanas de marca: precio por cotización */}
-              <div className="bento col-span-2 flex flex-col items-center justify-between gap-3 p-5 text-center sm:col-span-3 sm:flex-row sm:text-left" style={{ background: "linear-gradient(135deg,#3b1d5a,#1a0f2a)" }}>
-                <div className="flex items-center gap-4">
-                  <span className="grid h-12 w-12 flex-shrink-0 place-items-center rounded-2xl bg-white/10 text-white"><Ico name="flame" size={24} /></span>
-                  <div>
-                    <div className="font-bold text-white">Takis · Barcel · Runners · Vualá</div>
-                    <div className="text-sm text-white/50">Precio de mayoreo según volumen — cotiza y te respondemos hoy.</div>
+              {/* Productos sin descuento por volumen (margen muy ajustado) */}
+              {NO_VOLUME_NAMES.length > 0 && (
+                <div className="bento col-span-2 flex flex-col items-center justify-between gap-3 p-5 text-center sm:col-span-3 sm:flex-row sm:text-left" style={{ background: "linear-gradient(135deg,#3b1d5a,#1a0f2a)" }}>
+                  <div className="flex items-center gap-4">
+                    <span className="grid h-12 w-12 flex-shrink-0 place-items-center rounded-2xl bg-white/10 text-white"><Ico name="tag" size={24} /></span>
+                    <div>
+                      <div className="font-bold text-white">{NO_VOLUME_NAMES.join(" · ")}</div>
+                      <div className="text-sm text-white/50">Se venden a precio normal (sin descuento por volumen). ¿Pedido grande? Cotiza y te respondemos hoy.</div>
+                    </div>
                   </div>
+                  <a href={wa("Hola! Quiero cotizar un pedido grande de " + NO_VOLUME_NAMES.join(", ") + ".")} target="_blank" rel="noopener noreferrer" className="btn-ghost flex-shrink-0 !py-2.5">Cotizar</a>
                 </div>
-                <a href={wa("Hola! Quiero precios de mayoreo de Takis, Barcel, Runners y Vuala.")} target="_blank" rel="noopener noreferrer" className="btn-ghost flex-shrink-0 !py-2.5">Pedir precios</a>
-              </div>
+              )}
             </div>
             <p className="mt-4 text-center text-xs text-white/30">Evento: precio especial desde 1 pieza · Mayoreo: pago 100% por adelantado · Distribuidor: 50% de anticipo</p>
           </Reveal>
@@ -335,7 +329,7 @@ export default function B2BPage() {
             <div className="bento p-6 sm:p-9">
               <div className="flex flex-wrap justify-center gap-2">
                 {TIERS.map((t, i) => (
-                  <button key={t.name} onClick={() => setCalcCat(i)} className="cat-chip" data-active={i === calcCat}><CategoryIcon cat={TIER_CAT[t.name]} size={16} /> {t.name}</button>
+                  <button key={t.name} onClick={() => setCalcCat(i)} className="cat-chip" data-active={i === calcCat}><CategoryIcon cat={t.cat} size={16} /> {t.name}</button>
                 ))}
               </div>
 

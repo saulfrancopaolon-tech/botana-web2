@@ -14,6 +14,8 @@ import { Toast, LoyaltyPromo } from "@/components/ui-components"
 import { AnimateIn } from "@/components/animations"
 import { Ico } from "@/components/icons"
 import { ProductSheet } from "@/components/product-sheet"
+import { FlavorPicker } from "@/components/flavor-picker"
+import { collapseVariants, variantsOf } from "@/lib/variants"
 
 const SHEETS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSQKeuTywAmniswIKciTQS0hI-fMIm4l0DRiGATcUpA_eff42eVS6171CngdgtGphWUADrllm5dcxe1/pub?output=csv"
 
@@ -24,6 +26,7 @@ export default function Page() {
   const [cartOpen, setCartOpen] = useState(false)
   const [loyaltyOpen, setLoyaltyOpen] = useState(false)
   const [detail, setDetail] = useState<Product | null>(null)
+  const [flavors, setFlavors] = useState<Product[] | null>(null)
   const [toast, setToast] = useState({ msg: "", show: false })
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const touch = useRef<{ x: number; y: number; dx: number; dy: number } | null>(null)
@@ -56,6 +59,9 @@ export default function Page() {
     [stockData]
   )
 
+  // En la galería cada grupo de sabores aparece una sola vez
+  const galleryProducts = useMemo(() => collapseVariants(products).map(c => c.product), [products])
+
   const q = query.trim().toLowerCase()
   const searching = q.length > 0
 
@@ -69,8 +75,9 @@ export default function Page() {
   }, [products, activeCat, q, searching])
 
   const counts = useMemo(() => {
-    const c: Record<string, number> = { Todos: products.length }
-    products.forEach(p => { c[p.cat] = (c[p.cat] ?? 0) + 1 })
+    const cards = collapseVariants(products)
+    const c: Record<string, number> = { Todos: cards.length }
+    cards.forEach(({ product: p }) => { c[p.cat] = (c[p.cat] ?? 0) + 1 })
     return c
   }, [products])
 
@@ -80,7 +87,7 @@ export default function Page() {
 
   // Al tocar un recuadro de la galería: busca ese producto en el menú
   const pickProduct = useCallback((p: Product) => {
-    setQuery(p.name)
+    setQuery(p.baseName ?? p.name)
     setTimeout(scrollToMenu, 30)
   }, [scrollToMenu])
 
@@ -105,13 +112,14 @@ export default function Page() {
     }
   }
 
+  const shownCount = useMemo(() => collapseVariants(filtered).length, [filtered])
   const showRails = !searching && activeCat === "Todos"
 
   return (
     <CartProvider>
       <NavBar onCartOpen={() => setCartOpen(true)} onLoyaltyOpen={() => setLoyaltyOpen(true)} />
 
-      <Hero products={products} onMenuClick={scrollToMenu} onPickProduct={pickProduct} />
+      <Hero products={galleryProducts} onMenuClick={scrollToMenu} onPickProduct={pickProduct} />
 
       {/* ── MENÚ ── */}
       <main id="menu" className="scroll-mt-14">
@@ -152,7 +160,7 @@ export default function Page() {
                   {searching ? "Resultados" : activeCat}
                 </h2>
                 <p className="mt-1 text-xs text-white/40">
-                  {filtered.length} {filtered.length === 1 ? "producto" : "productos"}
+                  {shownCount} {shownCount === 1 ? "producto" : "productos"}
                   {searching ? " para “" + query.trim() + "”" : ""}
                 </p>
               </div>
@@ -164,6 +172,7 @@ export default function Page() {
             showGroups={showRails}
             onAddToCart={showToast}
             onOpenProduct={setDetail}
+            onPickFlavor={setFlavors}
           />
         </section>
       </main>
@@ -203,7 +212,8 @@ export default function Page() {
         <p className="mt-6 text-[11px] text-white/20">2025 BOTA-NA por Saúl y Aranza</p>
       </footer>
 
-      <ProductSheet product={detail} onClose={() => setDetail(null)} onAdded={showToast} />
+      <ProductSheet product={detail} variants={detail ? variantsOf(detail, products) : undefined} onClose={() => setDetail(null)} onAdded={showToast} />
+      <FlavorPicker variants={flavors} onClose={() => setFlavors(null)} onAdded={showToast} />
       <CartModal isOpen={cartOpen} onClose={() => setCartOpen(false)} />
       <LoyaltyModal isOpen={loyaltyOpen} onClose={() => setLoyaltyOpen(false)} />
       <Toast message={toast.msg} show={toast.show} />

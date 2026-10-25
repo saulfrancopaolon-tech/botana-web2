@@ -10,19 +10,27 @@ interface Props {
   onAdd: (p: Product) => void
   /** Al tocar la tarjeta (no el botón Agregar) se abre el detalle */
   onOpen?: (p: Product) => void
+  /** Sabores del grupo (ej. Vualá). Si hay más de uno, "Agregar" abre el menú de sabor */
+  variants?: Product[]
+  onPickFlavor?: (variants: Product[]) => void
 }
 
-function ProductCardBase({ product: p, onAdd, onOpen }: Props) {
+function ProductCardBase({ product: p, onAdd, onOpen, variants, onPickFlavor }: Props) {
   const { items, addItem } = useCart()
   const [done, setDone] = useState(false)
   const [imgOk, setImgOk] = useState(true)
-  const inCart = items.find(i => i.id === p.id)?.qty ?? 0
+  const grouped = !!variants && variants.length > 1
+  const ids = grouped ? variants!.map(v => v.id) : [p.id]
+  const inCart = items.filter(i => ids.includes(i.id)).reduce((n, i) => n + i.qty, 0)
   const color = CAT_COLOR[p.cat] ?? "#FF3B30"
-  const available = p.inStock !== false
+  const available = grouped ? variants!.some(v => v.inStock !== false) : p.inStock !== false
+  const title = grouped ? (p.baseName ?? p.name) : p.name
+  const desc = grouped ? (p.baseDesc ?? p.desc) : p.desc
 
   function add(e: React.MouseEvent) {
     e.stopPropagation()
     if (!available) return
+    if (grouped) { onPickFlavor?.(variants!); return }   // menú de sabor
     addItem(p)
     onAdd(p)
     setDone(true)
@@ -35,7 +43,7 @@ function ProductCardBase({ product: p, onAdd, onOpen }: Props) {
       onClick={onOpen ? () => onOpen(p) : undefined}
       onKeyDown={onOpen ? e => { if (e.key === "Enter" && e.target === e.currentTarget) onOpen(p) } : undefined}
       tabIndex={onOpen ? 0 : undefined}
-      aria-label={onOpen ? "Ver detalles de " + p.name : undefined}
+      aria-label={onOpen ? "Ver detalles de " + title : undefined}
     >
       {/* Imagen */}
       <div
@@ -43,13 +51,15 @@ function ProductCardBase({ product: p, onAdd, onOpen }: Props) {
         style={{ background: "radial-gradient(120% 90% at 50% 12%, " + color + "40 0%, transparent 62%), #1b1b1e" }}
       >
         {/* Ícono de respaldo mientras no haya foto */}
-        <div className="pimg absolute inset-0 grid place-items-center text-white/45">
-          <CategoryIcon cat={p.cat} size={64} strokeWidth={1.3} />
-        </div>
+        {!imgOk && (
+          <div className="absolute inset-0 grid place-items-center text-white/45">
+            <CategoryIcon cat={p.cat} size={64} strokeWidth={1.3} />
+          </div>
+        )}
         {imgOk && (
           <Image
             src={p.img}
-            alt={p.name}
+            alt={title}
             fill
             sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 23vw"
             onError={() => setImgOk(false)}
@@ -82,8 +92,8 @@ function ProductCardBase({ product: p, onAdd, onOpen }: Props) {
       {/* Info — alturas fijas para que todas las tarjetas se alineen */}
       <div className="flex flex-1 flex-col p-3.5 sm:p-4">
         <span className="h-3 text-[.62rem] font-semibold uppercase leading-3 tracking-[.14em] text-white/40">{p.brand ?? ""}</span>
-        <h3 className="mt-1 line-clamp-2 min-h-[2.35rem] text-[.92rem] font-semibold leading-[1.15rem] tracking-tight text-white sm:text-[.98rem]">{p.name}</h3>
-        <p className="mt-1 line-clamp-2 min-h-[1.9rem] text-[.7rem] leading-[.95rem] text-white/45">{p.desc}</p>
+        <h3 className="mt-1 line-clamp-2 min-h-[2.35rem] text-[.92rem] font-semibold leading-[1.15rem] tracking-tight text-white sm:text-[.98rem]">{title}</h3>
+        <p className="mt-1 line-clamp-2 min-h-[1.9rem] text-[.7rem] leading-[.95rem] text-white/45">{desc}</p>
 
         <div className="mt-auto flex items-center justify-between pt-3.5">
           <div className="min-w-0 leading-none">
@@ -93,7 +103,7 @@ function ProductCardBase({ product: p, onAdd, onOpen }: Props) {
           <button
             onClick={add}
             disabled={!available}
-            aria-label={"Agregar " + p.name + " al carrito"}
+            aria-label={(grouped ? "Elegir sabor de " : "Agregar ") + title + (grouped ? "" : " al carrito")}
             className={"add-pill " + (done ? "done" : "")}
           >
             <Ico name={done ? "check" : "plus"} size={16} strokeWidth={3} />
