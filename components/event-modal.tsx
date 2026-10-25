@@ -35,6 +35,7 @@ const EVENT_PRODUCTS = [
   { id: 27, name: "Runners",                 emoji: "🍿", cat: "Papas"   ,    retail: 20, event: 17, cost: 0 },
   { id: 29, name: "Coca-Cola 355 ml",         emoji: "🥤", cat: "Bebidas",    retail: 15, event: 13, cost: 0 },
   { id: 30, name: "Coca-Cola Zero 355 ml",    emoji: "🥤", cat: "Bebidas",    retail: 15, event: 13, cost: 0 },
+  { id: 31, name: "Chupa Chups Xtremes",      emoji: "🍬", cat: "Gomitas",    retail: 20, event: 17, cost: 0 },
   { id: 28, name: "Vualá Sorpresa Chocolate",emoji: "🍫", cat: "Dulces",     retail: 20, event: 17, cost: 0 },
 ]
 
