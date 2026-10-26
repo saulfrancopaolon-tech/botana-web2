@@ -40,6 +40,8 @@ export const costOf = (id: number, fallback = 0) => COSTS[id] ?? fallback
 
 /** Precio de evento: nunca por debajo del margen mínimo ni por encima del precio del menú. */
 export function eventPricing(base: number, retail: number, cost: number) {
+  // Aún sin costo registrado: precio del menú y sin descuento por volumen, para no arriesgar perder
+  if (!cost) return { event: retail, noDisc: true }
   const event = Math.min(retail, Math.max(base, minPrice(cost, MARGIN.evento)))
   const worst = event * (1 - MAX_VOLUME_DISCOUNT)
   // si con el descuento máximo ya no deja margen, ese producto no entra al descuento por volumen
