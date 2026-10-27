@@ -41,9 +41,9 @@ const RAW_EVENT_PRODUCTS = [
   { id: 28, name: "Vualá Sorpresa Chocolate",emoji: "🍫", cat: "Dulces",     retail: 20, event: 17, cost: 0 },
   { id: 32, name: "Vualá Sorpresa Vainilla", emoji: "🍫", cat: "Dulces",     retail: 25, event: 25, cost: 0 },
   { id: 33, name: "Vualá Sorpresa Cajeta",   emoji: "🍫", cat: "Dulces",     retail: 25, event: 25, cost: 0 },
-  { id: 34, name: "Príncipe Chocolate (6 galletas)", emoji: "🍪", cat: "Dulces",     retail: 15, event: 15, cost: 0 },
-  { id: 35, name: "Oreo Original (6 galletas)",     emoji: "🍪", cat: "Dulces",     retail: 15, event: 15, cost: 0 },
-  { id: 36, name: "Emperador Chocolate (6 galletas)", emoji: "🍪", cat: "Dulces",   retail: 15, event: 15, cost: 0 },
+  { id: 34, name: "Príncipe Chocolate (6 galletas)", emoji: "🍪", cat: "Dulces",     retail: 15, event: 13, cost: 0 },
+  { id: 35, name: "Oreo Original (6 galletas)",     emoji: "🍪", cat: "Dulces",     retail: 15, event: 13, cost: 0 },
+  { id: 36, name: "Emperador Chocolate (6 galletas)", emoji: "🍪", cat: "Dulces",   retail: 15, event: 13, cost: 0 },
 ]
 
 /** Lista final: precio del menú como referencia, costos reales y precio de evento con margen asegurado */

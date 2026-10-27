@@ -19,6 +19,7 @@ export const COSTS: Record<number, number> = {
   28: 19, 32: 19, 33: 19,                                  // Vualá (todos los sabores)
   29: 11.7, 30: 6.5,                                       // Coca-Cola normal y Zero
   31: 16,                                                  // Chupa Chups Xtremes
+  34: 9.6, 35: 9, 36: 6.9,                                 // Galletas: Príncipe, Oreo, Emperador (paquete de 6)
 }
 
 /** Margen mínimo sobre el precio de venta (0.28 = 28% de ganancia) */
@@ -56,7 +57,7 @@ export function tierPricing(baseMay: number, baseDist: number, retail: number, c
   return { may, dist, noVolume: may >= retail }
 }
 
-export interface WholesaleRow { name: string; cat: string; retail: number; may: number; dist: number; cost: number }
+export interface WholesaleRow { name: string; cat: string; ids: number[]; retail: number; may: number; dist: number; cost: number }
 
 // "base" = precios que ya usabas; solo suben si no alcanzan el margen mínimo.
 const GROUPS: { name: string; cat: string; ids: number[]; may?: number; dist?: number }[] = [
@@ -68,6 +69,8 @@ const GROUPS: { name: string; cat: string; ids: number[]; may?: number; dist?: n
   { name: "Aguas de ½ litro",              cat: "Bebidas",    ids: [15, 17],                    may: 18, dist: 17 },
   { name: "Chamoyadas",                    cat: "Bebidas",    ids: [16, 18, 19],                may: 25, dist: 23 },
   { name: "Coca-Cola Zero 355 ml",         cat: "Bebidas",    ids: [30] },
+  { name: "Galletas Oreo y Príncipe (6 pzas)", cat: "Dulces", ids: [34, 35] },
+  { name: "Galletas Emperador (6 pzas)",   cat: "Dulces",     ids: [36] },
 ]
 
 export const WHOLESALE_ROWS: WholesaleRow[] = GROUPS.map(g => {
@@ -76,7 +79,7 @@ export const WHOLESALE_ROWS: WholesaleRow[] = GROUPS.map(g => {
   const baseMay = g.may ?? Math.round(retail * 0.8)
   const baseDist = g.dist ?? Math.round(retail * 0.72)
   const { may, dist } = tierPricing(baseMay, baseDist, retail, cost)
-  return { name: g.name, cat: g.cat, retail, may, dist, cost }
+  return { name: g.name, cat: g.cat, ids: g.ids, retail, may, dist, cost }
 })
 
 /** Productos que, con tus costos, no dejan margen para dar descuento por volumen */
