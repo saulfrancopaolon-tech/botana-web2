@@ -19,6 +19,7 @@ export const COSTS: Record<number, number> = {
   28: 19, 32: 19, 33: 19,                                  // Vualá (todos los sabores)
   29: 11.7, 30: 6.5,                                       // Coca-Cola normal y Zero
   31: 16,                                                  // Chupa Chups Xtremes
+  37: 13, 38: 13, 39: 14,                                 // Vualá Big (chocolate, vainilla, chocolate Abuelita)
   34: 9.6, 35: 9, 36: 6.9,                                 // Galletas: Príncipe, Oreo, Emperador (paquete de 6)
 }
 
@@ -83,7 +84,7 @@ export const WHOLESALE_ROWS: WholesaleRow[] = GROUPS.map(g => {
 })
 
 /** Productos que, con tus costos, no dejan margen para dar descuento por volumen */
-export const NO_VOLUME_NAMES: string[] = [28, 29, 31]
+export const NO_VOLUME_NAMES: string[] = [28, 29, 31, 39]
   .filter(id => tierPricing(0, 0, retailOf(id), costOf(id)).noVolume)
   .map(id => { const p = PRODUCTS.find(x => x.id === id)!; return p.baseName ?? p.name })
 

@@ -25,7 +25,7 @@ const CAT_SUB: Record<string, string> = {
   Chips: "Vegetales crujientes",
   Gomitas: "Dulces, ácidas y enchiladas",
   Bebidas: "Coca-Cola, aguas y chamoyadas",
-  Dulces: "Vualá con sorpresa y galletas",
+  Dulces: "Vualá, galletas y pan dulce",
 }
 
 // Dentro de cada sección: primero las marcas (Takis, Barcel…), luego lo demás

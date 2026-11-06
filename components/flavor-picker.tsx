@@ -42,7 +42,8 @@ export function FlavorPicker({ variants, onClose, onAdded }: Props) {
   const color = CAT_COLOR[rep.cat] ?? "#FF3B30"
   const total = variants.reduce((n, v) => n + (counts[v.id] ?? 0), 0)
   const money = variants.reduce((n, v) => n + (counts[v.id] ?? 0) * v.price, 0)
-  const set = (id: number, n: number) => setCounts(c => ({ ...c, [id]: Math.max(0, Math.min(20, n)) }))
+  // suma o resta sobre el valor más reciente (aunque haya toques muy seguidos)
+  const bump = (id: number, delta: number) => setCounts(c => ({ ...c, [id]: Math.max(0, Math.min(20, (c[id] ?? 0) + delta)) }))
 
   function confirm() {
     if (!variants || total === 0) return
@@ -90,11 +91,11 @@ export function FlavorPicker({ variants, onClose, onAdded }: Props) {
                 </div>
 
                 <div className="flex h-10 items-center rounded-full bg-black/30">
-                  <button onClick={() => set(v.id, n - 1)} disabled={!ok || n === 0} aria-label={"Quitar " + v.flavor} className="tap grid h-10 w-10 place-items-center text-white disabled:opacity-25">
+                  <button onClick={() => bump(v.id, -1)} disabled={!ok || n === 0} aria-label={"Quitar " + v.flavor} className="tap grid h-10 w-10 place-items-center text-white disabled:opacity-25">
                     <Ico name="minus" size={16} strokeWidth={2.8} />
                   </button>
                   <span className="w-6 text-center text-sm font-bold tabular-nums text-white">{n}</span>
-                  <button onClick={() => set(v.id, n + 1)} disabled={!ok} aria-label={"Agregar " + v.flavor} className="tap grid h-10 w-10 place-items-center text-white disabled:opacity-25">
+                  <button onClick={() => bump(v.id, 1)} disabled={!ok} aria-label={"Agregar " + v.flavor} className="tap grid h-10 w-10 place-items-center text-white disabled:opacity-25">
                     <Ico name="plus" size={16} strokeWidth={2.8} />
                   </button>
                 </div>
